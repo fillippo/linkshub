@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -17,7 +18,6 @@
             --color-border: #dee2e6;     /* Gris claro para bordes */
             --color-white: #ffffff;      /* Blanco puro */
         }
-
 
         /* Estilos generales */
         body {
@@ -91,7 +91,6 @@
             padding: 20px;
             overflow-y: auto; /* Permite el scroll solo en esta área */
             flex-grow: 1;
-            /* max-height: calc(100vh - 150px); */ /* Eliminar o ajustar si flex-grow es suficiente */
         }
 
         /* Tabla */
@@ -121,9 +120,8 @@
             padding-left: 20px;
         }
         th:last-child, td:last-child {
-             padding-right: 20px;
+            padding-right: 20px;
         }
-
 
         tbody tr:nth-child(even) {
             background-color: var(--color-background-light); /* Gris muy claro para fila par */
@@ -144,23 +142,6 @@
         .link-cell a:hover {
             text-decoration: underline;
             color: var(--color-darker-blue); /* Azul más oscuro al hover */
-        }
-
-        /* Estilo para la primera columna (clickable name) */
-        .name-cell {
-            font-weight: bold;
-            color: var(--color-text-medium); /* Gris medio para el nombre */
-            cursor: pointer;
-            user-select: none;
-            transition: color 0.3s ease;
-            max-width: 150px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .name-cell:hover {
-            color: var(--color-primary-blue); /* Azul principal al hover */
         }
 
         /* Descripción */
@@ -225,12 +206,8 @@
             th:first-child, td:first-child {
                 padding-left: 10px;
             }
-             th:last-child, td:last-child {
+            th:last-child, td:last-child {
                 padding-right: 10px;
-            }
-
-            .name-cell {
-                 max-width: 100px;
             }
 
             .description-cell {
@@ -247,10 +224,9 @@
         <!-- Barra de botones en la parte superior -->
         <div class="button-bar">
             <button class="toggleButton" onclick="toggleTable('table1')">IAs</button>
-            <button class="toggleButton" onclick="toggleTable('table2')">Streaming y Prensa</button>
-            <button class="toggleButton" onclick="toggleTable('table3')">SEIDOR web</button>
+            <button class="toggleButton" onclick="toggleTable('table2')">Stream</button>
+            <button class="toggleButton" onclick="toggleTable('table3')">SEIDOR</button>
             <button class="toggleButton" onclick="toggleTable('table4')">Varios</button>
-            <button class="toggleButton" onclick="toggleTable('table5')">Ejemplo Oculto</button>
         </div>
 
         <!-- Área de contenido desplazable para las tablas -->
@@ -258,75 +234,61 @@
             <table id="table1">
                 <thead>
                     <tr>
-                        <th>Nombre</th>
                         <th>Enlace</th>
                         <th>Descripción</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://chatgpt.com/?oai-dm=1')">ChatGPT</td>
-                        <td class="link-cell"><a href="https://chatgpt.com/?oai-dm=1" target="_blank">Ir ChatGPT</a></td>
+                        <td class="link-cell"><a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a></td>
                         <td class="description-cell">Clásico IA de OpenAI</td>
                     </tr>
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://gemini.google.com/app/1e35afc7bfd7ed5e?hl=es')">Gemini</td>
-                        <td class="link-cell"><a href="https://gemini.google.com/app/1e35afc7bfd7ed5e?hl=es" target="_blank">Ir a Gemini</a></td>
+                        <td class="link-cell"><a href="https://gemini.google.com/app/1e35afc7bfd7ed5e?hl=es" target="_blank">Gemini</a></td>
                         <td class="description-cell">IA de Google. Permite seleccionar varios motores</td>
                     </tr>
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://suno.com/create?wid=default')">Suno</td>
-                        <td class="link-cell"><a href="https://suno.com/create?wid=default" target="_blank">Ir a Suno</a></td>
+                        <td class="link-cell"><a href="https://suno.com/create?wid=default" target="_blank">Suno</a></td>
                         <td class="description-cell">IA para generar canciones.</td>
                     </tr>     
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://www.canva.com/')">Canva</td>
-                        <td class="link-cell"><a href="https://www.canva.com/" target="_blank">Ir a Canva</a></td>
+                        <td class="link-cell"><a href="https://www.canva.com/" target="_blank">Canva</a></td>
                         <td class="description-cell">IA para generar imagenes.</td>
                     </tr>          
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://www.perplexity.ai/')">Perplexity</td>
-                        <td class="link-cell"><a href="https://www.perplexity.ai/" target="_blank">Ir a Perplexity</a></td>
+                        <td class="link-cell"><a href="https://www.perplexity.ai/" target="_blank">Perplexity</a></td>
                         <td class="description-cell">IA que muestra el hilo de cómo consigue la información.</td>
                     </tr>             
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://labs.google/fx')">Google labs</td>
-                        <td class="link-cell"><a href="https://labs.google/fx" target="_blank">Ir a Google labs</a></td>
+                        <td class="link-cell"><a href="https://labs.google/fx" target="_blank">Google labs</a></td>
                         <td class="description-cell">IA de google para generar varios tipos de ficharos.</td>
                     </tr>      
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://grok.com/')">Grok</td>
-                        <td class="link-cell"><a href="https://grok.com/" target="_blank">Ir a Grok</a></td>
+                        <td class="link-cell"><a href="https://grok.com/" target="_blank">Grok</a></td>
                         <td class="description-cell">IA de Elon Mask. Siempre iteresante para resultados de texto</td>
                     </tr>   
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://notebooklm.google.com/')">Google NotebookLM</td>
-                        <td class="link-cell"><a href="https://notebooklm.google.com/" target="_blank">Ir a Google NotebookLM</a></td>
+                        <td class="link-cell"><a href="https://notebooklm.google.com/" target="_blank">Google NotebookLM</a></td>
                         <td class="description-cell">Notebook LM. Imvestigación de fuentes y recursos</td>
                     </tr>           
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://aistudio.google.com/prompts/new_chat')">Google AI Studio</td>
-                        <td class="link-cell"><a href="https://aistudio.google.com/prompts/new_chat" target="_blank">Ir a Google AI Studio</a></td>
+                        <td class="link-cell"><a href="https://aistudio.google.com/prompts/new_chat" target="_blank">Google AI Studio</a></td>
                         <td class="description-cell">IA avanzada de Google. Muy interesante y permite seleccionar varios modelos de generación</td>
                     </tr>      
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://manus.im/app')">Manus</td>
-                        <td class="link-cell"><a href="https://manus.im/app" target="_blank">Ir a Manus </a></td>
+                        <td class="link-cell"><a href="https://manus.im/app" target="_blank">Manus</a></td>
                         <td class="description-cell">IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder</td>
                     </tr>    
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://chat.qwen.ai/')">Qwen</td>
-                        <td class="link-cell"><a href="https://chat.qwen.ai/" target="_blank">Ir a Qwen</a></td>
+                        <td class="link-cell"><a href="https://chat.qwen.ai/" target="_blank">Qwen</a></td>
                         <td class="description-cell">IA de Aliexpres. Una de las más potentes. Permite hacer de todo, incluso imagenes y videos. Varios motores</td>
                     </tr>       
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://ideal.house/es')">Ideal House</td>
-                        <td class="link-cell"><a href="https://ideal.house/es" target="_blank">Ir a Ideal House</a></td>
+                        <td class="link-cell"><a href="https://ideal.house/es" target="_blank">Ideal House</a></td>
                         <td class="description-cell">IA de Interiorismo</td>
                     </tr>                 
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://getimg.ai/text-to-image')">getimg.ai</td>
-                        <td class="link-cell"><a href="https://getimg.ai/text-to-image" target="_blank">Ir a getimg.ai</a></td>
+                        <td class="link-cell"><a href="https://getimg.ai/text-to-image" target="_blank">getimg.ai</a></td>
                         <td class="description-cell">Generación de Imagenes</td>
                     </tr>
                 </tbody>
@@ -335,25 +297,21 @@
             <table id="table2">
                 <thead>
                     <tr>
-                        <th>Nombre</th>
                         <th>Enlace</th>
                         <th>Descripción</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://www.youtube.com/')">Youtube</td>
-                        <td class="link-cell"><a href="https://www.youtube.com/" target="_blank">Ir a Youtube</a></td>
+                        <td class="link-cell"><a href="https://www.youtube.com/" target="_blank">Youtube</a></td>
                         <td class="description-cell">Youtube</td>
                     </tr>
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://www.twitch.tv/')">Twitch</td>
-                        <td class="link-cell"><a href="https://www.twitch.tv/" target="_blank">Ir a Twitch</a></td>
-                        <td class="description-cell">Tqitch.</td>
+                        <td class="link-cell"><a href="https://www.twitch.tv/" target="_blank">Twitch</a></td>
+                        <td class="description-cell">Twitch.</td>
                     </tr>
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://es.kiosko.net/es/')">Kiosko.net</td>
-                        <td class="link-cell"><a href="https://es.kiosko.net/es/" target="_blank">Ir a Kiosko.net</a></td>
+                        <td class="link-cell"><a href="https://es.kiosko.net/es/" target="_blank">Kiosko.net</a></td>
                         <td class="description-cell">Principales portadas prensa.</td>
                     </tr>
                 </tbody>
@@ -362,36 +320,34 @@
             <table id="table3">
                 <thead>
                     <tr>
-                        <th>Nombre</th>
                         <th>Enlace</th>
                         <th>Descripción</th>
                     </tr>
                 </thead>
                 <tbody>             
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://m365.cloud.microsoft/?auth=2')">Office 365</td>
-                        <td class="link-cell"><a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Ir a Office 365</a></td>
+                        <td class="link-cell"><a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Office 365</a></td>
                         <td class="description-cell">Office 365 Seidor.</td>
                     </tr>
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://teams.microsoft.com/v2/')">Teams Web</td>
-                        <td class="link-cell"><a href="https://teams.microsoft.com/v2/" target="_blank">Ir a Teams Web</a></td>
+                        <td class="link-cell"><a href="https://teams.microsoft.com/v2/" target="_blank">Teams Web</a></td>
                         <td class="description-cell">Teams version navegador</td>
                     </tr>           
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://outlook.office.com/mail/')">Outlook Web</td>
-                        <td class="link-cell"><a href="https://outlook.office.com/mail/" target="_blank">Ir a Outlook Web</a></td>
+                        <td class="link-cell"><a href="https://outlook.office.com/mail/" target="_blank">Outlook Web</a></td>
                         <td class="description-cell">Teams version navegador</td>
                     </tr>                  
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://intranetnew.seidor.com/home')">Intranet Seidor</td>
-                        <td class="link-cell"><a href="https://intranetnew.seidor.com/home" target="_blank">Ir a Intranet Seidor</a></td>
+                        <td class="link-cell"><a href="https://intranetnew.seidor.com/home" target="_blank">Intranet Seidor</a></td>
                         <td class="description-cell">Introducción Rapports, etc.</td>
                     </tr>          
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://intranet.seidor.es/sap/bc/ui2/flp')">Intranet Seidor (old)</td>
-                        <td class="link-cell"><a href="https://intranet.seidor.es/sap/bc/ui2/flp" target="_blank">Ir a Intranet Seidor (old)</a></td>
+                        <td class="link-cell"><a href="https://intranet.seidor.es/sap/bc/ui2/flp" target="_blank">Intranet Seidor (old)</a></td>
                         <td class="description-cell">Introducción Rapports, etc.</td>
+                    </tr>   
+                    <tr>
+                        <td class="link-cell"><a href="https://windows365.microsoft.com/" target="_blank">Cafosa</a></td>
+                        <td class="description-cell">Maquina Virtual Cafosa</td>
                     </tr>  
                 </tbody>
             </table>
@@ -399,56 +355,34 @@
             <table id="table4">
                 <thead>
                     <tr>
-                        <th>Nombre</th>
                         <th>Enlace</th>
                         <th>Descripción</th>
                     </tr>
                 </thead>
                 <tbody>    
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://github.com/fillippo/linkshub/')">Netify</td>
-                        <td class="link-cell"><a href="https://github.com/fillippo/linkshub/" target="_blank">Ir a Netify</a></td>
+                        <td class="link-cell"><a href="https://neocities.org/" target="_blank">Neocities</a></td>
                         <td class="description-cell">Diseño sencillo webs.</td>
                     </tr>                     
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://app.netlify.com/')">Netify</td>
-                        <td class="link-cell"><a href="https://app.netlify.com/" target="_blank">Ir a Netify</a></td>
+                        <td class="link-cell"><a href="https://app.netlify.com/" target="_blank">Netlify</a></td>
                         <td class="description-cell">Diseño sencillo webs.</td>
                     </tr>                     
                     <tr>
-                        <td class="name-cell" onclick="copyToClipboard('TransformaUnionEnDiferencias.html')">Convertir Union a Diferencias</td>
-                        <td class="link-cell"><a href="TransformaUnionEnDiferencias.html" target="_blank">Ir a Convertir Union a Diferencias</a></td>
-                        <td class="description-cell">Convierte SQL Union en diferencias</td>
+                        <td class="link-cell"><a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a></td>
+                        <td class="description-cell">SQL:Convertir Union a Diferencias</td>
+                    </tr>      
+                    <tr>
+                        <td class="link-cell"><a href="TransformaUnionEnDiferencias2.html" target="_blank">Convertir Union a Diferencias por campos</a></td>
+                        <td class="description-cell">SQL:Convertir Union a Diferencias por campos</td>
+                    </tr>        
+                    <tr>
+                        <td class="link-cell"><a href="DescubreCampos.html" target="_blank">Información de cada campo de una query</a></td>
+                        <td class="description-cell">SQL:Información de cada campo de una query</td>
                     </tr>      
                 </tbody>
             </table>
 
-            <table id="table5">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Enlace</th>
-                        <th>Descripción</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://www.facebook.com')">Facebook</td>
-                        <td class="link-cell"><a href="https://www.facebook.com" target="_blank">Ir a Facebook</a></td>
-                        <td class="description-cell">Red social para conectar con amigos y familiares.</td>
-                    </tr>
-                    <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://www.stackoverflow.com')">Stack Overflow</td>
-                        <td class="link-cell"><a href="https://www.stackoverflow.com" target="_blank">Ir a Stack Overflow</a></td>
-                        <td class="description-cell">Comunidad para desarrolladores.</td>
-                    </tr>
-                    <tr>
-                        <td class="name-cell" onclick="copyToClipboard('https://www.medium.com')">Medium</td>
-                        <td class="link-cell"><a href="https://www.medium.com" target="_blank">Ir a Medium</a></td>
-                        <td class="description-cell">Plataforma para publicar artículos y leer contenido.</td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
     </div>
 
@@ -469,22 +403,20 @@
             } else {
                 table.style.display = 'none';
             }
-             // Scroll to the top of the content area after toggling
-             const contentArea = document.querySelector('.content-area');
-             if (contentArea) {
-                 contentArea.scrollTo({
-                     top: 0,
-                     behavior: 'smooth' // Scroll suave
-                 });
-             }
+            // Scroll to the top of the content area after toggling
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) {
+                contentArea.scrollTo({
+                    top: 0,
+                    behavior: 'smooth' // Scroll suave
+                });
+            }
         }
 
         // Función para copiar texto al portapapeles
         function copyToClipboard(text) {
             navigator.clipboard.writeText(text)
                 .then(() => {
-                    // Usar un método de notificación menos intrusivo que alert, si se desea
-                    // Por ahora mantenemos alert como en el original
                     alert(`Dirección copiada: ${text}`);
                 })
                 .catch(err => {
@@ -492,11 +424,6 @@
                     alert('Ocurrió un error al copiar el texto.');
                 });
         }
-
-         // Opcional: Mostrar la primera tabla al cargar la página
-         // window.onload = function() {
-         //     toggleTable('table1');
-         // };
     </script>
 </body>
 </html>
