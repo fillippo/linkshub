@@ -1,0 +1,848 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparador Avanzado de Queries SQL</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            font-size: 14px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h1 { font-size: 1.8em; }
+        h2 { font-size: 1.4em; margin-top: 30px; }
+
+        textarea {
+            width: calc(100% - 22px); 
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 0.9em;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+        textarea[readonly] {
+            background-color: #e9ecef;
+        }
+        .button-group {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap; 
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: background-color 0.2s ease;
+            min-width: 100px; 
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #analyzeButton {
+            background-color: #3498db;
+            color: white;
+        }
+        #analyzeButton:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+        .danger-button {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .danger-button:hover:not(:disabled) {
+            background-color: #c0392b;
+        }
+        .secondary-button {
+            background-color: #7f8c8d; 
+            color: white;
+        }
+        .secondary-button:hover:not(:disabled) {
+            background-color: #6c7a7b;
+        }
+
+        #messageArea {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-weight: bold;
+            white-space: pre-line; 
+        }
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .message-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .message-warning { 
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .hidden { display: none !important; }
+
+        #analysisResults {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .field-selection-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        .field-selection-container label {
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .field-selection-container label:hover {
+            background-color: #f0f0f0;
+        }
+        .field-selection-container input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        .checkbox-option { margin-top: 10px; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Herramienta de Comparación de Queries SQL con UNION</h1>
+
+        <section id="inputSection">
+            <h2>1. Query de Entrada</h2>
+            <textarea id="inputQuery" rows="15">
+SELECT
+    o.OrderID,
+    o.OrderDate,
+    (SELECT SUM(od.Quantity * od.UnitPrice) FROM OrderDetails_A od WHERE od.OrderID = o.OrderID) AS TotalAmount,
+    c.CompanyName AS Customer,
+    (SELECT COUNT(*) FROM Shipments_A sh WHERE sh.OrderID = o.OrderID) AS ShipmentCount,
+    o.Notes AS OrderNotes
+FROM Orders_A o JOIN Customers_A c ON o.CustomerID = c.CustomerID
+WHERE o.Country = 'ES'
+UNION ALL
+SELECT
+    s.SaleID AS OrderID,
+    s.TransactionDate AS OrderDate,
+    (SELECT SUM(li.Units * li.Cost) FROM LineItems_B li WHERE li.SaleID = s.SaleID) AS TotalAmount,
+    b.BuyerName AS Customer,
+    (SELECT COUNT(*) FROM Deliveries_B d WHERE d.SaleID = s.SaleID) AS ShipmentCount,
+    s.SaleDescription AS OrderNotes
+FROM Sales_B s JOIN Buyers_B b ON s.BuyerID = b.BuyerID
+WHERE s.Region = 'EU-South'
+ORDER BY OrderID;</textarea>
+            <div class="button-group" style="justify-content: flex-end; margin-top: -5px; margin-bottom: 5px;">
+                <button id="copyInputQueryButton" class="secondary-button" title="Copiar Query de Entrada">Copiar Entrada</button>
+                <button id="pasteInputQueryButton" class="secondary-button" title="Pegar y Reemplazar Query de Entrada">Pegar Entrada</button>
+            </div>
+            <div class="button-group">
+                <button id="analyzeButton">Analizar Query</button>
+                <button id="clearInputButton" class="danger-button">Borrar Query Entrada</button>
+            </div>
+            <div id="messageArea"></div>
+        </section>
+
+        <div id="analysisResults" class="hidden">
+            <section id="keyFieldsSection">
+                <h2>2. Seleccione Campos Clave</h2>
+                <div class="field-selection-container" id="keyFieldsContainer">
+                    <p>Analice una query para ver los campos.</p>
+                </div>
+            </section>
+
+            <section id="compareFieldsSection">
+                <h2>3. Seleccione Campos a Comparar (todos por defecto)</h2>
+                <div class="field-selection-container" id="compareFieldsContainer">
+                    <p>Analice una query para ver los campos.</p>
+                </div>
+                <div class="checkbox-option">
+                    <label>
+                        <input type="checkbox" id="ntextCheckbox" disabled>
+                        Comparar campos sensibles (ntext, text, image) como NVARCHAR(MAX)
+                    </label>
+                </div>
+            </section>
+            
+            <button id="generateDiffButton" disabled>Generar Query de Diferencias</button>
+        </div>
+
+        <section id="outputSection" class="hidden">
+            <h2>4. Query de Diferencias Generada</h2>
+            <div class="button-group" style="justify-content: flex-end; margin-bottom: 5px;">
+                <button id="copyOutputButton" class="secondary-button hidden">Copiar Resultado</button>
+            </div>
+            <textarea id="outputQuery" rows="20" readonly></textarea>
+        </section>
+    </div>
+
+    <script>
+        const inputQueryEl = document.getElementById('inputQuery');
+        const analyzeButtonEl = document.getElementById('analyzeButton');
+        const clearInputButtonEl = document.getElementById('clearInputButton');
+        const messageAreaEl = document.getElementById('messageArea');
+        
+        const analysisResultsEl = document.getElementById('analysisResults');
+        const keyFieldsContainerEl = document.getElementById('keyFieldsContainer');
+        const compareFieldsContainerEl = document.getElementById('compareFieldsContainer');
+        const ntextCheckboxEl = document.getElementById('ntextCheckbox');
+        const generateDiffButtonEl = document.getElementById('generateDiffButton');
+        
+        const outputSectionEl = document.getElementById('outputSection');
+        const outputQueryEl = document.getElementById('outputQuery');
+        const copyOutputButtonEl = document.getElementById('copyOutputButton');
+
+        const copyInputQueryButtonEl = document.getElementById('copyInputQueryButton');
+        const pasteInputQueryButtonEl = document.getElementById('pasteInputQueryButton');
+
+
+        let extractedFields = []; 
+        let query1TextGlobal = '';
+        let query2TextGlobal = '';
+        let subqueryAliasWarnings = []; 
+
+        function addMissingAliasesToQueryText(queryText, queryNumber) {
+            let modifiedQueryText = queryText;
+            let selectClauseStartIndex = -1;
+            const selectKeywordPrefixMatch = modifiedQueryText.match(/^\s*SELECT\s+(?:DISTINCT\s+)?/i);
+            if (!selectKeywordPrefixMatch) {
+                console.warn(`Query ${queryNumber} no parece comenzar con SELECT. No se añadirán alias.`);
+                return queryText;
+            }
+            selectClauseStartIndex = selectKeywordPrefixMatch[0].length;
+
+            let fromIndex = -1;
+            let depth = 0;
+            let inStringLiteral = false;
+            for (let i = selectClauseStartIndex; i < modifiedQueryText.length; i++) {
+                const char = modifiedQueryText[i];
+                if (char === "'") { // Basic string literal handling
+                    // Toggle based on whether the ' is escaped by another ' (SQL standard for ' inside string)
+                    if (i + 1 < modifiedQueryText.length && modifiedQueryText[i+1] === "'") {
+                        i++; // Skip next quote as it's part of the literal
+                        continue;
+                    }
+                    inStringLiteral = !inStringLiteral;
+                }
+                
+                if (!inStringLiteral) {
+                    if (char === '(') depth++;
+                    else if (char === ')') depth--;
+                    else if (depth === 0 && modifiedQueryText.substring(i).toUpperCase().startsWith("FROM ")) {
+                        fromIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            if (fromIndex === -1 || selectClauseStartIndex >= fromIndex) {
+                console.warn(`No se pudo encontrar la cláusula FROM principal en Query ${queryNumber} para añadir alias de forma segura.`);
+                return queryText;
+            }
+                    
+            const originalSelectClause = modifiedQueryText.substring(selectClauseStartIndex, fromIndex);
+            let reconstructedSelectClause = "";
+            let lastIndex = 0;
+            let subqueryAliasCounter = 1; 
+
+            // Regex to find subqueries: (SELECT ...) and optionally its alias
+            // It tries to find a subquery (SELECT ... ) that is NOT followed by AS
+            const subqueryWithoutAliasRegex = /\((SELECT[\s\S]*?)\)(?!\s*AS\b)/gi;
+
+            let match;
+            while ((match = subqueryWithoutAliasRegex.exec(originalSelectClause)) !== null) {
+                // Check if this match is inside another subquery that *does* have an alias, to avoid double-aliasing
+                // This is a complex check and might not be perfect.
+                // A simpler approach: if the regex matches, and it's not part of a larger (SELECT...) AS Alias pattern already
+                
+                reconstructedSelectClause += originalSelectClause.substring(lastIndex, match.index); 
+                
+                const subqueryContent = match[1]; 
+                const generatedAliasName = `SubQueryCol${subqueryAliasCounter}_Q${queryNumber}`;
+                reconstructedSelectClause += `(${subqueryContent}) AS ${sanitizeFieldNameForSQL(generatedAliasName)}`;
+                const warningMsg = `Se añadió el alias '${generatedAliasName}' a una subconsulta sin alias en la Query ${queryNumber}.`;
+                console.warn(warningMsg);
+                if (!subqueryAliasWarnings.find(w => w.includes(generatedAliasName))) {
+                     subqueryAliasWarnings.push(warningMsg);
+                }
+                subqueryAliasCounter++;
+                lastIndex = subqueryWithoutAliasRegex.lastIndex;
+            }
+            reconstructedSelectClause += originalSelectClause.substring(lastIndex); 
+
+            modifiedQueryText = selectKeywordPrefixMatch[0] + reconstructedSelectClause + modifiedQueryText.substring(fromIndex);
+            return modifiedQueryText;
+        }
+
+
+        function showMessage(message, type = 'info') {
+            let fullMessage = message;
+            if (type === 'warning' && subqueryAliasWarnings.length > 0 && 
+                (message.startsWith("Query analizada") || message.startsWith("Query de diferencias generada. NOTA:"))) {
+                fullMessage += "\nDetalles de advertencias sobre alias (consola para más info):\n";
+                subqueryAliasWarnings.forEach(warn => {
+                    const uiWarnMatch = warn.match(/'(SubQueryCol\d+_Q\d+)' a una subconsulta sin alias en la Query (\d+)/);
+                    if (uiWarnMatch) {
+                        fullMessage += `- Query ${uiWarnMatch[2]}: Se añadió alias '${uiWarnMatch[1]}'.\n`;
+                    } else {
+                        fullMessage += `- ${warn.substring(0,100)}...\n`
+                    }
+                });
+            }
+            messageAreaEl.textContent = fullMessage;
+            messageAreaEl.className = `message-${type}`; 
+            messageAreaEl.classList.remove('hidden');
+        }
+
+        function clearMessage() {
+            messageAreaEl.textContent = '';
+            messageAreaEl.className = '';
+            messageAreaEl.classList.add('hidden');
+            subqueryAliasWarnings = []; 
+        }
+
+        function resetFormState() {
+            clearMessage();
+            outputQueryEl.value = '';
+            copyOutputButtonEl.classList.add('hidden');
+
+            keyFieldsContainerEl.innerHTML = '<p>Analice una query para ver los campos.</p>';
+            compareFieldsContainerEl.innerHTML = '<p>Analice una query para ver los campos.</p>';
+            
+            ntextCheckboxEl.checked = false;
+            ntextCheckboxEl.disabled = true;
+            
+            generateDiffButtonEl.disabled = true;
+            analysisResultsEl.classList.add('hidden');
+
+            extractedFields = [];
+            query1TextGlobal = '';
+            query2TextGlobal = '';
+        }
+
+        clearInputButtonEl.addEventListener('click', () => {
+            inputQueryEl.value = '';
+            resetFormState();
+            inputQueryEl.focus();
+        });
+
+        copyInputQueryButtonEl.addEventListener('click', () => {
+            const textToCopy = inputQueryEl.value;
+            if (!textToCopy) {
+                showMessage('Nada que copiar en la Query de Entrada.', 'info');
+                return;
+            }
+            legacyCopy(textToCopy, 'Query de Entrada');
+        });
+
+        pasteInputQueryButtonEl.addEventListener('click', () => {
+            if (navigator.clipboard && navigator.clipboard.readText) {
+                navigator.clipboard.readText()
+                    .then(text => {
+                        inputQueryEl.value = text;
+                        showMessage('Query de Entrada reemplazada con contenido del portapapeles.', 'success');
+                        inputQueryEl.focus();
+                    })
+                    .catch(err => {
+                        console.error('Error al pegar Query de Entrada: ', err);
+                        showMessage('No se pudo pegar desde el portapapeles. Es posible que necesite conceder permisos o su navegador no lo soporte. Intente pegar manualmente (Ctrl+V).', 'error');
+                    });
+            } else {
+                showMessage('La funcionalidad de pegar desde el portapapeles no es compatible con su navegador o no se concedieron permisos. Intente pegar manualmente (Ctrl+V).', 'error');
+            }
+        });
+
+
+        analyzeButtonEl.addEventListener('click', () => {
+            resetFormState(); 
+            const fullQuery = inputQueryEl.value.trim();
+
+            if (!fullQuery) {
+                showMessage('La query de entrada no puede estar vacía.', 'error');
+                return;
+            }
+
+            let queryWithoutFinalOrderBy = fullQuery.replace(/\sORDER\s+BY\s+[^;]+;?\s*$/i, '');
+            if (queryWithoutFinalOrderBy.endsWith(';')) {
+                queryWithoutFinalOrderBy = queryWithoutFinalOrderBy.slice(0, -1);
+            }
+            
+            let lastMatchData = { index: -1, keyword: '', fullSeparator: '' };
+            const unionSplitRegex = /\bUNION\s+(ALL\s+)?/gi; 
+            let match;
+            let tempQueryForSplitting = queryWithoutFinalOrderBy;
+            while ((match = unionSplitRegex.exec(tempQueryForSplitting)) !== null) {
+                const prefix = tempQueryForSplitting.substring(0, match.index);
+                let openParens = 0;
+                let closeParens = 0;
+                let inSingleQuote = false;
+                // let inDoubleQuote = false; // SQL Server uses single quotes for strings
+                for (let i = 0; i < prefix.length; i++) {
+                    const char = prefix[i];
+                     if (char === "'") {
+                        if (i + 1 < prefix.length && prefix[i+1] === "'") { i++; continue; }
+                        inSingleQuote = !inSingleQuote;
+                    } else if (!inSingleQuote) {
+                        if (char === '(') openParens++;
+                        else if (char === ')') closeParens++;
+                    }
+                }
+
+                if (openParens === closeParens) { 
+                    lastMatchData.index = match.index;
+                    lastMatchData.fullSeparator = match[0]; 
+                    if (match[0].toUpperCase().includes('ALL')) {
+                        lastMatchData.keyword = 'UNION ALL';
+                    } else {
+                        lastMatchData.keyword = 'UNION';
+                    }
+                }
+            }
+            
+            if (lastMatchData.index === -1) {
+                showMessage('No se pudo encontrar un "UNION" o "UNION ALL" válido y a nivel principal para separar las consultas. Verifique que el UNION/UNION ALL no esté comentado o anidado incorrectamente.', 'error');
+                return;
+            }
+            
+            query1TextGlobal = queryWithoutFinalOrderBy.substring(0, lastMatchData.index).trim();
+            query2TextGlobal = queryWithoutFinalOrderBy.substring(lastMatchData.index + lastMatchData.fullSeparator.length).trim();
+
+            if (!query1TextGlobal || !query2TextGlobal) {
+                showMessage('No se pudo separar la query en dos partes válidas después de encontrar el UNION/UNION ALL.', 'error');
+                return;
+            }
+
+            const orderByInCteRegex = /\sORDER\s+BY\s+((?!.*\b(?:TOP|OFFSET)\b)[\s\S])*?(?=\s*\)|;|$)/gi;
+            query1TextGlobal = query1TextGlobal.replace(orderByInCteRegex, '');
+            query2TextGlobal = query2TextGlobal.replace(orderByInCteRegex, '');
+
+            query1TextGlobal = addMissingAliasesToQueryText(query1TextGlobal, 1);
+            query2TextGlobal = addMissingAliasesToQueryText(query2TextGlobal, 2);
+
+            try {
+                extractedFields = extractFieldsFromSelect(query1TextGlobal); 
+            } catch (e) {
+                console.error("Error in extractFieldsFromSelect:", e);
+                showMessage(`Error extrayendo campos: ${e.message}`, 'error');
+                return;
+            }
+            
+            if (extractedFields.length === 0) {
+                showMessage('No se pudieron extraer campos de la primera consulta. Asegúrese de que la estructura SELECT ... FROM sea clara.', 'error');
+                return;
+            }
+
+            populateFieldSelections(keyFieldsContainerEl, extractedFields, 'key', false);
+            populateFieldSelections(compareFieldsContainerEl, extractedFields, 'compare', true);
+
+            ntextCheckboxEl.disabled = false;
+            analysisResultsEl.classList.remove('hidden');
+            outputSectionEl.classList.remove('hidden'); 
+            checkGenerateButtonState();
+            
+            if (subqueryAliasWarnings.length > 0) {
+                showMessage('Query analizada. Se añadieron alias automáticamente a subconsultas sin alias. Revise la consola para detalles y la query generada.', 'warning');
+            } else {
+                showMessage('Query analizada exitosamente. Seleccione campos.', 'success');
+            }
+        });
+
+        function extractFieldsFromSelect(queryText) { 
+            const fields = [];
+            
+            let selectStartIndex = -1;
+            const selectKeywordPrefixMatch = queryText.match(/^\s*SELECT\s+(?:DISTINCT\s+)?/i);
+            if (!selectKeywordPrefixMatch) {
+                throw new Error('La consulta no comienza con SELECT [DISTINCT].');
+            }
+            selectStartIndex = selectKeywordPrefixMatch[0].length;
+
+            let fromIndex = -1;
+            let depth = 0;
+            let inStringLiteral = false;
+            for (let i = selectStartIndex; i < queryText.length; i++) {
+                const char = queryText[i];
+                 if (char === "'") {
+                    if (i + 1 < queryText.length && queryText[i+1] === "'") { i++; continue; }
+                    inStringLiteral = !inStringLiteral;
+                }
+                if (!inStringLiteral) {
+                    if (char === '(') depth++;
+                    else if (char === ')') depth--;
+                    else if (depth === 0 && queryText.substring(i).toUpperCase().startsWith("FROM ")) {
+                        fromIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            if (fromIndex === -1 || selectStartIndex >= fromIndex) {
+                 throw new Error('No se pudo encontrar la cláusula FROM principal o la lista SELECT está vacía/malformada.');
+            }
+            
+            const selectClauseOriginal = queryText.substring(selectStartIndex, fromIndex).trim();
+
+            const subqueriesData = []; 
+            let subqueryIndex = 0;
+            
+            const subqueryWithAliasRegex = /\((SELECT[\s\S]*?)\)\s*AS\s*(?:([`"'])([\s\S]*?)\2|(\[[\s\S]*?\])|([\w]+(?:\s+[\w]+)*))/gi;
+            let tempSelectClauseForPlaceholders = selectClauseOriginal; 
+            let processedSelectClause = ""; 
+
+            let lastRegexIndex = 0;
+            let subqueryMatch;
+            while ((subqueryMatch = subqueryWithAliasRegex.exec(tempSelectClauseForPlaceholders)) !== null) {
+                processedSelectClause += tempSelectClauseForPlaceholders.substring(lastRegexIndex, subqueryMatch.index);
+
+                const placeholder = `__SUBQUERY_${subqueryIndex}__`;
+                const aliasGroupQuoteContent = subqueryMatch[3]; 
+                const aliasGroupBracket = subqueryMatch[4]; 
+                const aliasGroupSimple = subqueryMatch[5]; 
+                
+                let finalAlias = null;
+                if (aliasGroupQuoteContent) finalAlias = aliasGroupQuoteContent;
+                else if (aliasGroupBracket) finalAlias = aliasGroupBracket.slice(1, -1); 
+                else if (aliasGroupSimple) finalAlias = aliasGroupSimple;
+
+                if (finalAlias) {
+                    finalAlias = finalAlias.trim().replace(/^[`"']|[`"']$/g, '');
+                    subqueriesData.push({ placeholder: placeholder, alias: finalAlias });
+                } else {
+                     console.error("Error crítico: Subconsulta encontrada sin alias DESPUÉS del preprocesamiento para añadir alias.", subqueryMatch[0]);
+                    const fallbackAlias = `ErrorExtractAlias${subqueryIndex + 1}`;
+                    subqueriesData.push({ placeholder: placeholder, alias: fallbackAlias });
+                }
+                processedSelectClause += placeholder;
+                subqueryIndex++;
+                lastRegexIndex = subqueryWithAliasRegex.lastIndex;
+            }
+            processedSelectClause += tempSelectClauseForPlaceholders.substring(lastRegexIndex);
+            
+            const parts = processedSelectClause.split(',');
+
+            for (let part of parts) {
+                part = part.trim();
+                if (!part) continue;
+
+                if (part.startsWith('__SUBQUERY_')) {
+                    const foundSubquery = subqueriesData.find(sq => sq.placeholder === part);
+                    if (foundSubquery) {
+                        fields.push(foundSubquery.alias); 
+                    } else {
+                        console.error(`Error de lógica: Placeholder ${part} sin entrada correspondiente en subqueriesData.`);
+                        fields.push(`InternalErrorSubQuery_${part.split('_').pop()}`);
+                    }
+                    continue;
+                }
+
+                let finalAliasName = null;
+                let aliasMatch = part.match(/\s+AS\s+(?:([`"'])([\s\S]*?)\1|(\[[\s\S]*?\])|([\w]+(?:\s+[\w]+)*))$/i);
+                if (aliasMatch) {
+                    finalAliasName = (aliasMatch[2] || (aliasMatch[3] ? aliasMatch[3].slice(1,-1) : null) || aliasMatch[4]);
+                } else {
+                    aliasMatch = part.match(/^(?:([`"'])([\s\S]*?)\1|(\[[\s\S]*?\])|([\w]+(?:\s+[\w]+)*))\s*=\s*.+$/i);
+                    if (aliasMatch) {
+                        finalAliasName = (aliasMatch[2] || (aliasMatch[3] ? aliasMatch[3].slice(1,-1) : null) || aliasMatch[4]);
+                    }
+                }
+                
+                if (finalAliasName) {
+                    fields.push(finalAliasName.trim().replace(/^[`"']|[`"']$/g, ''));
+                } else {
+                    const columnMatch = part.match(/(?:[\w\[\]\.]+\.)?(\[[\s\S]*?\]|[\w]+)$/i); 
+                    if (columnMatch && columnMatch[1]) {
+                         let colName = columnMatch[1];
+                         if (colName.startsWith('[') && colName.endsWith(']')) colName = colName.slice(1,-1);
+                         fields.push(colName);
+                    } else {
+                        if (part.includes('(') && part.includes(')')) { 
+                             console.warn(`Función o expresión compleja sin alias detectada: "${part.substring(0,50)}...". Se usará un nombre genérico. Se recomienda que el usuario añada un alias explícito.`);
+                             fields.push(`FunctionExpr${fields.length + 1}`);
+                        } else {
+                             fields.push(part.replace(/[\[\]"`']/g, '')); 
+                        }
+                    }
+                }
+            }
+            return fields.filter(f => f && f.trim() !== "");
+        }
+
+        function populateFieldSelections(sectionElement, fields, type, selectByDefault) {
+            sectionElement.innerHTML = ''; 
+            if (fields.length === 0) {
+                sectionElement.innerHTML = '<p>No se encontraron campos.</p>';
+                return;
+            }
+
+            fields.forEach(field => {
+                const checkboxId = `${type}-${field.replace(/[^a-zA-Z0-9_]/g, '_')}_${Math.random().toString(36).substr(2, 5)}`;
+                const div = document.createElement('div');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.id = checkboxId;
+                checkbox.value = field; 
+                checkbox.checked = selectByDefault;
+                checkbox.dataset.fieldType = type; 
+
+                const label = document.createElement('label');
+                label.htmlFor = checkboxId;
+                label.textContent = field;
+                
+                div.appendChild(checkbox);
+                div.appendChild(label);
+                sectionElement.appendChild(div);
+            });
+        }
+        
+        function checkGenerateButtonState() {
+            const selectedKeyFields = Array.from(keyFieldsContainerEl.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+            const selectedCompareFields = Array.from(compareFieldsContainerEl.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+
+            generateDiffButtonEl.disabled = !(selectedKeyFields.length > 0 && selectedCompareFields.length > 0);
+        }
+
+        keyFieldsContainerEl.addEventListener('change', (event) => {
+            if (event.target.type === 'checkbox') {
+                checkGenerateButtonState();
+            }
+        });
+        
+        compareFieldsContainerEl.addEventListener('change', (event) => {
+            if (event.target.type === 'checkbox') {
+                checkGenerateButtonState();
+            }
+        });
+
+        function sanitizeFieldNameForSQL(fieldName) {
+            if (!fieldName) return '';
+            if (fieldName.startsWith('[') && fieldName.endsWith(']')) {
+                return fieldName; 
+            }
+            if (/^SubQueryCol\d+_Q\d+$/.test(fieldName)) { // Alias generados
+                return `[${fieldName}]`; 
+            }
+            if (/^[a-zA-Z_][\w]*$/.test(fieldName)) {
+                const reservedKeywords = ['KEY', 'VALUE', 'TYPE', 'TABLE', 'INDEX', 'SELECT', 'FROM', 'WHERE', 'ORDER', 'GROUP', 'BY', 'COLUMN', 'USER', 'TEXT', 'FILE', 'LEVEL', 'DATE', 'YEAR', 'MONTH']; 
+                if (!reservedKeywords.includes(fieldName.toUpperCase())) {
+                     return fieldName;
+                }
+            }
+            return `[${fieldName.replace(/]/g, ']]')}]`;
+        }
+
+        generateDiffButtonEl.addEventListener('click', () => {
+            clearMessage(); 
+            outputQueryEl.value = '';
+            copyOutputButtonEl.classList.add('hidden');
+
+            const selectedKeyFields = Array.from(keyFieldsContainerEl.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+            const selectedCompareFields = Array.from(compareFieldsContainerEl.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+            const compareNtextAsMax = ntextCheckboxEl.checked;
+
+            if (selectedKeyFields.length === 0) {
+                showMessage('Debe seleccionar al menos un campo clave.', 'error');
+                return;
+            }
+            if (selectedCompareFields.length === 0) {
+                showMessage('Debe seleccionar al menos un campo a comparar.', 'error');
+                return;
+            }
+            
+            let diffQuery = `WITH Query1_CTE AS (\n${query1TextGlobal}\n),\nQuery2_CTE AS (\n${query2TextGlobal}\n)\n`;
+            const selectClauses = [];
+
+            selectedCompareFields.forEach(compareFieldFromQuery1 => {
+                const sCompareFieldSQL_Q1 = sanitizeFieldNameForSQL(compareFieldFromQuery1);
+                
+                let compareFieldForQuery2 = compareFieldFromQuery1;
+                if (/^SubQueryCol\d+_Q1$/.test(compareFieldFromQuery1)) {
+                    compareFieldForQuery2 = compareFieldFromQuery1.replace('_Q1', '_Q2');
+                } else if (/^FunctionExpr\d+$/.test(compareFieldFromQuery1)) {
+                     // Para FunctionExprN, asumimos que el N es el mismo.
+                     // Si el usuario no pone alias, la estructura debe ser idéntica.
+                }
+                const sCompareFieldSQL_Q2 = sanitizeFieldNameForSQL(compareFieldForQuery2);
+
+                const sKeyFieldsForSelect = selectedKeyFields.map(f => `    Q1.${sanitizeFieldNameForSQL(f)} AS ${sanitizeFieldNameForSQL(f)}`).join(',\n');
+                
+                let q1ValCondition = `Q1.${sCompareFieldSQL_Q1}`;
+                let q2ValCondition = `Q2.${sCompareFieldSQL_Q2}`; 
+                
+                if (compareNtextAsMax) {
+                    q1ValCondition = `CAST(${q1ValCondition} AS NVARCHAR(MAX))`;
+                    q2ValCondition = `CAST(${q2ValCondition} AS NVARCHAR(MAX))`;
+                }
+
+                const selectQ1ValDisplay = `CAST(Q1.${sCompareFieldSQL_Q1} AS NVARCHAR(MAX))`;
+                const selectQ2ValDisplay = `CAST(Q2.${sCompareFieldSQL_Q2} AS NVARCHAR(MAX))`;
+
+                let clause = `SELECT\n${sKeyFieldsForSelect},\n`;
+                clause += `    '${compareFieldFromQuery1.replace(/'/g, "''")}' AS FieldName_Changed,\n`; 
+                clause += `    ${selectQ1ValDisplay} AS Value_Query1,\n`;
+                clause += `    ${selectQ2ValDisplay} AS Value_Query2\n`;
+                clause += `FROM Query1_CTE Q1\nINNER JOIN Query2_CTE Q2 ON\n`;
+                
+                const joinConditions = selectedKeyFields.map(f => {
+                    let keyFieldQ1Sanitized = sanitizeFieldNameForSQL(f);
+                    let keyFieldQ2Sanitized = keyFieldQ1Sanitized; // Por defecto, es el mismo
+                    if (/^SubQueryCol\d+_Q1$/.test(f)) {
+                        keyFieldQ2Sanitized = sanitizeFieldNameForSQL(f.replace('_Q1', '_Q2'));
+                    }
+                     return `    Q1.${keyFieldQ1Sanitized} = Q2.${keyFieldQ2Sanitized}`;
+                }).join(' AND\n');
+                clause += `${joinConditions}\n`;
+                
+                clause += `WHERE\n    (\n        (${q1ValCondition} <> ${q2ValCondition})\n`;
+                clause += `        OR (Q1.${sCompareFieldSQL_Q1} IS NULL AND Q2.${sCompareFieldSQL_Q2} IS NOT NULL)\n`;
+                clause += `        OR (Q1.${sCompareFieldSQL_Q1} IS NOT NULL AND Q2.${sCompareFieldSQL_Q2} IS NULL)\n`;
+                clause += `    )`;
+                
+                selectClauses.push(clause);
+            });
+
+            let finalMessage = "";
+            let messageType = "success"; 
+
+            if (subqueryAliasWarnings.length > 0) { 
+                finalMessage = "Query de diferencias generada. NOTA: Se añadieron alias automáticamente a subconsultas en su query de entrada que no los tenían. La query generada utiliza estos alias.\n\n";
+                messageType = "warning";
+            }
+
+            if (selectClauses.length === 0) {
+                 if (finalMessage) { 
+                    finalMessage += "No se generaron cláusulas de comparación (todos los campos comparables podrían coincidir o no fueron seleccionados).";
+                 } else {
+                    finalMessage = 'No se generaron cláusulas de comparación (puede que no haya campos seleccionados a comparar o todos los valores coincidan).';
+                    messageType = "info";
+                 }
+                outputQueryEl.value = diffQuery + "\n-- No hay campos seleccionados para comparación o no se generaron diferencias específicas.";
+            } else {
+                diffQuery += selectClauses.join('\n\nUNION ALL\n\n');
+                const orderByColumns = [];
+                for (let i = 0; i < selectedKeyFields.length; i++) {
+                    orderByColumns.push(i + 1);
+                }
+                orderByColumns.push(selectedKeyFields.length + 1); 
+                diffQuery += `\nORDER BY ${orderByColumns.join(', ')};`;
+                outputQueryEl.value = diffQuery;
+
+                if (messageType === "success") {
+                    finalMessage = 'Query de diferencias generada exitosamente.';
+                } else if (finalMessage) { 
+                     finalMessage += "Se generaron cláusulas de comparación usando los alias (incluyendo los generados automáticamente).";
+                }
+            }
+            
+            showMessage(finalMessage, messageType);
+            if (selectClauses.length > 0) { 
+                copyOutputButtonEl.classList.remove('hidden');
+            } else {
+                copyOutputButtonEl.classList.add('hidden');
+            }
+            outputSectionEl.classList.remove('hidden'); 
+        });
+        
+        copyOutputButtonEl.addEventListener('click', () => {
+            const textToCopy = outputQueryEl.value;
+            if (!textToCopy) {
+                showMessage('Nada que copiar.', 'info');
+                return;
+            }
+            legacyCopy(textToCopy, 'Query de Diferencias');
+        });
+
+        function legacyCopy(textToCopy, type = 'Resultado') { 
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                 navigator.clipboard.writeText(textToCopy)
+                    .then(() => {
+                        showMessage(`${type} copiado al portapapeles.`, 'success');
+                    })
+                    .catch(err => {
+                        console.error(`Error al copiar ${type} con navigator.clipboard: `, err);
+                        const textArea = document.createElement("textarea");
+                        textArea.value = textToCopy;
+                        textArea.style.position = "fixed"; textArea.style.left = "-9999px"; textArea.style.top = "-9999px";
+                        document.body.appendChild(textArea);
+                        textArea.focus(); textArea.select();
+                        try {
+                            const successful = document.execCommand('copy');
+                            if (successful) showMessage(`${type} copiado al portapapeles (fallback).`, 'success');
+                            else showMessage(`Error al copiar ${type} (fallback). Intente copiar manualmente.`, 'error');
+                        } catch (errExec) {
+                            console.error(`Error al copiar ${type} con document.execCommand: `, errExec);
+                            showMessage(`Error al copiar ${type} (fallback). Intente copiar manualmente.`, 'error');
+                        }
+                        document.body.removeChild(textArea);
+                    });
+            } else { 
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                textArea.style.position = "fixed"; textArea.style.left = "-9999px"; textArea.style.top = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.focus(); textArea.select();
+                try {
+                    const successful = document.execCommand('copy');
+                     if (successful) showMessage(`${type} copiado al portapapeles (fallback).`, 'success');
+                    else showMessage(`Error al copiar ${type} (fallback). Intente copiar manualmente.`, 'error');
+                } catch (errExec) {
+                    console.error(`Error al copiar ${type} con document.execCommand: `, errExec);
+                    showMessage(`Error al copiar ${type} (fallback). Intente copiar manualmente.`, 'error');
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // Initialize
+        resetFormState(); 
+        clearMessage(); 
+        inputQueryEl.focus();
+
+    </script>
+</body>
+</html>
