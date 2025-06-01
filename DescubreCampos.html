@@ -1,0 +1,397 @@
+                                                                                                                                                                
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Consulta de Metadatos SQL Server Avanzado</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            margin: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            max-width: 900px;
+            margin: 30px auto;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        textarea {
+            width: 98%;
+            min-height: 150px; /* Aumentado un poco */
+            padding: 12px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 14px;
+            resize: vertical;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+        }
+        textarea:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52,152,219,.25);
+            outline: none;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        button {
+            flex-grow: 1;
+            padding: 12px 18px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.2s ease-in-out;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button.secondary {
+            background-color: #7f8c8d;
+        }
+        button.secondary:hover {
+            background-color: #6c7a7d;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+        }
+        .error {
+            color: #c0392b;
+            border: 1px solid #e74c3c;
+            background-color: #fdecea;
+        }
+        .warning {
+            color: #d35400;
+            border: 1px solid #f39c12;
+            background-color: #fef9e7;
+        }
+        .copy-feedback {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 0.9em;
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Generador de Consulta de Metadatos SQL Server</h1>
+        <p>Esta herramienta intenta analizar consultas SQL sencillas y con JOINs para generar una consulta de metadatos. Las subconsultas complejas, CTEs y UNIONs pueden no ser procesadas correctamente.</p>
+
+        <label for="sqlInput">Consulta SQL Server de Entrada:</label>
+        <textarea id="sqlInput" placeholder="Ej: SELECT c.IdCliente, c.Nombre, p.NombreProducto FROM Clientes c JOIN Pedidos pd ON c.IdCliente = pd.IdCliente JOIN Productos p ON pd.IdProducto = p.IdProducto WHERE c.Activo = 1"></textarea>
+
+        <div class="button-group">
+            <button onclick="generateMetadataQuery()">Generar Consulta de Metadatos</button>
+            <button class="secondary" onclick="copyToClipboard()" id="copyButton">Copiar Consulta Generada</button>
+        </div>
+        <span id="copyFeedback" class="copy-feedback"></span>
+
+        <label for="sqlOutput">Consulta de Metadatos Generada:</label>
+        <textarea id="sqlOutput" readonly placeholder="Aquí aparecerá la consulta de metadatos..."></textarea>
+
+        <div id="infoMessage" class="message" style="display:none;"></div>
+    </div>
+
+    <script>
+        function showMessage(message, type = 'error') { // type can be 'error' or 'warning'
+            const messageDiv = document.getElementById('infoMessage');
+            messageDiv.textContent = message;
+            messageDiv.className = `message ${type}`; // Aplicar clase de error o advertencia
+            messageDiv.style.display = 'block';
+        }
+
+        function clearMessage() {
+            const messageDiv = document.getElementById('infoMessage');
+            messageDiv.style.display = 'none';
+            messageDiv.textContent = '';
+            messageDiv.className = 'message'; // Reset class
+        }
+        
+        function clearCopyFeedback() {
+            document.getElementById('copyFeedback').textContent = '';
+        }
+
+        /**
+         * Parsea la cadena de columnas.
+         * - Maneja comas dentro de paréntesis.
+         * - Quita alias de columna (AS Alias).
+         * - Si la columna es T.C o A.C, extrae solo C.
+         * - Filtra subconsultas en la lista SELECT.
+         */
+        function parseSelectedColumns(columnsString) {
+            const columns = [];
+            let currentColumn = "";
+            let parenLevel = 0;
+
+            for (let i = 0; i < columnsString.length; i++) {
+                const char = columnsString[i];
+                if (char === '(') parenLevel++;
+                else if (char === ')') parenLevel--;
+
+                if (char === ',' && parenLevel === 0) {
+                    columns.push(currentColumn.trim());
+                    currentColumn = "";
+                } else {
+                    currentColumn += char;
+                }
+            }
+            columns.push(currentColumn.trim());
+
+            return columns.map(col => {
+                const aliasMatch = col.match(/^(.*?)(?:\s+AS\s+[\w\[\]]+)?$/i);
+                let baseCol = (aliasMatch && aliasMatch[1]) ? aliasMatch[1].trim() : col.trim();
+
+                // Si es una subconsulta en el select, la ignoramos.
+                if (baseCol.startsWith('(') && baseCol.endsWith(')') && baseCol.toUpperCase().includes('SELECT')) {
+                    return null;
+                }
+                // Si es una función con parámetros, la ignoramos por ahora.
+                if (/\w+\(.*\)/.test(baseCol) && !baseCol.includes('.')) { // Evitar confundir T.Columna() con Func()
+                     // Podríamos intentar extraer el primer argumento si es una columna, pero es complejo.
+                     // Por ahora, si parece una función y no está calificada, la ignoramos.
+                     // Excepción: COUNT(*) u otras agregaciones sin alias directo a columna.
+                    if (!/COUNT\s*\(\s*\*+\s*\)/i.test(baseCol)) { // No ignorar COUNT(*)
+                       // return null; // Comentado para ser menos agresivo, el usuario puede quererlo
+                    }
+                }
+
+
+                // Quitar prefijo de tabla/alias: "Tabla.Columna" -> "Columna", "[Alias].[Columna]" -> "[Columna]"
+                if (baseCol.includes('.')) {
+                    baseCol = baseCol.substring(baseCol.lastIndexOf('.') + 1);
+                }
+                
+                // Quitar corchetes solo del nombre de la columna: "[Columna]" -> "Columna"
+                baseCol = baseCol.replace(/^\[|\]$/g, '');
+                
+                // No añadir columnas vacías o que sean solo '*'
+                if (baseCol === '*' || baseCol === '') return null;
+
+                return baseCol;
+            }).filter(col => col !== null);
+        }
+
+        /**
+         * Extrae nombres de tablas de la cláusula FROM y JOINs.
+         * Intenta manejar alias simples. Devuelve nombres de tablas reales.
+         */
+        function extractTableNames(fullQuery) {
+            const tables = new Set();
+            const tableAliasMap = {}; // Para mapear alias a nombres reales si es posible
+
+            // Regex para encontrar FROM tabla [AS alias] y JOIN tabla [AS alias]
+            // Esto es simplificado y podría fallar con SQL muy complejo.
+            const fromClauseRegex = /\bFROM\s+([\w\[\]\.]+)(?:\s+AS\s+([\w\[\]]+))?/gi;
+            const joinClauseRegex = /\bJOIN\s+([\w\[\]\.]+)(?:\s+AS\s+([\w\[\]]+))?/gi;
+
+            let match;
+
+            // Función para limpiar y añadir nombre de tabla
+            const addTable = (tableName, alias) => {
+                if (!tableName) return;
+                // Limpiar: quitar BD..Esquema.., quitar []
+                let cleanedName = tableName.replace(/^\[(.*)\]$/, '$1'); // Quita [] globales
+                const parts = cleanedName.split('.');
+                cleanedName = parts[parts.length - 1].replace(/^\[|\]$/g, ''); // Toma ultima parte y quita []
+
+                if (cleanedName) tables.add(cleanedName);
+                if (alias) {
+                    let cleanedAlias = alias.replace(/^\[|\]$/g, '');
+                    if (cleanedName && cleanedAlias) tableAliasMap[cleanedAlias] = cleanedName;
+                }
+            };
+            
+            // Buscar en FROM
+            while ((match = fromClauseRegex.exec(fullQuery)) !== null) {
+                addTable(match[1], match[2]);
+            }
+
+            // Buscar en JOINs
+            while ((match = joinClauseRegex.exec(fullQuery)) !== null) {
+                addTable(match[1], match[2]);
+            }
+            
+            // Si no se encontró nada con regex (ej. FROM [MiTabla] WHERE...), intentamos un parse más simple
+            if (tables.size === 0) {
+                 const upperSqlInput = fullQuery.toUpperCase();
+                 const fromIndex = upperSqlInput.indexOf(" FROM ");
+                 if (fromIndex !== -1) {
+                    let fromClauseContent = fullQuery.substring(fromIndex + " FROM ".length).trim();
+                    const terminators = [" WHERE ", " INNER JOIN ", " LEFT JOIN ", " RIGHT JOIN ", " FULL JOIN ", " GROUP BY ", " ORDER BY ", " HAVING ", ";", "\n"];
+                    let endOfTableNameIndex = fromClauseContent.length;
+                    for (const term of terminators) {
+                        const termIndex = fromClauseContent.toUpperCase().indexOf(term.toUpperCase());
+                        if (termIndex !== -1 && termIndex < endOfTableNameIndex) {
+                            endOfTableNameIndex = termIndex;
+                        }
+                    }
+                    let rawTableName = fromClauseContent.substring(0, endOfTableNameIndex).trim();
+                     // Si hay un alias "AS", quitarlo
+                    const asIndex = rawTableName.toUpperCase().lastIndexOf(" AS ");
+                    if (asIndex > 0 && !rawTableName.substring(0, asIndex).includes(',')) { // asegurar que no es una columna con alias
+                        rawTableName = rawTableName.substring(0, asIndex).trim();
+                    } else {
+                         // Si no hay "AS", pero hay un espacio, el último token podría ser un alias implícito
+                        const spaceIndex = rawTableName.lastIndexOf(" ");
+                        if (spaceIndex > 0 && !rawTableName.substring(0, spaceIndex).includes(',')) {
+                            // Podría ser "NombreTabla Alias" o solo "NombreTabla"
+                            // Esto es riesgoso. Mejor tomar todo y limpiar.
+                        }
+                    }
+                    addTable(rawTableName, null); // No intenta obtener alias aquí
+                 }
+            }
+
+
+            return Array.from(tables);
+        }
+
+
+        function generateMetadataQuery() {
+            const sqlInputText = document.getElementById('sqlInput').value;
+            const outputTextarea = document.getElementById('sqlOutput');
+            
+            clearMessage();
+            clearCopyFeedback();
+            outputTextarea.value = '';
+
+            if (!sqlInputText.trim()) {
+                showMessage("Por favor, ingrese una consulta SQL.");
+                return;
+            }
+
+            try {
+                const upperSqlInput = sqlInputText.toUpperCase();
+                const selectIndex = upperSqlInput.indexOf("SELECT ");
+                // Encontrar el primer FROM, ya que UNIONs podrían tener múltiples
+                const fromIndex = upperSqlInput.indexOf(" FROM "); 
+
+                if (selectIndex === -1 || fromIndex === -1 || selectIndex >= fromIndex) {
+                    showMessage("Consulta SQL no válida. Debe contener SELECT y FROM en el orden correcto.");
+                    return;
+                }
+
+                // --- Extracción de Columnas ---
+                let columnsPartString = sqlInputText.substring(selectIndex + "SELECT ".length, fromIndex).trim();
+                columnsPartString = columnsPartString.replace(/^TOP\s+\d+(\s+PERCENT)?(\s+WITH\s+TIES)?\s*/i, '');
+                
+                const extractedColumns = parseSelectedColumns(columnsPartString);
+
+                if (extractedColumns.length === 0) {
+                    showMessage("No se pudieron extraer nombres de columnas válidos. Asegúrese de que las columnas no sean solo expresiones, subconsultas o '*' (liste las columnas explícitamente).");
+                    return;
+                }
+                
+                // --- Extracción de Tablas (FROM y JOINs) ---
+                // Considerar solo la parte de la query hasta un posible UNION, etc.
+                let querySegmentToAnalyze = sqlInputText;
+                const unionIndex = upperSqlInput.indexOf("UNION");
+                if (unionIndex > -1 && unionIndex > fromIndex) {
+                    querySegmentToAnalyze = sqlInputText.substring(0, unionIndex);
+                    showMessage("Se detectó UNION. El análisis se limitará a la primera consulta SELECT. Para un análisis completo, procese cada parte de la UNION por separado.", "warning");
+                }
+                
+                const extractedTableNames = extractTableNames(querySegmentToAnalyze);
+
+                if (extractedTableNames.length === 0) {
+                    showMessage("No se pudieron extraer nombres de tablas. Verifique la cláusula FROM y JOINs.");
+                    return;
+                }
+                
+                // --- Generación de la Consulta de Salida ---
+                const columnsForInClause = extractedColumns.map(col => `'${col}'`).join(', ');
+                const tablesForInClause = extractedTableNames.map(tbl => `'${tbl}'`).join(', ');
+
+                const metadataQuery = `
+SELECT
+    t.name AS TableName,
+    c.name AS ColumnName,
+    ty.name AS DataType,
+    CASE 
+        WHEN ty.name IN ('varchar', 'nvarchar', 'char', 'nchar', 'varbinary', 'binary') THEN 
+            CASE c.max_length WHEN -1 THEN 'MAX' ELSE CAST(c.max_length AS VARCHAR(10)) END
+        WHEN ty.name IN ('text', 'ntext', 'image') THEN 'N/A (legacy)' -- Longitud es diferente para estos
+        ELSE CAST(c.max_length AS VARCHAR(10)) -- Para tipos numéricos/fecha, es el tamaño en bytes del tipo
+    END AS MaxLength,
+    c.precision AS Precision,
+    c.scale AS Scale,
+    CASE c.is_nullable WHEN 1 THEN 'Sí' ELSE 'No' END AS IsNullable,
+    CASE c.is_identity WHEN 1 THEN 'Sí' ELSE 'No' END AS IsIdentity,
+    c.is_computed AS IsComputed,
+    c.collation_name AS CollationName
+FROM
+    sys.columns c
+INNER JOIN
+    sys.tables t ON c.object_id = t.object_id
+INNER JOIN
+    sys.types ty ON c.user_type_id = ty.user_type_id
+WHERE
+    t.name IN (${tablesForInClause})
+    AND c.name IN (${columnsForInClause})
+ORDER BY
+    t.name, c.column_id;
+                `.trim();
+
+                outputTextarea.value = metadataQuery;
+                if (unionIndex > -1 && unionIndex > fromIndex && !document.getElementById('infoMessage').textContent.includes("Se detectó UNION")) {
+                     showMessage("Se detectó UNION. El análisis se limitó a la primera consulta SELECT. La consulta de metadatos generada es para esa primera parte.", "warning");
+                }
+
+
+            } catch (e) {
+                console.error("Error durante el procesamiento:", e);
+                showMessage("Ocurrió un error al procesar la consulta: " + e.message);
+            }
+        }
+
+        function copyToClipboard() {
+            const outputTextarea = document.getElementById('sqlOutput');
+            const feedbackSpan = document.getElementById('copyFeedback');
+            clearCopyFeedback();
+
+            if (!outputTextarea.value) {
+                feedbackSpan.textContent = "Nada que copiar.";
+                setTimeout(clearCopyFeedback, 2000);
+                return;
+            }
+
+            navigator.clipboard.writeText(outputTextarea.value)
+                .then(() => {
+                    feedbackSpan.textContent = "¡Copiado al portapapeles!";
+                    setTimeout(clearCopyFeedback, 3000);
+                })
+                .catch(err => {
+                    console.error('Error al copiar: ', err);
+                    feedbackSpan.textContent = "Error al copiar.";
+                    setTimeout(clearCopyFeedback, 3000);
+                });
+        }
+    </script>
+</body>
+</html>
