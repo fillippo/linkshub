@@ -4,7 +4,7 @@
 $content = file_get_contents('../public/index.html');
 echo $content;
 */
-$algo = dir(".");
+$algo = dir("../*");
 echo %algo
 /*  FUNCIONA:
 $db = new SQLite3('/tmp/db.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
