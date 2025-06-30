@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enlaces</title>
+    <style>
+        /* --- Variables de Color (Opcional pero útil para consistencia) --- */
+        /* Puedes ajustar estos valores para refinar la paleta */
+        :root {
+            --color-primary-blue: #4a7ba0; /* Azul principal, ligeramente muted */
+            --color-darker-blue: #3a6380; /* Azul más oscuro para hover */
+            --color-text-dark: #212529;   /* Negro/Gris muy oscuro para texto principal */
+            --color-text-medium: #495057; /* Gris medio para texto secundario */
+            --color-background-light: #f8f9fa; /* Gris muy claro para fondos */
+            --color-background-medium: #e9ecef; /* Gris medio claro para barras/hover */
+            --color-border: #dee2e6;     /* Gris claro para bordes */
+            --color-white: #ffffff;      /* Blanco puro */
+        }
+
+        /* Estilos generales */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--color-background-light); /* Fondo más suave */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow: hidden; /* Controlamos el scroll en una área específica */
+            color: var(--color-text-dark); /* Color de texto por defecto */
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            background: var(--color-white); /* Fondo blanco */
+            border-radius: 10px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        h1 {
+            color: var(--color-text-dark);
+            text-align: center;
+            padding: 20px 0 10px;
+            margin: 0;
+            font-weight: 600; /* Ligeramente más negrita */
+        }
+
+        /* Barra de botones (navegación) */
+        .button-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 10px;
+            background-color: var(--color-background-medium); /* Fondo gris medio */
+            border-bottom: 1px solid var(--color-border); /* Separador */
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .toggleButton {
+            background-color: var(--color-primary-blue); /* Azul principal */
+            color: var(--color-white); /* Texto blanco */
+            border: none;
+            padding: 8px 15px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            margin: 4px;
+            flex-shrink: 0;
+        }
+
+        .toggleButton:hover {
+            background-color: var(--color-darker-blue); /* Azul más oscuro al hover */
+        }
+
+        .toggleButton:active {
+            transform: scale(0.98);
+        }
+
+        /* Área de contenido (tablas) */
+        .content-area {
+            padding: 20px;
+            overflow-y: auto; /* Permite el scroll solo en esta área */
+            flex-grow: 1;
+        }
+
+        /* Tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: none; /* Inicialmente oculta */
+            background-color: var(--color-white); /* Fondo blanco para la tabla */
+        }
+
+        thead {
+            background-color: var(--color-primary-blue); /* Azul principal para encabezado */
+            color: var(--color-white); /* Texto blanco */
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border); /* Borde gris claro */
+        }
+
+        th:first-child, td:first-child {
+            padding-left: 20px;
+        }
+        th:last-child, td:last-child {
+            padding-right: 20px;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--color-background-light); /* Gris muy claro para fila par */
+        }
+
+        tbody tr:hover {
+            background-color: var(--color-background-medium); /* Gris medio claro al hover */
+        }
+
+        /* Estilo especial para enlaces */
+        .link-cell a {
+            color: var(--color-primary-blue); /* Azul principal para enlaces */
+            text-decoration: none;
+            font-weight: normal;
+            transition: color 0.2s ease;
+        }
+
+        .link-cell a:hover {
+            text-decoration: underline;
+            color: var(--color-darker-blue); /* Azul más oscuro al hover */
+        }
+
+        /* Descripción */
+        .description-cell {
+            word-wrap: break-word;
+            color: var(--color-text-medium); /* Gris medio para descripción */
+            font-size: 0.9em;
+        }
+
+        /* Mejoras de Scrollbar (WebKit/Blink - Chrome, Safari, Edge) */
+        .content-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .content-area::-webkit-scrollbar-track {
+            background: var(--color-background-light); /* Fondo claro del track */
+            border-radius: 10px;
+        }
+
+        .content-area::-webkit-scrollbar-thumb {
+            background-color: var(--color-border); /* Color del thumb (gris borde) */
+            border-radius: 10px;
+            border: 2px solid var(--color-background-light); /* Espacio alrededor */
+        }
+
+        .content-area::-webkit-scrollbar-thumb:hover {
+            background-color: var(--color-text-medium); /* Gris medio al hover */
+        }
+
+        /* Mejoras de Scrollbar (Firefox) */
+        .content-area {
+            scrollbar-width: thin;
+            scrollbar-color: var(--color-border) var(--color-background-light); /* color_thumb color_track */
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .main-wrapper {
+                margin: 10px;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .button-bar {
+                padding: 5px;
+            }
+
+            .toggleButton {
+                padding: 6px 10px;
+                font-size: 12px;
+                margin: 3px;
+            }
+
+            .content-area {
+                padding: 10px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+
+            th:first-child, td:first-child {
+                padding-left: 10px;
+            }
+            th:last-child, td:last-child {
+                padding-right: 10px;
+            }
+
+            .description-cell {
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Nuevo contenedor principal -->
+    <div class="main-wrapper">
+        <h1>Links</h1>
+
+        <!-- Barra de botones en la parte superior -->
+        <div class="button-bar">
+            <button class="toggleButton" onclick="toggleTable('table1')">IAs</button>
+            <button class="toggleButton" onclick="toggleTable('table2')">Stream</button>
+            <button class="toggleButton" onclick="toggleTable('table3')">SEIDOR</button>
+            <button class="toggleButton" onclick="toggleTable('table4')">Varios</button>
+        </div>
+
+        <!-- Área de contenido desplazable para las tablas -->
+        <div class="content-area">
+            <table id="table1">
+                <thead>
+                    <tr>
+                        <th>Enlace</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="link-cell"><a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a></td>
+                        <td class="description-cell">Clásico IA de OpenAI</td>
+                    </tr>
+                    <tr>
+                        <td class="link-cell"><a href="https://gemini.google.com/app/1e35afc7bfd7ed5e?hl=es" target="_blank">Gemini</a></td>
+                        <td class="description-cell">IA de Google. Permite seleccionar varios motores</td>
+                    </tr>
+                    <tr>
+                        <td class="link-cell"><a href="https://suno.com/create?wid=default" target="_blank">Suno</a></td>
+                        <td class="description-cell">IA para generar canciones.</td>
+                    </tr>     
+                    <tr>
+                        <td class="link-cell"><a href="https://www.canva.com/" target="_blank">Canva</a></td>
+                        <td class="description-cell">IA para generar imagenes.</td>
+                    </tr>          
+                    <tr>
+                        <td class="link-cell"><a href="https://www.perplexity.ai/" target="_blank">Perplexity</a></td>
+                        <td class="description-cell">IA que muestra el hilo de cómo consigue la información.</td>
+                    </tr>             
+                    <tr>
+                        <td class="link-cell"><a href="https://labs.google/fx" target="_blank">Google labs</a></td>
+                        <td class="description-cell">IA de google para generar varios tipos de ficharos.</td>
+                    </tr>      
+                    <tr>
+                        <td class="link-cell"><a href="https://grok.com/" target="_blank">Grok</a></td>
+                        <td class="description-cell">IA de Elon Mask. Siempre iteresante para resultados de texto</td>
+                    </tr>   
+                    <tr>
+                        <td class="link-cell"><a href="https://notebooklm.google.com/" target="_blank">Google NotebookLM</a></td>
+                        <td class="description-cell">Notebook LM. Imvestigación de fuentes y recursos</td>
+                    </tr>           
+                    <tr>
+                        <td class="link-cell"><a href="https://aistudio.google.com/prompts/new_chat" target="_blank">Google AI Studio</a></td>
+                        <td class="description-cell">IA avanzada de Google. Muy interesante y permite seleccionar varios modelos de generación</td>
+                    </tr>            
+                    <tr>
+                        <td class="link-cell"><a href="https://gemini.google.com/app?hl=es" target="_blank">Google Gemini</a></td>
+                        <td class="description-cell">IA Google. Permite Deep research para combinarlo con web</td>
+                    </tr>      
+                    <tr>
+                        <td class="link-cell"><a href="https://manus.im/app" target="_blank">Manus</a></td>
+                        <td class="description-cell">IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder</td>
+                    </tr>    
+                    <tr>
+                        <td class="link-cell"><a href="https://chat.qwen.ai/" target="_blank">Qwen</a></td>
+                        <td class="description-cell">IA de Aliexpres. Una de las más potentes. Permite hacer de todo, incluso imagenes y videos. Varios motores</td>
+                    </tr>       
+                    <tr>
+                        <td class="link-cell"><a href="https://ideal.house/es" target="_blank">Ideal House</a></td>
+                        <td class="description-cell">IA de Interiorismo</td>
+                    </tr>                 
+                    <tr>
+                        <td class="link-cell"><a href="https://getimg.ai/text-to-image" target="_blank">getimg.ai</a></td>
+                        <td class="description-cell">Generación de Imagenes</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table id="table2">
+                <thead>
+                    <tr>
+                        <th>Enlace</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="link-cell"><a href="https://www.youtube.com/" target="_blank">Youtube</a></td>
+                        <td class="description-cell">Youtube</td>
+                    </tr>
+                    <tr>
+                        <td class="link-cell"><a href="https://www.twitch.tv/" target="_blank">Twitch</a></td>
+                        <td class="description-cell">Twitch.</td>
+                    </tr>
+                    <tr>
+                        <td class="link-cell"><a href="https://es.kiosko.net/es/" target="_blank">Kiosko.net</a></td>
+                        <td class="description-cell">Principales portadas prensa.</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table id="table3">
+                <thead>
+                    <tr>
+                        <th>Enlace</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>             
+                    <tr>
+                        <td class="link-cell"><a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Office 365</a></td>
+                        <td class="description-cell">Office 365 Seidor.</td>
+                    </tr>
+                    <tr>
+                        <td class="link-cell"><a href="https://teams.microsoft.com/v2/" target="_blank">Teams Web</a></td>
+                        <td class="description-cell">Teams version navegador</td>
+                    </tr>           
+                    <tr>
+                        <td class="link-cell"><a href="https://outlook.office.com/mail/" target="_blank">Outlook Web</a></td>
+                        <td class="description-cell">Teams version navegador</td>
+                    </tr>                  
+                    <tr>
+                        <td class="link-cell"><a href="https://intranetnew.seidor.com/home" target="_blank">Intranet Seidor</a></td>
+                        <td class="description-cell">Introducción Rapports, etc.</td>
+                    </tr>          
+                    <tr>
+                        <td class="link-cell"><a href="https://intranet.seidor.es/sap/bc/ui2/flp" target="_blank">Intranet Seidor (old)</a></td>
+                        <td class="description-cell">Introducción Rapports, etc.</td>
+                    </tr>   
+                    <tr>
+                        <td class="link-cell"><a href="https://windows365.microsoft.com/" target="_blank">Cafosa</a></td>
+                        <td class="description-cell">Maquina Virtual Cafosa</td>
+                    </tr>  
+                </tbody>
+            </table>
+
+            <table id="table4">
+                <thead>
+                    <tr>
+                        <th>Enlace</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>    
+                    <tr>
+                        <td class="link-cell"><a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a></td>
+                        <td class="description-cell">Diseño sencillo webs.</td>
+                    </tr>                  
+                    <tr>
+                        <td class="link-cell"><a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a></td>
+                        <td class="description-cell">SQL:Convertir Union a Diferencias</td>
+                    </tr>      
+                    <tr>
+                        <td class="link-cell"><a href="TransformaUnionEnDiferencias2.html" target="_blank">Convertir Union a Diferencias por campos</a></td>
+                        <td class="description-cell">SQL:Convertir Union a Diferencias por campos</td>
+                    </tr>        
+                    <tr>
+                        <td class="link-cell"><a href="DescubreCampos.html" target="_blank">Información de cada campo de una query</a></td>
+                        <td class="description-cell">SQL:Información de cada campo de una query</td>
+                    </tr>           
+                    <tr>
+                        <td class="link-cell"><a href="https://translate.google.es/" target="_blank">Google Translate</a></td>
+                        <td class="description-cell">Traductor de Google</td> 
+                    </tr>   
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <script>
+        // Función para alternar la visibilidad de una tabla específica
+        function toggleTable(tableId) {
+            const table = document.getElementById(tableId);
+            // Cierra todas las otras tablas primero (opcional, pero puede mejorar la UI si solo quieres una abierta a la vez)
+            document.querySelectorAll('.content-area table').forEach(t => {
+                if (t.id !== tableId && t.style.display !== 'none') {
+                    t.style.display = 'none';
+                }
+            });
+
+            // Alterna la tabla clickeada
+            if (table.style.display === 'none' || table.style.display === '') {
+                table.style.display = 'table';
+            } else {
+                table.style.display = 'none';
+            }
+            // Scroll to the top of the content area after toggling
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) {
+                contentArea.scrollTo({
+                    top: 0,
+                    behavior: 'smooth' // Scroll suave
+                });
+            }
+        }
+
+        // Función para copiar texto al portapapeles
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    alert(`Dirección copiada: ${text}`);
+                })
+                .catch(err => {
+                    console.error('Error al copiar el texto:', err);
+                    alert('Ocurrió un error al copiar el texto.');
+                });
+        }
+    </script>
+</body>
+</html>
