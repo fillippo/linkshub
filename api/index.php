@@ -1,5 +1,5 @@
 <?php
 //phpinfo();
-$content = file_get_contents('../public/index.php');
+$content = file_get_contents('../public/index.html');
 echo $content;
 ?>
