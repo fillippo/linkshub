@@ -1,9 +1,10 @@
 <?php
 //phpinfo();
-/*
+
 $directorioRaiz = getcwd();
 echo $directorioRaiz ;
 
+/*
 $algo = dir("/var/task/user/*");
 echo $algo;
 */
