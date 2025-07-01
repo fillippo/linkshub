@@ -1,13 +1,13 @@
 <?php
 //phpinfo();
-
+/*
 $directorioRaiz = getcwd();
 echo $directorioRaiz ;
 
 $algo = dir("/var/task/user/*");
 echo $algo;
-
-$content = file_get_contents('/var/task/user/index.html');
+*/
+$content = file_get_contents('/var/task/user/public/index.html');
 echo $content;
 
 
