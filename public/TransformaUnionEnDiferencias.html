@@ -1,0 +1,570 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertidor SQL UNION a Diferencias V2.4 (Revertido)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            font-size: 14px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #1877f2;
+            margin-top: 0;
+        }
+        h2 {
+            border-bottom: 1px solid #dddfe2;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            color: #606770;
+            font-weight: bold;
+        }
+        textarea {
+            width: calc(100% - 22px);
+            min-height: 150px;
+            padding: 10px;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 13px;
+            resize: vertical;
+            margin-bottom: 10px;
+            white-space: pre; 
+            overflow-wrap: normal;
+            overflow-x: auto;
+        }
+        input[type="text"], select {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        button {
+            background-color: #1877f2;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            margin-top: 10px;
+            margin-right: 10px;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #166fe5;
+        }
+        button.secondary {
+            background-color: #e4e6eb;
+            color: #4b4f56;
+        }
+        button.secondary:hover {
+            background-color: #dcdde1;
+        }
+        .config-section {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            background-color: #f7f8fa;
+        }
+        .column-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccd0d5;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #fff;
+        }
+        .column-list label {
+            display: flex;
+            align-items: center;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-weight: normal;
+            color: #1c1e21;
+            cursor: pointer;
+        }
+        .column-list input[type="checkbox"] {
+            margin-right: 8px;
+            width: auto;
+            margin-bottom: 0;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .message.success {
+            background-color: #e9f6ec;
+            color: #0f5132;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background-color: #f8d7da;
+            color: #842029;
+            border: 1px solid #f5c2c7;
+        }
+        .inline-inputs label {
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .inline-inputs input[type="text"] {
+            width: 100px;
+            display: inline-block;
+        }
+        .small-button-group button {
+            padding: 6px 12px;
+            font-size: 12px;
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Convertidor SQL UNION a Diferencias (Interactivo V2.4 - Revertido)</h1>
+
+        <section id="sourceSection">
+            <h2>1. Query de Origen</h2>
+            <label for="sourceQuery">Pega aquí tu query SQL con UNION:</label>
+            <textarea id="sourceQuery" placeholder="Ej: SELECT 'NEW' as BD, ID, Nombre FROM Tabla1 UNION SELECT 'OLD' as BD, ID, Nombre FROM Tabla2 ORDER BY ID, BD"></textarea>
+            <button id="analyzeQueryBtn">Analizar Query y Configurar</button>
+        </section>
+
+        <section id="configSection" style="display:none;">
+            <h2>2. Configuración</h2>
+            
+            <div class="config-subsection">
+                <h3>a. Identificador de Origen (Columna Discriminadora)</h3>
+                <label for="discriminatorColumn">Nombre de la Columna Discriminadora:</label>
+                <select id="discriminatorColumn"></select>
+                
+                <div class="inline-inputs">
+                    <label for="newValue">Valor para 'Nuevo' Origen:</label>
+                    <input type="text" id="newValue" value="NEW">
+                    <label for="oldValue">Valor para 'Viejo' Origen:</label>
+                    <input type="text" id="oldValue" value="OLD">
+                </div>
+            </div>
+
+            <div class="config-subsection">
+                <h3>b. Columnas a Comparar (generarán _NUEVO/_VIEJO y se usarán en HAVING)</h3>
+                <p style="font-size:0.9em; color:#606770;">Las columnas que <strong>NO</strong> marques aquí (si alguna) se usarán para el <code>GROUP BY</code> y aparecerán directamente en el <code>SELECT</code>.</p>
+                 <div class="small-button-group">
+                    <button onclick="toggleSelectAll('compareColumnsList', true)" class="secondary">Seleccionar Todas para Comparar</button>
+                    <button onclick="toggleSelectAll('compareColumnsList', false)" class="secondary">Deseleccionar Todas para Comparar (usar todas para GROUP BY)</button>
+                </div>
+                <div id="compareColumnsList" class="column-list"></div>
+            </div>
+            
+            <button id="generateQueryBtn">Generar Query de Diferencias</button>
+        </section>
+
+        <section id="resultSection" style="display:none;">
+            <h2>3. Query de Resultado</h2>
+            <textarea id="resultQuery" readonly placeholder="Aquí aparecerá la query convertida..."></textarea>
+            <button id="copyResultBtn" class="secondary">Copiar Resultado</button>
+        </section>
+
+        <div id="messageArea" class="message" style="display:none;"></div>
+    </div>
+
+    <script>
+        let parsedColumns = []; 
+        let analyzedColumnCount = 0; 
+
+        function setMessage(text, type = 'success') {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.textContent = text;
+            messageArea.className = `message ${type}`;
+            messageArea.style.display = 'block';
+        }
+
+        function normalizeColumnName(colPart, index) {
+            colPart = colPart.trim();
+            const asMatch = colPart.match(/(.+?)\s+AS\s+(?:(['"`\[])((?:(?!\2).)*?)\2|([\w_]+(?:\s+[\w_]+)*))$/i);
+            if (asMatch) {
+                const original = asMatch[1].trim();
+                let alias = (asMatch[3] || asMatch[4]); 
+                alias = alias.replace(/^['"`\[\]]+|['"`\[\]]+$/g, '');
+                return { original: original, alias: alias };
+            }
+
+            const dotIndex = colPart.lastIndexOf('.');
+            if (dotIndex !== -1 && !colPart.substring(0, dotIndex).includes('(') && colPart.substring(0, dotIndex).match(/^[\w_.\s]*$/)) {
+                const aliasFromDot = colPart.substring(dotIndex + 1).replace(/['"`\[\]]/g, '');
+                if (aliasFromDot.match(/^[\w_]+$/i)) {
+                    return { original: colPart, alias: aliasFromDot };
+                }
+            }
+            
+            const literalAliasMatch = colPart.match(/^(['"`])(.*?)\1\s+([\w_]+)$/i);
+            if (literalAliasMatch && literalAliasMatch[3]) {
+                 return { original: `${literalAliasMatch[1]}${literalAliasMatch[2]}${literalAliasMatch[1]}`, alias: literalAliasMatch[3] };
+            }
+
+            if (colPart.match(/^[\w_]+$/i)) {
+                 return { original: colPart, alias: colPart };
+            } else {
+                console.warn(`Expresión compleja sin alias explícito: "${colPart.substring(0,100)}...". Se generará un alias genérico. Se recomienda usar 'AS'.`);
+                return { original: colPart, alias: `expr_col_${index + 1}` };
+            }
+        }
+        
+        function simpleSqlFormat(sql) {
+            let formattedSql = '';
+            let indentLevel = 0;
+            const indentString = '    ';
+            let inSelectColumns = false;
+
+            sql.split('\n').forEach(line => {
+                line = line.trim();
+                if (line === '') return;
+
+                if (line.match(/^(FROM|WHERE|GROUP BY|HAVING|ORDER BY|UNION|END(\s+AS|\s*,|\s*$))/i) && indentLevel > 0) {
+                    if (line.match(/^(FROM|WHERE|GROUP BY|HAVING|ORDER BY)/i) && inSelectColumns) {
+                        indentLevel--;
+                        inSelectColumns = false;
+                    } else if (line.match(/^END(\s+AS|\s*,|\s*$)/i)) {
+                        indentLevel--; 
+                    }
+                }
+
+                let currentIndent = indentString.repeat(indentLevel);
+                if (inSelectColumns && !line.match(/^(SELECT)/i) && (line.endsWith(',') || line.match(/AS\s+['"`\[]?\w+['"`\]]?$/i))) {
+                    formattedSql += indentString.repeat(Math.max(0, indentLevel-1)) + indentString + line + '\n';
+                } else {
+                    formattedSql += currentIndent + line + '\n';
+                }
+
+                if (line.match(/^(SELECT|WITH|CASE)/i) || (line.endsWith('(') && !line.startsWith(')') )) {
+                    indentLevel++;
+                    if (line.match(/^SELECT/i)) {
+                        inSelectColumns = true; 
+                    }
+                }
+            });
+            return formattedSql.trim();
+        }
+
+
+        document.getElementById('analyzeQueryBtn').addEventListener('click', () => {
+            const sourceQueryText = document.getElementById('sourceQuery').value;
+            if (!sourceQueryText.trim()) {
+                setMessage('La query de origen no puede estar vacía.', 'error');
+                return;
+            }
+            if (sourceQueryText.toUpperCase().indexOf('UNION') === -1) {
+                setMessage('La query de origen debe contener la palabra clave UNION.', 'error');
+                return;
+            }
+
+            parsedColumns = []; 
+            analyzedColumnCount = 0; 
+            try {
+                const firstSelectEndIndex = sourceQueryText.toUpperCase().indexOf('UNION');
+                const firstSelectPart = sourceQueryText.substring(0, firstSelectEndIndex);
+                const selectKeywordMatch = firstSelectPart.match(/^SELECT\s+/i);
+                let fromKeywordMatchIndex = -1;
+                
+                let currentParenLevelForFrom = 0;
+                let fromKeywordTest = firstSelectPart.toUpperCase();
+                for(let k=0; k < fromKeywordTest.length; k++) {
+                    if (fromKeywordTest[k] === '(') currentParenLevelForFrom++;
+                    else if (fromKeywordTest[k] === ')') currentParenLevelForFrom--;
+                    else if (currentParenLevelForFrom === 0 && fromKeywordTest.substring(k).startsWith('FROM ')) {
+                        fromKeywordMatchIndex = k;
+                        break;
+                    }
+                }
+
+                if (!selectKeywordMatch || fromKeywordMatchIndex === -1) {
+                    setMessage('No se pudo parsear la cláusula SELECT y FROM principal.', 'error');
+                    return;
+                }
+                
+                const selectKeywordIndex = selectKeywordMatch[0].length;
+                const fromKeywordIndex = fromKeywordMatchIndex;
+
+                if (selectKeywordIndex >= fromKeywordIndex) {
+                     setMessage('Error de parsing: SELECT o FROM no encontrado en orden correcto.', 'error'); return;
+                }
+
+                const columnsString = firstSelectPart.substring(selectKeywordIndex, fromKeywordIndex).trim();
+                const rawColumns = [];
+                let parenLevel = 0;
+                let currentColumn = '';
+                let inString = false;
+                let stringChar = '';
+
+                for (let i = 0; i < columnsString.length; i++) {
+                    const char = columnsString[i];
+                    if (inString) {
+                        if (char === stringChar && (i === 0 || columnsString[i-1] !== '\\') ) { 
+                            inString = false;
+                        }
+                    } else {
+                        if (char === '(') parenLevel++;
+                        else if (char === ')') parenLevel--;
+                        else if (char === "'" || char === '"') {
+                            inString = true;
+                            stringChar = char;
+                        }
+                    }
+                    if (char === ',' && parenLevel === 0 && !inString) {
+                        rawColumns.push(currentColumn.trim());
+                        currentColumn = '';
+                    } else {
+                        currentColumn += char;
+                    }
+                }
+                rawColumns.push(currentColumn.trim());
+                
+                rawColumns.forEach((rc, idx) => {
+                    if (rc) { 
+                        parsedColumns.push(normalizeColumnName(rc, analyzedColumnCount++));
+                    }
+                });
+                
+                if (parsedColumns.length === 0) {
+                    setMessage('No se pudieron extraer columnas. Verifique la sintaxis del SELECT.', 'error'); return;
+                }
+
+                const discriminatorSelect = document.getElementById('discriminatorColumn');
+                discriminatorSelect.innerHTML = '';
+                let autoSelectedDiscriminator = false;
+                parsedColumns.forEach(pc => {
+                    const option = document.createElement('option');
+                    option.value = pc.alias;
+                    option.textContent = `${pc.alias} (Original: ${pc.original.substring(0,60)}${pc.original.length > 60 ? '...' : ''})`;
+                    discriminatorSelect.appendChild(option);
+                    if (!autoSelectedDiscriminator && (pc.alias.toUpperCase() === 'BD' || pc.alias.toUpperCase() === 'BD_SOURCE' || pc.alias.toUpperCase().includes('SOURCE'))) {
+                        option.selected = true; autoSelectedDiscriminator = true;
+                    }
+                });
+                if (!autoSelectedDiscriminator && discriminatorSelect.options.length > 0) {
+                    discriminatorSelect.options[0].selected = true;
+                }
+
+                populateCompareColumnList();
+                document.getElementById('configSection').style.display = 'block';
+                document.getElementById('resultSection').style.display = 'none';
+                setMessage('Query analizada. Por favor, configure las columnas.', 'success');
+
+            } catch (error) {
+                console.error("Error durante el análisis:", error);
+                setMessage(`Error al analizar: ${error.message}. Detalles: ${error.stack}`, 'error');
+            }
+        });
+
+        function populateCompareColumnList() {
+            const listContainer = document.getElementById('compareColumnsList');
+            listContainer.innerHTML = '';
+            const selectedDiscriminatorAlias = document.getElementById('discriminatorColumn').value;
+
+            parsedColumns.forEach(pc => {
+                if (pc.alias === selectedDiscriminatorAlias) return;
+                const wrapper = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = pc.alias;
+                checkbox.name = "compare_col";
+                checkbox.checked = true; 
+                const textNode = document.createTextNode(" " + pc.alias + ` (Original: ${pc.original.substring(0,60)}${pc.original.length > 60 ? '...' : ''})`);
+                wrapper.appendChild(checkbox);
+                wrapper.appendChild(textNode);
+                listContainer.appendChild(wrapper);
+            });
+        }
+        
+        document.getElementById('discriminatorColumn').addEventListener('change', populateCompareColumnList);
+
+        function toggleSelectAll(containerId, state) {
+            const checkboxes = document.querySelectorAll(`#${containerId} input[type="checkbox"]`);
+            checkboxes.forEach(cb => cb.checked = state);
+        }
+        
+        document.getElementById('generateQueryBtn').addEventListener('click', () => {
+            const sourceQueryText = document.getElementById('sourceQuery').value;
+            const discriminatorColumnName = document.getElementById('discriminatorColumn').value;
+            const newValue = document.getElementById('newValue').value.trim();
+            const oldValue = document.getElementById('oldValue').value.trim();
+
+            if (!discriminatorColumnName || !newValue || !oldValue) {
+                setMessage('Por favor, especifique la columna discriminadora y sus valores.', 'error'); return;
+            }
+            
+            const allAvailableColsForSelect = parsedColumns.filter(pc => pc.alias !== discriminatorColumnName);
+            const compareColumnElements = document.querySelectorAll('#compareColumnsList input[type="checkbox"]:checked');
+            const explicitlyComparedColumnsAliases = Array.from(compareColumnElements).map(cb => cb.value);
+
+            let groupByColumnsAliases = [];
+            let columnsForComparisonInHavingAliases = [];
+
+            if (explicitlyComparedColumnsAliases.length === allAvailableColsForSelect.length && allAvailableColsForSelect.length > 0) {
+                groupByColumnsAliases = allAvailableColsForSelect.map(pc => pc.alias);
+                columnsForComparisonInHavingAliases = groupByColumnsAliases;
+            } else if (explicitlyComparedColumnsAliases.length === 0) {
+                groupByColumnsAliases = allAvailableColsForSelect.map(pc => pc.alias);
+                if (allAvailableColsForSelect.length > 0) {
+                    columnsForComparisonInHavingAliases.push(allAvailableColsForSelect[0].alias); 
+                    const firstCheckbox = document.querySelector(`#compareColumnsList input[value="${allAvailableColsForSelect[0].alias}"]`);
+                    if (firstCheckbox && !firstCheckbox.checked) firstCheckbox.checked = true;
+                    setMessage('Advertencia: No se seleccionó columna para comparación. Se comparará la primera columna por defecto.', 'error');
+                } else {
+                    setMessage('Advertencia: No hay columnas disponibles para agrupar o comparar.', 'error');
+                }
+            } else {
+                columnsForComparisonInHavingAliases = explicitlyComparedColumnsAliases;
+                groupByColumnsAliases = allAvailableColsForSelect
+                                    .filter(pc => !explicitlyComparedColumnsAliases.includes(pc.alias))
+                                    .map(pc => pc.alias);
+                if (groupByColumnsAliases.length === 0 && columnsForComparisonInHavingAliases.length > 0) {
+                     groupByColumnsAliases = columnsForComparisonInHavingAliases;
+                }
+            }
+            if (groupByColumnsAliases.length === 0 && allAvailableColsForSelect.length > 0) {
+                 groupByColumnsAliases.push(allAvailableColsForSelect[0].alias);
+                 setMessage('Advertencia: Se seleccionó la primera columna disponible para GROUP BY automáticamente como fallback.', 'error');
+            }
+
+            const getColumnReferenceInCTE = (alias) => alias; 
+
+            let queryForCTE = sourceQueryText;
+            const orderByRegex = /\sORDER\s+BY\s+[\s\S]+$/i;
+            queryForCTE = queryForCTE.replace(orderByRegex, '').trim();
+
+            let resultQueryParts = [];
+            resultQueryParts.push(`WITH CombinedData AS (\n${queryForCTE}\n)`);
+            resultQueryParts.push(`SELECT`);
+            
+            let selectColumnsCount = 0;
+            // REVERTIDO: No se añaden columnas del discriminador aquí por defecto
+
+            groupByColumnsAliases.forEach(gbcAlias => {
+                resultQueryParts.push(`    ${getColumnReferenceInCTE(gbcAlias)},`);
+                selectColumnsCount++;
+            });
+
+            columnsForComparisonInHavingAliases.forEach(ccAlias => {
+                const columnReferenceInCTE = getColumnReferenceInCTE(ccAlias);
+                const baseAliasForNewOld = ccAlias; 
+                const safeNewValSuffix = newValue.replace(/[^a-zA-Z0-9_]/g, ''); // Sanitizar sufijo
+                const safeOldValSuffix = oldValue.replace(/[^a-zA-Z0-9_]/g, ''); // Sanitizar sufijo
+                
+                resultQueryParts.push(`    MAX(CASE WHEN ${discriminatorColumnName} = '${newValue}' THEN ${columnReferenceInCTE} END) AS ${baseAliasForNewOld}_${safeNewValSuffix},`);
+                resultQueryParts.push(`    MAX(CASE WHEN ${discriminatorColumnName} = '${oldValue}' THEN ${columnReferenceInCTE} END) AS ${baseAliasForNewOld}_${safeOldValSuffix},`);
+                selectColumnsCount++;
+            });
+            
+            if (selectColumnsCount === 0 && allAvailableColsForSelect.length > 0) { 
+                 resultQueryParts.push(`    ${allAvailableColsForSelect[0].alias} AS FallbackColumn, -- No columns selected for output`);
+                 setMessage('Error: No hay columnas para mostrar en el SELECT. Se incluyó una columna de fallback.', 'error');
+            } else if (selectColumnsCount === 0) {
+                resultQueryParts.push(`    '-- No columns available --' AS Status,`);
+                 setMessage('Error: No hay columnas disponibles para el SELECT.', 'error');
+            }
+
+            if (resultQueryParts.length > 1 && resultQueryParts[resultQueryParts.length-1].endsWith(',')) {
+                resultQueryParts[resultQueryParts.length-1] = resultQueryParts[resultQueryParts.length-1].slice(0, -1);
+            }
+
+            resultQueryParts.push(`FROM CombinedData`);
+            if (groupByColumnsAliases.length > 0) {
+                 resultQueryParts.push(`GROUP BY ${groupByColumnsAliases.map(alias => getColumnReferenceInCTE(alias)).join(', ')}`);
+            } else if (columnsForComparisonInHavingAliases.length > 0 || selectColumnsCount > 0) { 
+                setMessage('Advertencia: Query con agregados (MAX) pero sin GROUP BY explícito. Válido si la data combinada es una sola fila.', 'error');
+            }
+
+            if (columnsForComparisonInHavingAliases.length > 0) {
+                resultQueryParts.push(`HAVING`);
+                const havingConditions = columnsForComparisonInHavingAliases.map((ccAlias, index) => {
+                    const columnReferenceInCTE = getColumnReferenceInCTE(ccAlias);
+                    const newCol = `MAX(CASE WHEN ${discriminatorColumnName} = '${newValue}' THEN ${columnReferenceInCTE} END)`;
+                    const oldCol = `MAX(CASE WHEN ${discriminatorColumnName} = '${oldValue}' THEN ${columnReferenceInCTE} END)`;
+                    const condition = `( (${newCol} <> ${oldCol}) OR (${newCol} IS NULL AND ${oldCol} IS NOT NULL) OR (${newCol} IS NOT NULL AND ${oldCol} IS NULL) )`;
+                    return (index > 0 ? `    OR ` : `    `) + condition;
+                });
+                resultQueryParts.push(havingConditions.join('\n'));
+            }
+
+            // REVERTIDO: ORDER BY solo por las columnas del GROUP BY
+            if (groupByColumnsAliases.length > 0) {
+                 resultQueryParts.push(`ORDER BY ${groupByColumnsAliases.map(alias => getColumnReferenceInCTE(alias)).join(', ')};`); 
+            } else {
+                 resultQueryParts.push(`;`);
+            }
+
+
+            const rawResultQuery = resultQueryParts.join('\n');
+            document.getElementById('resultQuery').value = simpleSqlFormat(rawResultQuery);
+            document.getElementById('resultSection').style.display = 'block';
+            if (!rawResultQuery.includes("-- No columns selected")) {
+                setMessage('Query de diferencias generada exitosamente.');
+            }
+            
+            localStorage.setItem('sqlConv_discriminator', discriminatorColumnName);
+            localStorage.setItem('sqlConv_newValue', newValue);
+            localStorage.setItem('sqlConv_oldValue', oldValue);
+        });
+
+        document.getElementById('copyResultBtn').addEventListener('click', () => {
+            const resultQueryTextarea = document.getElementById('resultQuery');
+            if (!resultQueryTextarea.value) {
+                setMessage('No hay nada que copiar.', 'error'); return;
+            }
+            navigator.clipboard.writeText(resultQueryTextarea.value)
+                .then(() => setMessage('Query resultante copiada al portapapeles.'))
+                .catch(err => {
+                    console.error('Error al copiar: ', err);
+                    setMessage('Error al copiar. Revise permisos o cópielo manualmente.', 'error');
+                });
+        });
+        
+        window.addEventListener('load', () => {
+            const savedNewValue = localStorage.getItem('sqlConv_newValue');
+            const savedOldValue = localStorage.getItem('sqlConv_oldValue');
+            if (savedNewValue) document.getElementById('newValue').value = savedNewValue;
+            if (savedOldValue) document.getElementById('oldValue').value = savedOldValue;
+             document.getElementById('sourceQuery').value = 
+`select 'NEW' as BD, A.docnum, A.cardcode, A.U_SEITotRemRVMTM, A.U_SEITotRemRVMTMCal, A.u_sei102 as NumeroRentas, A.U_SEI215 as RentasPendientes, 
+	(SELECT COUNT(*) FROM DONT_USE_MALAYSIA_BETA95_NEW_SEIDOR..[@TFACTURACIONES] B WHERE A.DocEntry = B.U_ClavePed) As RentasGeneradas,
+	(SELECT COUNT(*) FROM DONT_USE_MALAYSIA_BETA95_NEW_SEIDOR..OINV where OINV.Project=A.DocNum) As NumFacts
+                     FROM DONT_USE_MALAYSIA_BETA95_NEW_SEIDOR..ORDR A        
+where A.docnum in(20221139, 20221476, 20221477, 20221490, 20221627)
+UNION
+select 'OLD' as BD, A.docnum, A.cardcode, A.U_SEITotRemRVMTM, A.U_SEITotRemRVMTMCal, A.u_sei102 as NumeroRentas, A.U_SEI215 as RentasPendientes, 
+	(SELECT COUNT(*) FROM DONT_USE_MALAYSIA_BETA95_OLD_SEIDOR..[@TFACTURACIONES] B WHERE A.DocEntry = B.U_ClavePed) As RentasGeneradas,
+	(SELECT COUNT(*) FROM DONT_USE_MALAYSIA_BETA95_OLD_SEIDOR..OINV where OINV.Project=A.DocNum) As NumFacts
+                     FROM DONT_USE_MALAYSIA_BETA95_OLD_SEIDOR..ORDR A        
+where A.docnum in(20221139, 20221476, 20221477, 20221490, 20221627)
+ORDER BY Docnum, BD`;
+        });
+    </script>
+</body>
+</html>
