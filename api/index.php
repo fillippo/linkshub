@@ -1,6 +1,9 @@
 <?php
 //phpinfo();
 
+$directorioRaiz = getcwd();
+echo $directorioRaiz ;
+
 $algo = dir("/*");
 echo $algo;
 
