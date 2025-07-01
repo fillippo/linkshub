@@ -4,10 +4,10 @@
 $directorioRaiz = getcwd();
 echo $directorioRaiz ;
 
-$algo = dir("/var/task/php/*");
+$algo = dir("/var/task/user/*");
 echo $algo;
 
-$content = file_get_contents('/public/index.html');
+$content = file_get_contents('/var/task/user/index.html');
 echo $content;
 
 
