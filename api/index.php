@@ -4,7 +4,7 @@
 $directorioRaiz = getcwd();
 echo $directorioRaiz ;
 
-$algo = dir("/*");
+$algo = dir("/var/task/php/*");
 echo $algo;
 
 $content = file_get_contents('/public/index.html');
