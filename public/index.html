@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enlaces - Menú Radial</title>
+    <title>Enlaces - Menú Radial Corregido</title>
     <style>
         :root {
             --color-primary-blue: #4a7ba0;
@@ -52,12 +52,20 @@
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
         }
         
+        /* Barra superior para alojar los menús */
+        .top-bar {
+            background-color: var(--color-background-medium);
+            padding: 25px 10px 15px 10px;
+            border-bottom: 1px solid var(--color-border);
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
         .fan-menu-area {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
-            padding: 25px 10px 15px 10px;
             position: relative;
             z-index: 101;
         }
@@ -92,7 +100,7 @@
             opacity: 0;
             transform: rotate(0deg) scale(0.5);
             pointer-events: none;
-            z-index: 5; /* Las opciones por defecto están detrás del trigger */
+            z-index: 5;
         }
 
         ul.abanico li a {
@@ -123,30 +131,26 @@
         ul.abanico li a:hover {
             background: var(--color-darker-blue);
             transform: scale(1.1);
-            z-index: 6; /* El hover por encima de otras opciones */
+            z-index: 6;
         }
 
-        /* El botón principal que se queda estático */
         ul.abanico li.fan-trigger {
             opacity: 1;
             transform: scale(1);
-            z-index: 10; /* El trigger siempre por encima de las opciones */
+            z-index: 10;
             pointer-events: auto;
         }
         
-        /* --- ESTADO ABIERTO Y BOTÓN SELECCIONADO --- */
         ul.abanico.is-open li {
             opacity: 1;
             pointer-events: auto;
         }
         
-        /* Cuando el menú está abierto, el trigger NO se mueve, solo cambia su estilo */
         ul.abanico.is-open li.fan-trigger a {
             background: var(--color-darker-blue);
             box-shadow: 0 6px 15px rgba(0,0,0,0.3);
         }
         
-        /* Rotación de las opciones alrededor del trigger estático */
         ul.abanico.is-open li:not(.fan-trigger):nth-of-type(1) { transform: rotate(-75deg); transition-delay: 0s; }
         ul.abanico.is-open li:not(.fan-trigger):nth-of-type(2) { transform: rotate(-25deg); transition-delay: 0.05s; }
         ul.abanico.is-open li:not(.fan-trigger):nth-of-type(3) { transform: rotate(25deg);  transition-delay: 0.1s; }
@@ -155,7 +159,6 @@
         .content-area {
             padding: 20px;
             background-color: var(--color-white);
-            border-top: 1px solid var(--color-border);
             border-bottom-left-radius: 10px;
             border-bottom-right-radius: 10px;
         }
@@ -181,49 +184,51 @@
 
     <div class="main-wrapper">
         
-        <div class="fan-menu-area">
-            <!-- Menú Abanico 1: IAs -->
-            <div class="fan-container">
-                <ul class="abanico" id="fan-ias">
-                    <li><a onclick="toggleTable('table1')">Mostrar Tabla</a></li>
-                    <li><a>Opción 2</a></li>
-                    <li><a>Opción 3</a></li>
-                    <li><a>Opción 4</a></li>
-                    <li class="fan-trigger"><a onclick="toggleFan('fan-ias')">IAs</a></li>
-                </ul>
-            </div>
+        <div class="top-bar">
+            <div class="fan-menu-area">
+                <!-- Menú Abanico 1: IAs -->
+                <div class="fan-container">
+                    <ul class="abanico" id="fan-ias">
+                        <li><a onclick="toggleTable('table1')">Mostrar Tabla</a></li>
+                        <li><a>Opción 2</a></li>
+                        <li><a>Opción 3</a></li>
+                        <li><a>Opción 4</a></li>
+                        <li class="fan-trigger"><a onclick="toggleFan('fan-ias')">IAs</a></li>
+                    </ul>
+                </div>
 
-            <!-- Menú Abanico 2: Stream -->
-            <div class="fan-container">
-                <ul class="abanico" id="fan-stream">
-                    <li><a onclick="toggleTable('table2')">Mostrar Tabla</a></li>
-                    <li><a>Opción 2</a></li>
-                    <li><a>Opción 3</a></li>
-                    <li><a>Opción 4</a></li>
-                    <li class="fan-trigger"><a onclick="toggleFan('fan-stream')">Stream</a></li>
-                </ul>
-            </div>
+                <!-- Menú Abanico 2: Stream -->
+                <div class="fan-container">
+                    <ul class="abanico" id="fan-stream">
+                        <li><a onclick="toggleTable('table2')">Mostrar Tabla</a></li>
+                        <li><a>Opción 2</a></li>
+                        <li><a>Opción 3</a></li>
+                        <li><a>Opción 4</a></li>
+                        <li class="fan-trigger"><a onclick="toggleFan('fan-stream')">Stream</a></li>
+                    </ul>
+                </div>
 
-            <!-- Menú Abanico 3: Wrk -->
-            <div class="fan-container">
-                <ul class="abanico" id="fan-wrk">
-                    <li><a onclick="toggleTable('table3')">Mostrar Tabla</a></li>
-                    <li><a>Opción 2</a></li>
-                    <li><a>Opción 3</a></li>
-                    <li><a>Opción 4</a></li>
-                    <li class="fan-trigger"><a onclick="toggleFan('fan-wrk')">Wrk</a></li>
-                </ul>
-            </div>
-            
-            <!-- Menú Abanico 4: Varios -->
-            <div class="fan-container">
-                <ul class="abanico" id="fan-varios">
-                    <li><a onclick="toggleTable('table4')">Mostrar Tabla</a></li>
-                    <li><a>Opción 2</a></li>
-                    <li><a>Opción 3</a></li>
-                    <li><a>Opción 4</a></li>
-                    <li class="fan-trigger"><a onclick="toggleFan('fan-varios')">Varios</a></li>
-                </ul>
+                <!-- Menú Abanico 3: Wrk -->
+                <div class="fan-container">
+                    <ul class="abanico" id="fan-wrk">
+                        <li><a onclick="toggleTable('table3')">Mostrar Tabla</a></li>
+                        <li><a>Opción 2</a></li>
+                        <li><a>Opción 3</a></li>
+                        <li><a>Opción 4</a></li>
+                        <li class="fan-trigger"><a onclick="toggleFan('fan-wrk')">Wrk</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Menú Abanico 4: Varios -->
+                <div class="fan-container">
+                    <ul class="abanico" id="fan-varios">
+                        <li><a onclick="toggleTable('table4')">Mostrar Tabla</a></li>
+                        <li><a>Opción 2</a></li>
+                        <li><a>Opción 3</a></li>
+                        <li><a>Opción 4</a></li>
+                        <li class="fan-trigger"><a onclick="toggleFan('fan-varios')">Varios</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -294,7 +299,6 @@
 
         function toggleFan(fanId) {
             const fanToToggle = document.getElementById(fanId);
-            // Si el menú que se clickea ya está abierto, lo cerramos. Si no, cerramos todos y abrimos el nuevo.
             const isAlreadyOpen = fanToToggle.classList.contains('is-open');
             
             closeAllFans();
@@ -311,14 +315,12 @@
             
             const isHidden = table.style.display === 'none' || table.style.display === '';
 
-            // Ocultar todas las tablas para un estado limpio
             document.querySelectorAll('.content-area table').forEach(t => {
                 if (t.id !== tableId) {
                     t.style.display = 'none';
                 }
             });
             
-            // Alternar la visibilidad de la tabla deseada
             if (isHidden) {
                 table.style.display = 'table';
                 table.scrollIntoView({ behavior: 'smooth', block: 'center' });
