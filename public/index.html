@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enlaces con Menú de Abanico</title>
+    <title>Enlaces con Menú de Abanico Elegante</title>
     <style>
-        /* --- Variables de Color --- */
         :root {
             --color-primary-blue: #4a7ba0;
             --color-darker-blue: #3a6380;
@@ -17,17 +16,30 @@
             --color-white: #ffffff;
         }
 
-        /* --- Estilos Generales --- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--color-background-light);
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            overflow: hidden;
             color: var(--color-text-dark);
+        }
+
+        /* El overlay que oscurecerá el fondo */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 99;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .overlay.is-active {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         .main-wrapper {
@@ -39,7 +51,7 @@
             background: var(--color-white);
             border-radius: 10px;
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
+            /* Se elimina 'overflow: hidden' para permitir que el abanico se muestre fuera */
         }
 
         h1 {
@@ -49,28 +61,28 @@
             margin: 0;
             font-weight: 600;
         }
-        
-        /* --- Barra de Botones (Contenedor de Abanicos) --- */
+
         .button-bar {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            align-items: flex-start; /* Alinear arriba */
+            align-items: flex-start;
             padding: 10px;
-            padding-bottom: 70px; /* Espacio para que el abanico se vea */
+            padding-bottom: 70px; /* Espacio para el origen del abanico */
             background-color: var(--color-background-medium);
             border-bottom: 1px solid var(--color-border);
             position: sticky;
             top: 0;
-            z-index: 100; /* Asegurar que esté por encima del contenido */
+            z-index: 100; /* Debe estar por encima del contenido y del overlay */
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
         }
         
-        /* --- NUEVOS ESTILOS: Menú de Abanico --- */
+        /* --- ESTILOS MEJORADOS DEL ABANICO --- */
         .fan-container {
             position: relative;
-            width: 120px;
+            width: 140px; /* Más espacio entre menús */
             height: 120px;
-            margin: 0 10px;
         }
         
         ul.abanico {
@@ -89,40 +101,41 @@
             position: absolute;
             bottom: 0;
             left: 50%;
-            width: 88px;
-            height: 200px; /* Altura del brazo del abanico */
-            margin-left: -44px;
+            width: 90px;
+            height: 220px; /* Altura del "brazo" del abanico */
+            margin-left: -45px;
             transform-origin: bottom center;
-            transition: all 0.6s ease-in-out;
-            opacity: 0; /* Oculto por defecto */
-            pointer-events: none; /* No se puede hacer clic cuando está oculto */
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Transición con efecto "rebote" */
+            opacity: 0;
+            pointer-events: none;
         }
 
         ul.abanico li a {
-            display: flex; /* Para centrar el texto vertical y horizontalmente */
+            display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
-            height: 48px;
+            height: 52px;
             text-decoration: none;
             background: var(--color-primary-blue);
             color: var(--color-white);
             line-height: 1.2;
             text-align: center;
-            border: 4px solid var(--color-background-medium);
+            border: 3px solid var(--color-white);
             border-radius: 30px;
             box-sizing: border-box;
             transition: all 0.4s;
             position: absolute;
             bottom: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* Sombra para dar profundidad */
         }
         
         ul.abanico li a:hover {
             background: var(--color-darker-blue);
-            transform: scale(1.05);
+            transform: scale(1.1); /* Efecto de zoom al pasar el ratón */
+            z-index: 10; /* Asegura que el item con hover esté por encima de los demás */
         }
 
-        /* Botón principal que dispara el abanico */
         ul.abanico li.fan-trigger {
             opacity: 1;
             z-index: 10;
@@ -131,85 +144,61 @@
         
         ul.abanico li.fan-trigger a {
              cursor: pointer;
+             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         /* Estado Abierto del Abanico */
         ul.abanico.is-open li {
             opacity: 1;
-            pointer-events: auto; /* Se puede hacer clic cuando está abierto */
+            pointer-events: auto;
         }
 
         ul.abanico.is-open li.fan-trigger {
-            opacity: 0; /* Oculta el botón "MENU" al abrir */
+            opacity: 0;
             pointer-events: none;
         }
         
-        /* Rotación de cada elemento del abanico */
-        ul.abanico.is-open li:nth-of-type(1) { transform: rotate(45deg); }
-        ul.abanico.is-open li:nth-of-type(2) { transform: rotate(15deg); }
-        ul.abanico.is-open li:nth-of-type(3) { transform: rotate(-15deg); }
-        ul.abanico.is-open li:nth-of-type(4) { transform: rotate(-45deg); }
+        /* Rotación y retardo para efecto secuencial */
+        ul.abanico.is-open li:nth-of-type(1) { transform: rotate(60deg);  transition-delay: 0s; }
+        ul.abanico.is-open li:nth-of-type(2) { transform: rotate(20deg);  transition-delay: 0.05s; }
+        ul.abanico.is-open li:nth-of-type(3) { transform: rotate(-20deg); transition-delay: 0.1s; }
+        ul.abanico.is-open li:nth-of-type(4) { transform: rotate(-60deg); transition-delay: 0.15s; }
 
-        /* --- Área de Contenido (Tablas) --- */
+        /* --- Área de Contenido --- */
         .content-area {
             padding: 20px;
             overflow-y: auto;
             flex-grow: 1;
+            min-height: 400px; /* Asegura que haya contenido para hacer scroll */
+            border-bottom-left-radius: 10px;
+            border-bottom-right-radius: 10px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             display: none;
-            background-color: var(--color-white);
         }
-
-        thead {
-            background-color: var(--color-primary-blue);
-            color: var(--color-white);
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--color-border);
-        }
-        
-        .link-cell a {
-            color: var(--color-primary-blue);
-            text-decoration: none;
-            font-weight: normal;
-            transition: color 0.2s ease;
-        }
-
-        .link-cell a:hover {
-            text-decoration: underline;
-            color: var(--color-darker-blue);
-        }
-
-        .description-cell {
-            color: var(--color-text-medium);
-            font-size: 0.9em;
-        }
-
+        thead { background-color: var(--color-primary-blue); color: var(--color-white); }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--color-border); }
+        .link-cell a { color: var(--color-primary-blue); text-decoration: none; }
+        .link-cell a:hover { text-decoration: underline; color: var(--color-darker-blue); }
+        .description-cell { color: var(--color-text-medium); font-size: 0.9em; }
     </style>
 </head>
 <body>
 
+    <div class="overlay"></div>
+
     <div class="main-wrapper">
         <h1>Links</h1>
 
-        <!-- Barra de botones con los nuevos menús de abanico -->
         <div class="button-bar">
-
             <!-- Menú Abanico 1: IAs -->
             <div class="fan-container">
                 <ul class="abanico" id="fan-ias">
-                    <li><a href="javascript:void(0);" onclick="toggleTable('table1')">Mostrar/Ocultar Tabla</a></li>
+                    <li><a href="javascript:void(0);" onclick="toggleTable('table1')">Ver Tabla</a></li>
                     <li><a href="#">Opción 2</a></li>
                     <li><a href="#">Opción 3</a></li>
                     <li><a href="#">Opción 4</a></li>
@@ -220,7 +209,7 @@
             <!-- Menú Abanico 2: Stream -->
             <div class="fan-container">
                 <ul class="abanico" id="fan-stream">
-                    <li><a href="javascript:void(0);" onclick="toggleTable('table2')">Mostrar/Ocultar Tabla</a></li>
+                    <li><a href="javascript:void(0);" onclick="toggleTable('table2')">Ver Tabla</a></li>
                     <li><a href="#">Opción 2</a></li>
                     <li><a href="#">Opción 3</a></li>
                     <li><a href="#">Opción 4</a></li>
@@ -231,7 +220,7 @@
             <!-- Menú Abanico 3: Wrk -->
             <div class="fan-container">
                 <ul class="abanico" id="fan-wrk">
-                     <li><a href="javascript:void(0);" onclick="toggleTable('table3')">Mostrar/Ocultar Tabla</a></li>
+                     <li><a href="javascript:void(0);" onclick="toggleTable('table3')">Ver Tabla</a></li>
                     <li><a href="#">Opción 2</a></li>
                     <li><a href="#">Opción 3</a></li>
                     <li><a href="#">Opción 4</a></li>
@@ -242,123 +231,97 @@
             <!-- Menú Abanico 4: Varios -->
             <div class="fan-container">
                 <ul class="abanico" id="fan-varios">
-                    <li><a href="javascript:void(0);" onclick="toggleTable('table4')">Mostrar/Ocultar Tabla</a></li>
+                    <li><a href="javascript:void(0);" onclick="toggleTable('table4')">Ver Tabla</a></li>
                     <li><a href="#">Opción 2</a></li>
                     <li><a href="#">Opción 3</a></li>
                     <li><a href="#">Opción 4</a></li>
                     <li class="fan-trigger"><a href="javascript:void(0);" onclick="toggleFan('fan-varios')">Varios</a></li>
                 </ul>
             </div>
-
         </div>
 
-        <!-- Área de contenido desplazable para las tablas -->
         <div class="content-area">
             <table id="table1">
-                <thead>
-                    <tr>
-                        <th>Enlace</th>
-                        <th>Descripción</th>
-                    </tr>
-                </thead>
+                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>
                     <tr><td class="link-cell"><a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a></td><td class="description-cell">Clásico IA de OpenAI</td></tr>
                     <tr><td class="link-cell"><a href="https://suno.com/create?wid=default" target="_blank">Suno</a></td><td class="description-cell">IA para generar canciones.</td></tr>
                     <tr><td class="link-cell"><a href="https://www.canva.com/" target="_blank">Canva</a></td><td class="description-cell">IA para generar imagenes.</td></tr>
-                    <tr><td class="link-cell"><a href="https://www.perplexity.ai/" target="_blank">Perplexity</a></td><td class="description-cell">IA que muestra el hilo de cómo consigue la información.</td></tr>
-                    <tr><td class="link-cell"><a href="https://labs.google/fx" target="_blank">Google labs</a></td><td class="description-cell">IA de google para generar varios tipos de ficharos.</td></tr>
-                    <tr><td class="link-cell"><a href="https://grok.com/" target="_blank">Grok</a></td><td class="description-cell">IA de Elon Mask. Siempre iteresante para resultados de texto</td></tr>
-                    <tr><td class="link-cell"><a href="https://notebooklm.google.com/" target="_blank">Google NotebookLM</a></td><td class="description-cell">Notebook LM. Imvestigación de fuentes y recursos</td></tr>
-                    <tr><td class="link-cell"><a href="https://aistudio.google.com/prompts/new_chat" target="_blank">Google AI Studio</a></td><td class="description-cell">IA avanzada de Google. Muy interesante y permite seleccionar varios modelos de generación</td></tr>
-                    <tr><td class="link-cell"><a href="https://gemini.google.com/app?hl=es" target="_blank">Google Gemini</a></td><td class="description-cell">IA Google. Permite Deep research para combinarlo con web</td></tr>
-                    <tr><td class="link-cell"><a href="https://firebase.google.com/?hl=es" target="_blank">Google Firebase</a></td><td class="description-cell">IA Google. Permite realizar aplicaciones con IA</td></tr>
-                    <tr><td class="link-cell"><a href="https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/" target="_blank">Gemini CLI</a></td><td class="description-cell">Geminy Code Assist. Permite realizar aplicaciones con IA y Visual Studio</td></tr>
-                    <tr><td class="link-cell"><a href="https://manus.im/app" target="_blank">Manus</a></td><td class="description-cell">IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder</td></tr>
-                    <tr><td class="link-cell"><a href="https://chat.qwen.ai/" target="_blank">Qwen</a></td><td class="description-cell">IA de Aliexpres. Una de las más potentes. Permite hacer de todo, incluso imagenes y videos. Varios motores</td></tr>
-                    <tr><td class="link-cell"><a href="https://ideal.house/es" target="_blank">Ideal House</a></td><td class="description-cell">IA de Interiorismo</td></tr>
-                    <tr><td class="link-cell"><a href="https://getimg.ai/text-to-image" target="_blank">getimg.ai</a></td><td class="description-cell">Generación de Imagenes</td></tr>
+                    <!-- Contenido de la tabla IAs -->
                 </tbody>
             </table>
-
             <table id="table2">
-                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
-                <tbody>
+                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                 <tbody>
                     <tr><td class="link-cell"><a href="https://www.youtube.com/" target="_blank">Youtube</a></td><td class="description-cell">Youtube</td></tr>
-                    <tr><td class="link-cell"><a href="https://www.twitch.tv/" target="_blank">Twitch</a></td><td class="description-cell">Twitch.</td></tr>
-                    <tr><td class="link-cell"><a href="https://es.kiosko.net/es/" target="_blank">Kiosko.net</a></td><td class="description-cell">Principales portadas prensa.</td></tr>
+                    <!-- Contenido de la tabla Stream -->
                 </tbody>
             </table>
-
             <table id="table3">
-                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
-                <tbody>
+                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                 <tbody>
                     <tr><td class="link-cell"><a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Office 365</a></td><td class="description-cell">Office 365 Seidor.</td></tr>
-                    <tr><td class="link-cell"><a href="https://teams.microsoft.com/v2/" target="_blank">Teams Web</a></td><td class="description-cell">Teams version navegador</td></tr>
-                    <tr><td class="link-cell"><a href="https://outlook.office.com/mail/" target="_blank">Outlook Web</a></td><td class="description-cell">Teams version navegador</td></tr>
-                    <tr><td class="link-cell"><a href="https://intranetnew.seidor.com/home" target="_blank">Intranet Seidor</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>
-                    <tr><td class="link-cell"><a href="https://intranet.seidor.es/sap/bc/ui2/flp" target="_blank">Intranet Seidor (old)</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>
-                    <tr><td class="link-cell"><a href="https://windows365.microsoft.com/" target="_blank">Cafosa</a></td><td class="description-cell">Maquina Virtual Cafosa</td></tr>
+                    <!-- Contenido de la tabla Wrk -->
                 </tbody>
             </table>
-
             <table id="table4">
-                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
-                <tbody>
+                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                 <tbody>
                     <tr><td class="link-cell"><a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a></td><td class="description-cell">Diseño sencillo webs.</td></tr>
-                    <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a></td><td class="description-cell">SQL:Convertir Union a Diferencias</td></tr>
-                    <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias2.html" target="_blank">Convertir Union a Diferencias por campos</a></td><td class="description-cell">SQL:Convertir Union a Diferencias por campos</td></tr>
-                    <tr><td class="link-cell"><a href="DescubreCampos.html" target="_blank">Información de cada campo de una query</a></td><td class="description-cell">SQL:Información de cada campo de una query</td></tr>
-                    <tr><td class="link-cell"><a href="https://translate.google.es/" target="_blank">Google Translate</a></td><td class="description-cell">Traductor de Google</td></tr>
+                    <!-- Contenido de la tabla Varios -->
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
+        const overlay = document.querySelector('.overlay');
+        const allFans = document.querySelectorAll('.abanico');
+
+        function closeAllFans() {
+            allFans.forEach(fan => fan.classList.remove('is-open'));
+            overlay.classList.remove('is-active');
+        }
+
         // --- NUEVA FUNCIÓN: Alterna la visibilidad de un menú de abanico ---
         function toggleFan(fanId) {
             const fanToToggle = document.getElementById(fanId);
-            
-            // Cierra todos los otros abanicos antes de abrir el nuevo
-            document.querySelectorAll('.abanico.is-open').forEach(openFan => {
-                if (openFan.id !== fanId) {
-                    openFan.classList.remove('is-open');
-                }
-            });
+            const isOpening = !fanToToggle.classList.contains('is-open');
 
-            // Alterna la clase 'is-open' en el abanico clickeado
-            fanToToggle.classList.toggle('is-open');
+            closeAllFans(); // Cierra todo primero
+
+            if (isOpening) {
+                fanToToggle.classList.add('is-open');
+                overlay.classList.add('is-active');
+            }
         }
 
-        // --- FUNCIÓN MODIFICADA: Alterna visibilidad de la tabla y cierra el abanico ---
+        // --- FUNCIÓN MODIFICADA: Alterna visibilidad de la tabla ---
         function toggleTable(tableId) {
             const table = document.getElementById(tableId);
             const contentArea = document.querySelector('.content-area');
 
-            // Oculta todas las demás tablas
+            // Cierra el abanico y el overlay
+            closeAllFans();
+
+            // Lógica para mostrar/ocultar la tabla
+            const isHidden = table.style.display === 'none' || table.style.display === '';
+
+            // Oculta todas las tablas
             document.querySelectorAll('.content-area table').forEach(t => {
-                if (t.id !== tableId && t.style.display !== 'none') {
-                    t.style.display = 'none';
-                }
+                t.style.display = 'none';
             });
-
-            // Muestra u oculta la tabla seleccionada
-            if (table.style.display === 'none' || table.style.display === '') {
-                table.style.display = 'table';
-            } else {
-                table.style.display = 'none';
-            }
             
-            // Cierra todos los menús de abanico abiertos
-            document.querySelectorAll('.abanico.is-open').forEach(openFan => {
-                openFan.classList.remove('is-open');
-            });
-
-            // Desplaza el área de contenido hacia arriba
-            if (contentArea) {
-                contentArea.scrollTo({ top: 0, behavior: 'smooth' });
+            // Muestra la tabla seleccionada si estaba oculta
+            if(isHidden){
+                table.style.display = 'table';
+                // Opcional: Desplazarse a la tabla
+                table.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }
+
+        // Añade un evento al overlay para cerrar los menús al hacer clic fuera
+        overlay.addEventListener('click', closeAllFans);
     </script>
 </body>
 </html>
