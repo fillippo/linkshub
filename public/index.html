@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enlaces con Menú de Abanico Elegante</title>
+    <title>Enlaces con Menú de Abanico Semicircular</title>
     <style>
         :root {
             --color-primary-blue: #4a7ba0;
@@ -24,7 +24,6 @@
             color: var(--color-text-dark);
         }
 
-        /* El overlay que oscurecerá el fondo */
         .overlay {
             position: fixed;
             top: 0;
@@ -51,7 +50,6 @@
             background: var(--color-white);
             border-radius: 10px;
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            /* Se elimina 'overflow: hidden' para permitir que el abanico se muestre fuera */
         }
 
         h1 {
@@ -67,22 +65,22 @@
             flex-wrap: wrap;
             justify-content: center;
             align-items: flex-start;
-            padding: 10px;
-            padding-bottom: 70px; /* Espacio para el origen del abanico */
+            padding: 20px 10px; /* Un poco de padding vertical */
             background-color: var(--color-background-medium);
             border-bottom: 1px solid var(--color-border);
             position: sticky;
             top: 0;
-            z-index: 100; /* Debe estar por encima del contenido y del overlay */
+            z-index: 101; /* Debe estar por encima de todo */
             border-top-left-radius: 10px;
             border-top-right-radius: 10px;
         }
         
-        /* --- ESTILOS MEJORADOS DEL ABANICO --- */
+        /* --- ESTILOS DEL ABANICO SEMICIRCULAR INFERIOR --- */
         .fan-container {
             position: relative;
-            width: 140px; /* Más espacio entre menús */
-            height: 120px;
+            width: 140px;
+            height: 60px; /* Solo la altura del botón principal */
+            z-index: 102; /* Para que el menú activo se ponga sobre el inactivo */
         }
         
         ul.abanico {
@@ -94,24 +92,26 @@
             margin: 0;
             padding: 0;
             list-style: none;
-            font: normal 12px "arial narrow", sans-serif;
         }
 
         ul.abanico li {
             position: absolute;
-            bottom: 0;
+            top: 5px; /* Ligeramente abajo para dar espacio */
             left: 50%;
             width: 90px;
-            height: 220px; /* Altura del "brazo" del abanico */
+            height: 180px; /* Este es el RADIO del semicírculo */
             margin-left: -45px;
-            transform-origin: bottom center;
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Transición con efecto "rebote" */
+            /* LA CLAVE DEL EFECTO: El origen está ARRIBA */
+            transform-origin: top center;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             opacity: 0;
-            transform: rotate(0deg) scale(0.5); /* Inicia más pequeño y sin rotación */
+            transform: rotate(0deg) scale(0.5);
             pointer-events: none;
         }
 
         ul.abanico li a {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 13px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -127,16 +127,18 @@
             box-sizing: border-box;
             transition: all 0.4s;
             position: absolute;
+            /* El botón visible está al FINAL del brazo invisible */
             bottom: 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* Sombra para dar profundidad */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
         }
         
         ul.abanico li a:hover {
             background: var(--color-darker-blue);
-            transform: scale(1.1); /* Efecto de zoom al pasar el ratón */
-            z-index: 10; /* Asegura que el item con hover esté por encima de los demás */
+            transform: scale(1.1);
+            z-index: 10;
         }
 
+        /* Botón principal que activa el menú */
         ul.abanico li.fan-trigger {
             opacity: 1;
             transform: scale(1);
@@ -153,7 +155,6 @@
         ul.abanico.is-open li {
             opacity: 1;
             pointer-events: auto;
-            transform: scale(1); /* Vuelve al tamaño normal */
         }
 
         ul.abanico.is-open li.fan-trigger {
@@ -162,18 +163,16 @@
             transform: scale(0.5);
         }
         
-        /* Rotación y retardo para efecto secuencial */
-        ul.abanico.is-open li:nth-of-type(1) { transform: rotate(60deg);  transition-delay: 0s; }
-        ul.abanico.is-open li:nth-of-type(2) { transform: rotate(20deg);  transition-delay: 0.05s; }
-        ul.abanico.is-open li:nth-of-type(3) { transform: rotate(-20deg); transition-delay: 0.1s; }
-        ul.abanico.is-open li:nth-of-type(4) { transform: rotate(-60deg); transition-delay: 0.15s; }
+        /* Rotación y retardo para efecto semicircular inferior */
+        ul.abanico.is-open li:nth-of-type(1) { transform: rotate(-75deg); transition-delay: 0s; }
+        ul.abanico.is-open li:nth-of-type(2) { transform: rotate(-25deg); transition-delay: 0.05s; }
+        ul.abanico.is-open li:nth-of-type(3) { transform: rotate(25deg);  transition-delay: 0.1s; }
+        ul.abanico.is-open li:nth-of-type(4) { transform: rotate(75deg);  transition-delay: 0.15s; }
 
         /* --- Área de Contenido --- */
         .content-area {
             padding: 20px;
-            overflow-y: auto;
-            flex-grow: 1;
-            min-height: 400px; /* Asegura que haya contenido para hacer scroll */
+            background-color: var(--color-white);
             border-bottom-left-radius: 10px;
             border-bottom-right-radius: 10px;
         }
@@ -247,7 +246,7 @@
         </div>
 
         <div class="content-area">
-            <table id="table1">
+             <table id="table1">
                 <thead>
                     <tr>
                         <th>Enlace</th>
@@ -320,8 +319,6 @@
             const fanToToggle = document.getElementById(fanId);
             const isOpening = !fanToToggle.classList.contains('is-open');
 
-            // Cierra siempre todos los menús ANTES de decidir si se abre uno nuevo.
-            // Esta es la clave para evitar el solapamiento.
             closeAllFans();
 
             if (isOpening) {
@@ -332,27 +329,18 @@
 
         function toggleTable(tableId) {
             const table = document.getElementById(tableId);
-            
-            // Al seleccionar una opción, siempre se cierran los menús.
             closeAllFans();
-
             const isHidden = table.style.display === 'none' || table.style.display === '';
-
-            // Oculta todas las tablas primero
             document.querySelectorAll('.content-area table').forEach(t => {
                 t.style.display = 'none';
             });
-            
-            // Muestra la tabla deseada si estaba oculta, o la deja oculta si ya se estaba mostrando
             if (isHidden) {
                 table.style.display = 'table';
-                // Desplaza la vista a la tabla que se acaba de mostrar
                 table.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
 
-        // Evento para cerrar menús al hacer clic en el fondo oscuro
         overlay.addEventListener('click', closeAllFans);
     </script>
 </body>
-</html>```
+</html>
