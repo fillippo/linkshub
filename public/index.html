@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enlaces - Menú Interactivo</title>
+    <title>Enlaces - Menú Radial</title>
     <style>
         :root {
             --color-primary-blue: #4a7ba0;
@@ -14,7 +14,6 @@
             --color-background-medium: #e9ecef;
             --color-border: #dee2e6;
             --color-white: #ffffff;
-            --highlight-color: #d1e7ff;
         }
 
         body {
@@ -93,11 +92,12 @@
             opacity: 0;
             transform: rotate(0deg) scale(0.5);
             pointer-events: none;
+            z-index: 5; /* Las opciones por defecto están detrás del trigger */
         }
 
         ul.abanico li a {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 12px; /* Ligeramente más pequeño para nombres largos */
+            font-size: 13px;
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -113,7 +113,7 @@
             border: 3px solid var(--color-white);
             border-radius: 30px;
             box-sizing: border-box;
-            transition: all 0.4s;
+            transition: background-color 0.4s, transform 0.4s, box-shadow 0.4s;
             position: absolute;
             bottom: 0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
@@ -123,42 +123,34 @@
         ul.abanico li a:hover {
             background: var(--color-darker-blue);
             transform: scale(1.1);
-            z-index: 10;
+            z-index: 6; /* El hover por encima de otras opciones */
         }
 
+        /* El botón principal que se queda estático */
         ul.abanico li.fan-trigger {
             opacity: 1;
             transform: scale(1);
-            z-index: 20; /* Por encima de los demás botones */
+            z-index: 10; /* El trigger siempre por encima de las opciones */
             pointer-events: auto;
-            transition: all 0.4s ease-in-out;
         }
         
-        ul.abanico li.fan-trigger a {
-             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
         /* --- ESTADO ABIERTO Y BOTÓN SELECCIONADO --- */
         ul.abanico.is-open li {
             opacity: 1;
             pointer-events: auto;
         }
         
-        /* El botón principal sube y se queda visible */
-        ul.abanico.is-open li.fan-trigger {
-            opacity: 1;
-            transform: translateY(-195px) scale(1.05);
-        }
-        /* Y cambia su estilo para indicar que está seleccionado */
+        /* Cuando el menú está abierto, el trigger NO se mueve, solo cambia su estilo */
         ul.abanico.is-open li.fan-trigger a {
             background: var(--color-darker-blue);
             box-shadow: 0 6px 15px rgba(0,0,0,0.3);
         }
         
-        ul.abanico.is-open li:nth-of-type(1) { transform: rotate(-75deg); transition-delay: 0s; }
-        ul.abanico.is-open li:nth-of-type(2) { transform: rotate(-25deg); transition-delay: 0.05s; }
-        ul.abanico.is-open li:nth-of-type(3) { transform: rotate(25deg);  transition-delay: 0.1s; }
-        ul.abanico.is-open li:nth-of-type(4) { transform: rotate(75deg);  transition-delay: 0.15s; }
+        /* Rotación de las opciones alrededor del trigger estático */
+        ul.abanico.is-open li:not(.fan-trigger):nth-of-type(1) { transform: rotate(-75deg); transition-delay: 0s; }
+        ul.abanico.is-open li:not(.fan-trigger):nth-of-type(2) { transform: rotate(-25deg); transition-delay: 0.05s; }
+        ul.abanico.is-open li:not(.fan-trigger):nth-of-type(3) { transform: rotate(25deg);  transition-delay: 0.1s; }
+        ul.abanico.is-open li:not(.fan-trigger):nth-of-type(4) { transform: rotate(75deg);  transition-delay: 0.15s; }
 
         .content-area {
             padding: 20px;
@@ -177,13 +169,7 @@
         thead { background-color: var(--color-primary-blue); color: var(--color-white); }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--color-border); }
         tbody tr:nth-child(even) { background-color: var(--color-background-light); }
-        
-        /* Estilo para la fila resaltada */
-        tr.highlight-row {
-            background-color: var(--highlight-color) !important;
-            transition: background-color 0.3s ease-in-out;
-        }
-
+        tbody tr:hover { background-color: var(--color-background-medium); }
         .link-cell a { color: var(--color-primary-blue); text-decoration: none; }
         .link-cell a:hover { text-decoration: underline; color: var(--color-darker-blue); }
         .description-cell { color: var(--color-text-medium); font-size: 0.9em; }
@@ -199,10 +185,10 @@
             <!-- Menú Abanico 1: IAs -->
             <div class="fan-container">
                 <ul class="abanico" id="fan-ias">
-                    <li><a onclick="showAndScrollTo('table1', 'link-chatgpt')">ChatGPT</a></li>
-                    <li><a onclick="showAndScrollTo('table1', 'link-suno')">Suno</a></li>
-                    <li><a onclick="showAndScrollTo('table1', 'link-canva')">Canva</a></li>
-                    <li><a onclick="showAndScrollTo('table1', 'link-perplexity')">Perplexity</a></li>
+                    <li><a onclick="toggleTable('table1')">Mostrar Tabla</a></li>
+                    <li><a>Opción 2</a></li>
+                    <li><a>Opción 3</a></li>
+                    <li><a>Opción 4</a></li>
                     <li class="fan-trigger"><a onclick="toggleFan('fan-ias')">IAs</a></li>
                 </ul>
             </div>
@@ -210,9 +196,9 @@
             <!-- Menú Abanico 2: Stream -->
             <div class="fan-container">
                 <ul class="abanico" id="fan-stream">
-                    <li><a onclick="showAndScrollTo('table2', 'link-youtube')">Youtube</a></li>
-                    <li><a onclick="showAndScrollTo('table2', 'link-twitch')">Twitch</a></li>
-                    <li><a onclick="showAndScrollTo('table2', 'link-kiosko')">Kiosko.net</a></li>
+                    <li><a onclick="toggleTable('table2')">Mostrar Tabla</a></li>
+                    <li><a>Opción 2</a></li>
+                    <li><a>Opción 3</a></li>
                     <li><a>Opción 4</a></li>
                     <li class="fan-trigger"><a onclick="toggleFan('fan-stream')">Stream</a></li>
                 </ul>
@@ -221,10 +207,10 @@
             <!-- Menú Abanico 3: Wrk -->
             <div class="fan-container">
                 <ul class="abanico" id="fan-wrk">
-                     <li><a onclick="showAndScrollTo('table3', 'link-office365')">Office 365</a></li>
-                    <li><a onclick="showAndScrollTo('table3', 'link-teams')">Teams Web</a></li>
-                    <li><a onclick="showAndScrollTo('table3', 'link-intranet')">Intranet</a></li>
-                    <li><a onclick="showAndScrollTo('table3', 'link-cafosa')">Cafosa VM</a></li>
+                    <li><a onclick="toggleTable('table3')">Mostrar Tabla</a></li>
+                    <li><a>Opción 2</a></li>
+                    <li><a>Opción 3</a></li>
+                    <li><a>Opción 4</a></li>
                     <li class="fan-trigger"><a onclick="toggleFan('fan-wrk')">Wrk</a></li>
                 </ul>
             </div>
@@ -232,10 +218,10 @@
             <!-- Menú Abanico 4: Varios -->
             <div class="fan-container">
                 <ul class="abanico" id="fan-varios">
-                    <li><a onclick="showAndScrollTo('table4', 'link-vercel')">Vercel</a></li>
-                    <li><a onclick="showAndScrollTo('table4', 'link-union')">SQL Union</a></li>
-                    <li><a onclick="showAndScrollTo('table4', 'link-campos')">SQL Campos</a></li>
-                    <li><a onclick="showAndScrollTo('table4', 'link-translate')">Translate</a></li>
+                    <li><a onclick="toggleTable('table4')">Mostrar Tabla</a></li>
+                    <li><a>Opción 2</a></li>
+                    <li><a>Opción 3</a></li>
+                    <li><a>Opción 4</a></li>
                     <li class="fan-trigger"><a onclick="toggleFan('fan-varios')">Varios</a></li>
                 </ul>
             </div>
@@ -245,53 +231,53 @@
              <table id="table1">
                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>
-                    <tr id="link-chatgpt"><td class="link-cell"><a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a></td><td class="description-cell">Clásico IA de OpenAI</td></tr>
-                    <tr id="link-suno"><td class="link-cell"><a href="https://suno.com/create?wid=default" target="_blank">Suno</a></td><td class="description-cell">IA para generar canciones.</td></tr>
-                    <tr id="link-canva"><td class="link-cell"><a href="https://www.canva.com/" target="_blank">Canva</a></td><td class="description-cell">IA para generar imagenes.</td></tr>
-                    <tr id="link-perplexity"><td class="link-cell"><a href="https://www.perplexity.ai/" target="_blank">Perplexity</a></td><td class="description-cell">IA que muestra el hilo de cómo consigue la información.</td></tr>
-                    <tr id="link-google-labs"><td class="link-cell"><a href="https://labs.google/fx" target="_blank">Google labs</a></td><td class="description-cell">IA de google para generar varios tipos de ficharos.</td></tr>
-                    <tr id="link-grok"><td class="link-cell"><a href="https://grok.com/" target="_blank">Grok</a></td><td class="description-cell">IA de Elon Mask. Siempre iteresante para resultados de texto</td></tr>
-                    <tr id="link-notebooklm"><td class="link-cell"><a href="https://notebooklm.google.com/" target="_blank">Google NotebookLM</a></td><td class="description-cell">Notebook LM. Imvestigación de fuentes y recursos</td></tr>
-                    <tr id="link-aistudio"><td class="link-cell"><a href="https://aistudio.google.com/prompts/new_chat" target="_blank">Google AI Studio</a></td><td class="description-cell">IA avanzada de Google. Muy interesante y permite seleccionar varios modelos de generación</td></tr>
-                    <tr id="link-gemini"><td class="link-cell"><a href="https://gemini.google.com/app?hl=es" target="_blank">Google Gemini</a></td><td class="description-cell">IA Google. Permite Deep research para combinarlo con web</td></tr>
-                    <tr id="link-firebase"><td class="link-cell"><a href="https://firebase.google.com/?hl=es" target="_blank">Google Firebase</a></td><td class="description-cell">IA Google. Permite realizar aplicaciones con IA</td></tr>
-                    <tr id="link-gemini-cli"><td class="link-cell"><a href="https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/" target="_blank">Gemini CLI</a></td><td class="description-cell">Geminy Code Assist. Permite realizar aplicaciones con IA y Visual Studio</td></tr>
-                    <tr id="link-manus"><td class="link-cell"><a href="https://manus.im/app" target="_blank">Manus</a></td><td class="description-cell">IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder</td></tr>
-                    <tr id="link-qwen"><td class="link-cell"><a href="https://chat.qwen.ai/" target="_blank">Qwen</a></td><td class="description-cell">IA de Aliexpres. Una de las más potentes. Permite hacer de todo, incluso imagenes y videos. Varios motores</td></tr>
-                    <tr id="link-idealhouse"><td class="link-cell"><a href="https://ideal.house/es" target="_blank">Ideal House</a></td><td class="description-cell">IA de Interiorismo</td></tr>
-                    <tr id="link-getimg"><td class="link-cell"><a href="https://getimg.ai/text-to-image" target="_blank">getimg.ai</a></td><td class="description-cell">Generación de Imagenes</td></tr>
+                    <tr><td class="link-cell"><a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a></td><td class="description-cell">Clásico IA de OpenAI</td></tr>
+                    <tr><td class="link-cell"><a href="https://suno.com/create?wid=default" target="_blank">Suno</a></td><td class="description-cell">IA para generar canciones.</td></tr>
+                    <tr><td class="link-cell"><a href="https://www.canva.com/" target="_blank">Canva</a></td><td class="description-cell">IA para generar imagenes.</td></tr>
+                    <tr><td class="link-cell"><a href="https://www.perplexity.ai/" target="_blank">Perplexity</a></td><td class="description-cell">IA que muestra el hilo de cómo consigue la información.</td></tr>
+                    <tr><td class="link-cell"><a href="https://labs.google/fx" target="_blank">Google labs</a></td><td class="description-cell">IA de google para generar varios tipos de ficharos.</td></tr>
+                    <tr><td class="link-cell"><a href="https://grok.com/" target="_blank">Grok</a></td><td class="description-cell">IA de Elon Mask. Siempre iteresante para resultados de texto</td></tr>
+                    <tr><td class="link-cell"><a href="https://notebooklm.google.com/" target="_blank">Google NotebookLM</a></td><td class="description-cell">Notebook LM. Imvestigación de fuentes y recursos</td></tr>
+                    <tr><td class="link-cell"><a href="https://aistudio.google.com/prompts/new_chat" target="_blank">Google AI Studio</a></td><td class="description-cell">IA avanzada de Google. Muy interesante y permite seleccionar varios modelos de generación</td></tr>
+                    <tr><td class="link-cell"><a href="https://gemini.google.com/app?hl=es" target="_blank">Google Gemini</a></td><td class="description-cell">IA Google. Permite Deep research para combinarlo con web</td></tr>
+                    <tr><td class="link-cell"><a href="https://firebase.google.com/?hl=es" target="_blank">Google Firebase</a></td><td class="description-cell">IA Google. Permite realizar aplicaciones con IA</td></tr>
+                    <tr><td class="link-cell"><a href="https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/" target="_blank">Gemini CLI</a></td><td class="description-cell">Geminy Code Assist. Permite realizar aplicaciones con IA y Visual Studio</td></tr>
+                    <tr><td class="link-cell"><a href="https://manus.im/app" target="_blank">Manus</a></td><td class="description-cell">IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder</td></tr>
+                    <tr><td class="link-cell"><a href="https://chat.qwen.ai/" target="_blank">Qwen</a></td><td class="description-cell">IA de Aliexpres. Una de las más potentes. Permite hacer de todo, incluso imagenes y videos. Varios motores</td></tr>
+                    <tr><td class="link-cell"><a href="https://ideal.house/es" target="_blank">Ideal House</a></td><td class="description-cell">IA de Interiorismo</td></tr>
+                    <tr><td class="link-cell"><a href="https://getimg.ai/text-to-image" target="_blank">getimg.ai</a></td><td class="description-cell">Generación de Imagenes</td></tr>
                 </tbody>
             </table>
 
             <table id="table2">
                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>
-                    <tr id="link-youtube"><td class="link-cell"><a href="https://www.youtube.com/" target="_blank">Youtube</a></td><td class="description-cell">Youtube</td></tr>
-                    <tr id="link-twitch"><td class="link-cell"><a href="https://www.twitch.tv/" target="_blank">Twitch</a></td><td class="description-cell">Twitch.</td></tr>
-                    <tr id="link-kiosko"><td class="link-cell"><a href="https://es.kiosko.net/es/" target="_blank">Kiosko.net</a></td><td class="description-cell">Principales portadas prensa.</td></tr>
+                    <tr><td class="link-cell"><a href="https://www.youtube.com/" target="_blank">Youtube</a></td><td class="description-cell">Youtube</td></tr>
+                    <tr><td class="link-cell"><a href="https://www.twitch.tv/" target="_blank">Twitch</a></td><td class="description-cell">Twitch.</td></tr>
+                    <tr><td class="link-cell"><a href="https://es.kiosko.net/es/" target="_blank">Kiosko.net</a></td><td class="description-cell">Principales portadas prensa.</td></tr>
                 </tbody>
             </table>
 
             <table id="table3">
                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>
-                    <tr id="link-office365"><td class="link-cell"><a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Office 365</a></td><td class="description-cell">Office 365 Seidor.</td></tr>
-                    <tr id="link-teams"><td class="link-cell"><a href="https://teams.microsoft.com/v2/" target="_blank">Teams Web</a></td><td class="description-cell">Teams version navegador</td></tr>
-                    <tr id="link-outlook"><td class="link-cell"><a href="https://outlook.office.com/mail/" target="_blank">Outlook Web</a></td><td class="description-cell">Teams version navegador</td></tr>
-                    <tr id="link-intranet"><td class="link-cell"><a href="https://intranetnew.seidor.com/home" target="_blank">Intranet Seidor</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>
-                    <tr id="link-intranet-old"><td class="link-cell"><a href="https://intranet.seidor.es/sap/bc/ui2/flp" target="_blank">Intranet Seidor (old)</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>
-                    <tr id="link-cafosa"><td class="link-cell"><a href="https://windows365.microsoft.com/" target="_blank">Cafosa</a></td><td class="description-cell">Maquina Virtual Cafosa</td></tr>
+                    <tr><td class="link-cell"><a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Office 365</a></td><td class="description-cell">Office 365 Seidor.</td></tr>
+                    <tr><td class="link-cell"><a href="https://teams.microsoft.com/v2/" target="_blank">Teams Web</a></td><td class="description-cell">Teams version navegador</td></tr>
+                    <tr><td class="link-cell"><a href="https://outlook.office.com/mail/" target="_blank">Outlook Web</a></td><td class="description-cell">Teams version navegador</td></tr>
+                    <tr><td class="link-cell"><a href="https://intranetnew.seidor.com/home" target="_blank">Intranet Seidor</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>
+                    <tr><td class="link-cell"><a href="https://intranet.seidor.es/sap/bc/ui2/flp" target="_blank">Intranet Seidor (old)</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>
+                    <tr><td class="link-cell"><a href="https://windows365.microsoft.com/" target="_blank">Cafosa</a></td><td class="description-cell">Maquina Virtual Cafosa</td></tr>
                 </tbody>
             </table>
 
             <table id="table4">
                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>
-                    <tr id="link-vercel"><td class="link-cell"><a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a></td><td class="description-cell">Diseño sencillo webs.</td></tr>
-                    <tr id="link-union"><td class="link-cell"><a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a></td><td class="description-cell">SQL:Convertir Union a Diferencias</td></tr>
-                    <tr id="link-union2"><td class="link-cell"><a href="TransformaUnionEnDiferencias2.html" target="_blank">Convertir Union a Diferencias por campos</a></td><td class="description-cell">SQL:Convertir Union a Diferencias por campos</td></tr>
-                    <tr id="link-campos"><td class="link-cell"><a href="DescubreCampos.html" target="_blank">Información de cada campo de una query</a></td><td class="description-cell">SQL:Información de cada campo de una query</td></tr>
-                    <tr id="link-translate"><td class="link-cell"><a href="https://translate.google.es/" target="_blank">Google Translate</a></td><td class="description-cell">Traductor de Google</td></tr>
+                    <tr><td class="link-cell"><a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a></td><td class="description-cell">Diseño sencillo webs.</td></tr>
+                    <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a></td><td class="description-cell">SQL:Convertir Union a Diferencias</td></tr>
+                    <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias2.html" target="_blank">Convertir Union a Diferencias por campos</a></td><td class="description-cell">SQL:Convertir Union a Diferencias por campos</td></tr>
+                    <tr><td class="link-cell"><a href="DescubreCampos.html" target="_blank">Información de cada campo de una query</a></td><td class="description-cell">SQL:Información de cada campo de una query</td></tr>
+                    <tr><td class="link-cell"><a href="https://translate.google.es/" target="_blank">Google Translate</a></td><td class="description-cell">Traductor de Google</td></tr>
                 </tbody>
             </table>
         </div>
@@ -308,39 +294,36 @@
 
         function toggleFan(fanId) {
             const fanToToggle = document.getElementById(fanId);
-            const isOpening = !fanToToggle.classList.contains('is-open');
+            // Si el menú que se clickea ya está abierto, lo cerramos. Si no, cerramos todos y abrimos el nuevo.
+            const isAlreadyOpen = fanToToggle.classList.contains('is-open');
+            
             closeAllFans();
-            if (isOpening) {
+
+            if (!isAlreadyOpen) {
                 fanToToggle.classList.add('is-open');
                 overlay.classList.add('is-active');
             }
         }
 
-        function showAndScrollTo(tableId, rowId) {
+        function toggleTable(tableId) {
             const table = document.getElementById(tableId);
-            const row = document.getElementById(rowId);
-
             closeAllFans();
+            
+            const isHidden = table.style.display === 'none' || table.style.display === '';
 
             // Ocultar todas las tablas para un estado limpio
             document.querySelectorAll('.content-area table').forEach(t => {
-                t.style.display = 'none';
+                if (t.id !== tableId) {
+                    t.style.display = 'none';
+                }
             });
-            // Quitar resaltado de cualquier otra fila
-            document.querySelectorAll('tr.highlight-row').forEach(highlightedRow => {
-                highlightedRow.classList.remove('highlight-row');
-            });
-
-            if (table && row) {
-                // Mostrar la tabla correcta y desplazarse a la fila
+            
+            // Alternar la visibilidad de la tabla deseada
+            if (isHidden) {
                 table.style.display = 'table';
-                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-                // Resaltar la fila y quitar el resaltado después de un momento
-                row.classList.add('highlight-row');
-                setTimeout(() => {
-                    row.classList.remove('highlight-row');
-                }, 2000); // El resaltado dura 2 segundos
+                table.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                table.style.display = 'none';
             }
         }
 
