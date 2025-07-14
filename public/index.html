@@ -63,7 +63,7 @@
             z-index: 10;
         }
         
-        /* --- INICIO: ESTILOS CORREGIDOS DEL MENÚ DE ABANICO --- */
+        /* --- INICIO: ESTILOS CORREGIDOS Y VERIFICADOS DEL MENÚ DE ABANICO --- */
         ul.abanico {
             position: relative;
             width: 160px;
@@ -107,41 +107,41 @@
         
         /* --- ESTADO INICIAL (SIN HOVER) --- */
         
-        /* Los 5 botones del abanico están ocultos y sin rotar */
+        /* Los 5 botones del abanico están ocultos y sin rotar. */
         ul.abanico li:not(:last-child) {
             opacity: 0;
             transform: rotate(0deg);
-            pointer-events: none; /* No se puede interactuar con ellos */
+            pointer-events: none; /* No son clickables cuando están ocultos */
         }
         
-        /* El último botón (el principal) está visible */
+        /* El último botón (el principal) está VISIBLE y con su transición. */
         ul.abanico li:last-child {
             opacity: 1;
-            z-index: 5;
+            transform: rotate(0deg);
+            pointer-events: auto;
         }
         
         /* --- ESTADO ACTIVO (CON HOVER) --- */
 
         /* Al pasar el ratón por el contenedor... */
-        ul.abanico:hover li {
-            opacity: 1; /* Todos los botones del abanico se hacen visibles */
-            pointer-events: auto; /* Y se puede interactuar con ellos */
-        }
-        
         ul.abanico:hover li a {
             background: var(--color-darker-blue);
         }
         
-        /* El último botón (el principal) se oculta */
+        /* El último botón (el principal) se OCULTA. */
         ul.abanico:hover li:last-child {
             opacity: 0;
             pointer-events: none;
         }
-
-        /* Y los 5 botones del abanico giran a su posición final */
+        
+        /* Los 5 botones del abanico se hacen VISIBLES, clickables y giran a su posición final. */
+        ul.abanico:hover li:not(:last-child) {
+            opacity: 1;
+            pointer-events: auto;
+        }
         ul.abanico:hover li:nth-of-type(1)  { transform: rotate(45deg); }
         ul.abanico:hover li:nth-of-type(2)  { transform: rotate(22.5deg); }
-        ul.abanico:hover li:nth-of-type(3)  { z-index: 10; transform: rotate(0deg); } /* Central */
+        ul.abanico:hover li:nth-of-type(3)  { z-index: 10; transform: rotate(0deg); }
         ul.abanico:hover li:nth-of-type(4)  { transform: rotate(-22.5deg); }
         ul.abanico:hover li:nth-of-type(5)  { transform: rotate(-45deg); }
         /* --- FIN: ESTILOS DEL MENÚ DE ABANICO --- */
@@ -182,8 +182,8 @@
                 <li><a onmouseover="showTable('table2')">Youtube</a></li>
                 <li><a onmouseover="showTable('table2')">Twitch</a></li>
                 <li><a onmouseover="showTable('table2')">Prensa</a></li>
-                <li><a onmouseover="showTable('table2')">Opción 4</a></li>
-                <li><a onmouseover="showTable('table2')">Opción 5</a></li>
+                <li><a onmouseover="showTable('table2')">Sub 4</a></li>
+                <li><a onmouseover="showTable('table2')">Sub 5</a></li>
                 <li><a>Stream</a></li>
             </ul>
 
@@ -202,8 +202,8 @@
                 <li><a onmouseover="showTable('table4')">SQL</a></li>
                 <li><a onmouseover="showTable('table4')">Webs</a></li>
                 <li><a onmouseover="showTable('table4')">Traducir</a></li>
-                <li><a onmouseover="showTable('table4')">Opción 4</a></li>
-                <li><a onmouseover="showTable('table4')">Opción 5</a></li>
+                <li><a onmouseover="showTable('table4')">Sub 4</a></li>
+                <li><a onmouseover="showTable('table4')">Sub 5</a></li>
                 <li><a>Varios</a></li>
             </ul>
         </div>
@@ -243,7 +243,7 @@
     </div>
 
     <script>
-        // Función optimizada para mostrar la tabla correcta al pasar el ratón
+        // La función JavaScript sigue siendo la misma, funciona perfectamente.
         function showTable(tableId) {
             const table = document.getElementById(tableId);
             if (table.style.display !== 'table') {
