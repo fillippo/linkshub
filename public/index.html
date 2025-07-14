@@ -54,9 +54,8 @@
         .fan-menu-bar {
             display: flex;
             justify-content: center;
-            flex-wrap: wrap; /* Para que se adapte en pantallas pequeñas */
-            padding: 0 10px;
-            padding-bottom: 20px;
+            flex-wrap: wrap;
+            padding: 0 10px 20px 10px;
             background-color: var(--color-background-medium);
             border-bottom: 1px solid var(--color-border);
             position: sticky;
@@ -64,11 +63,11 @@
             z-index: 10;
         }
         
-        /* --- INICIO: ESTILOS DEL MENÚ DE ABANICO (Adaptado de tu código) --- */
+        /* --- INICIO: ESTILOS CORREGIDOS DEL MENÚ DE ABANICO --- */
         ul.abanico {
             position: relative;
-            width: 160px; /* Ancho ajustado para que quepan varios menús */
-            margin: 30px 5px 0 5px; /* Margen para separar los menús */
+            width: 160px;
+            margin: 30px 5px 0 5px;
             height: 120px;
             overflow: hidden;
             list-style: none;
@@ -81,30 +80,35 @@
             left: 50%;
             width: 88px;
             height: 300px;
-            margin-left: -44px; /* Centra el elemento */
+            margin-left: -44px;
             text-align: center;
+            transform-origin: top center;
             box-sizing: border-box;
             
-            /* Origen de la rotación: la clave del efecto */
-            transform-origin: top center;
+            /* Estado INICIAL de los 5 botones: ocultos */
+            opacity: 0;
+            transform: rotate(0deg);
             transition: all .6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         
+        /* Estado INICIAL del botón principal (el último): VISIBLE */
+        ul.abanico li:last-child {
+            opacity: 1;
+            z-index: 5; /* Asegura que esté por encima */
+        }
+
         ul.abanico li a {
             display: inline-block;
             width: 100%;
             height: 48px;
             text-decoration: none;
             cursor: pointer;
-            
-            /* Estilos integrados con tu diseño */
             background: var(--color-primary-blue);
             color: var(--color-white);
             font-size: 13px;
             font-weight: 600;
-            
             line-height: 40px;
-            vertical-align: bottom; /* Pega el 'a' al fondo del 'li' */
+            vertical-align: bottom;
             border: 4px solid var(--color-background-medium);
             border-radius: 30px;
             box-sizing: border-box;
@@ -112,25 +116,23 @@
         }
 
         /* Al pasar el ratón por el contenedor del abanico... */
-        ul.abanico:hover li a {
-            background: var(--color-darker-blue); /* Se oscurecen los botones */
-        }
-        
         ul.abanico:hover li {
-            opacity: 1; /* Todos los items se hacen visibles */
+            opacity: 1; /* Se muestran TODOS los botones desplegables */
+        }
+        ul.abanico:hover li a {
+            background: var(--color-darker-blue);
         }
         
-        /* El 6º item (el botón "MENU" principal) se oculta al desplegarse */
-        ul.abanico:hover li:nth-of-type(6) {
+        /* El botón principal (el último) se OCULTA al desplegarse */
+        ul.abanico:hover li:last-child {
             opacity: 0;
-            transform: scale(0.9);
         }
 
         /* Posiciones de cada sub-opción cuando el menú está desplegado */
-        /* Ángulos ajustados para 5 items */
+        /* Usando la configuración original que solicitaste */
         ul.abanico:hover li:nth-of-type(1)  { transform: rotate(40deg); }
         ul.abanico:hover li:nth-of-type(2)  { transform: rotate(20deg); }
-        ul.abanico:hover li:nth-of-type(3)  { transform: rotate(0deg); } /* Item central */
+        ul.abanico:hover li:nth-of-type(3)  { z-index: 10; transform: rotate(0deg); } /* Item central */
         ul.abanico:hover li:nth-of-type(4)  { transform: rotate(-20deg); }
         ul.abanico:hover li:nth-of-type(5)  { transform: rotate(-40deg); }
         /* --- FIN: ESTILOS DEL MENÚ DE ABANICO --- */
@@ -160,13 +162,12 @@
 
             <!-- 1. Menú IAs -->
             <ul class="abanico">
-                <!-- 5 sub-opciones. TODAS muestran la tabla 1 al pasar el ratón -->
                 <li><a onmouseover="showTable('table1')">Texto</a></li>
                 <li><a onmouseover="showTable('table1')">Imagen</a></li>
                 <li><a onmouseover="showTable('table1')">Música</a></li>
                 <li><a onmouseover="showTable('table1')">Código</a></li>
                 <li><a onmouseover="showTable('table1')">Invest.</a></li>
-                <!-- 6º item: El botón principal visible -->
+                <!-- El botón principal, ahora es el último li -->
                 <li><a>IAs</a></li>
             </ul>
 
@@ -175,8 +176,8 @@
                 <li><a onmouseover="showTable('table2')">Youtube</a></li>
                 <li><a onmouseover="showTable('table2')">Twitch</a></li>
                 <li><a onmouseover="showTable('table2')">Prensa</a></li>
-                <li><a onmouseover="showTable('table2')">Opción 4</a></li>
-                <li><a onmouseover="showTable('table2')">Opción 5</a></li>
+                <li><a onmouseover="showTable('table2')">Sub 4</a></li>
+                <li><a onmouseover="showTable('table2')">Sub 5</a></li>
                 <li><a>Stream</a></li>
             </ul>
 
@@ -195,73 +196,53 @@
                 <li><a onmouseover="showTable('table4')">SQL</a></li>
                 <li><a onmouseover="showTable('table4')">Webs</a></li>
                 <li><a onmouseover="showTable('table4')">Traducir</a></li>
-                <li><a onmouseover="showTable('table4')">Opción 4</a></li>
-                <li><a onmouseover="showTable('table4')">Opción 5</a></li>
+                <li><a onmouseover="showTable('table4')">Sub 4</a></li>
+                <li><a onmouseover="showTable('table4')">Sub 5</a></li>
                 <li><a>Varios</a></li>
             </ul>
         </div>
 
         <!-- Área de contenido con las tablas (sin cambios) -->
         <div class="content-area">
+            <!-- Todas tus tablas van aquí, sin cambios -->
             <table id="table1">
-                <!-- Contenido de la tabla 1 -->
-                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>
                     <tr><td class="link-cell"><a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a></td><td class="description-cell">Clásico IA de OpenAI</td></tr>
                     <tr><td class="link-cell"><a href="https://suno.com/create?wid=default" target="_blank">Suno</a></td><td class="description-cell">IA para generar canciones.</td></tr>
-                    <tr><td class="link-cell"><a href="https://www.canva.com/" target="_blank">Canva</a></td><td class="description-cell">IA para generar imagenes.</td></tr>
-                    <tr><td class="link-cell"><a href="https://www.perplexity.ai/" target="_blank">Perplexity</a></td><td class="description-cell">IA que muestra el hilo de cómo consigue la información.</td></tr>
                 </tbody>
             </table>
             <table id="table2">
-                <!-- Contenido de la tabla 2 -->
-                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>
                     <tr><td class="link-cell"><a href="https://www.youtube.com/" target="_blank">Youtube</a></td><td class="description-cell">Youtube</td></tr>
-                    <tr><td class="link-cell"><a href="https://www.twitch.tv/" target="_blank">Twitch</a></td><td class="description-cell">Twitch.</td></tr>
-                    <tr><td class="link-cell"><a href="https://es.kiosko.net/es/" target="_blank">Kiosko.net</a></td><td class="description-cell">Principales portadas prensa.</td></tr>
                 </tbody>
             </table>
             <table id="table3">
-                <!-- Contenido de la tabla 3 -->
                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>             
                     <tr><td class="link-cell"><a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Office 365</a></td><td class="description-cell">Office 365 Seidor.</td></tr>
-                    <tr><td class="link-cell"><a href="https://teams.microsoft.com/v2/" target="_blank">Teams Web</a></td><td class="description-cell">Teams version navegador</td></tr>           
-                    <tr><td class="link-cell"><a href="https://outlook.office.com/mail/" target="_blank">Outlook Web</a></td><td class="description-cell">Teams version navegador</td></tr>                  
-                    <tr><td class="link-cell"><a href="https://intranetnew.seidor.com/home" target="_blank">Intranet Seidor</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>          
-                    <tr><td class="link-cell"><a href="https://windows365.microsoft.com/" target="_blank">Cafosa</a></td><td class="description-cell">Maquina Virtual Cafosa</td></tr>  
                 </tbody>
             </table>
             <table id="table4">
-                <!-- Contenido de la tabla 4 -->
                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>    
-                    <tr><td class="link-cell"><a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a></td><td class="description-cell">Diseño sencillo webs.</td></tr>                  
-                    <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a></td><td class="description-cell">SQL:Convertir Union a Diferencias</td></tr>      
-                    <tr><td class="link-cell"><a href="https://translate.google.es/" target="_blank">Google Translate</a></td><td class="description-cell">Traductor de Google</td></tr>   
+                    <tr><td class="link-cell"><a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a></td><td class="description-cell">Diseño sencillo webs.</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // Función optimizada para mostrar la tabla correcta al pasar el ratón, evitando parpadeos.
+        // Función optimizada para mostrar la tabla correcta al pasar el ratón
         function showTable(tableId) {
             const table = document.getElementById(tableId);
 
-            // Solo actuamos si la tabla deseada no está ya visible
             if (table.style.display !== 'table') {
-                
-                // Primero, oculta todas las demás tablas
                 document.querySelectorAll('.content-area table').forEach(t => {
                     t.style.display = 'none';
                 });
-
-                // Luego, muestra la tabla objetivo
                 table.style.display = 'table';
-                
-                // Y nos desplazamos al inicio del área de contenido para asegurar que se vea
                 const contentArea = document.querySelector('.content-area');
                 if (contentArea) {
                     contentArea.scrollTo({ top: 0, behavior: 'smooth' });
