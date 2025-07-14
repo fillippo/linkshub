@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enlaces con Menú Desplegable</title>
+    <style>
+        /* --- Variables de Color (Opcional pero útil para consistencia) --- */
+        :root {
+            --color-primary-blue: #4a7ba0; /* Azul principal, ligeramente muted */
+            --color-darker-blue: #3a6380; /* Azul más oscuro para hover */
+            --color-text-dark: #212529;   /* Negro/Gris muy oscuro para texto principal */
+            --color-text-medium: #495057; /* Gris medio para texto secundario */
+            --color-background-light: #f8f9fa; /* Gris muy claro para fondos */
+            --color-background-medium: #e9ecef; /* Gris medio claro para barras/hover */
+            --color-border: #dee2e6;     /* Gris claro para bordes */
+            --color-white: #ffffff;      /* Blanco puro */
+            --fan-menu-size: 40px; /* Tamaño del botón principal del menú */
+            --fan-item-size: 35px; /* Tamaño de los items del abanico */
+            --fan-radius: 80px;  /* Distancia de los items al centro */
+        }
+
+        /* Estilos generales */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--color-background-light);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow: hidden;
+            color: var(--color-text-dark);
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            background: var(--color-white);
+            border-radius: 10px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        h1 {
+            color: var(--color-text-dark);
+            text-align: center;
+            padding: 20px 0 10px;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        /* --- NUEVA BARRA DE MENÚS DESPLEGABLES --- */
+        .menu-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px 10px 35px; /* Más padding inferior para dar espacio al menú */
+            background-color: var(--color-background-medium);
+            border-bottom: 1px solid var(--color-border);
+            position: sticky;
+            top: 0;
+            z-index: 20; /* Elevado para estar sobre el contenido */
+        }
+
+        .fan-menu {
+            position: relative;
+            margin: 0 25px; /* Espacio entre los menús */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .fan-trigger {
+            width: var(--fan-menu-size);
+            height: var(--fan-menu-size);
+            background-color: var(--color-primary-blue);
+            color: var(--color-white);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 11;
+        }
+        
+        .fan-menu-label {
+            margin-top: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--color-text-medium);
+        }
+
+        .fan-menu .fan-options {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: absolute;
+            top: 0;
+            left: calc(var(--fan-menu-size) / 2);
+            /* Centrado en el eje X del trigger */
+            transform: translateX(-50%);
+        }
+
+        .fan-menu .fan-item {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: var(--fan-item-size);
+            height: var(--fan-item-size);
+            background-color: var(--color-darker-blue);
+            color: var(--color-white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none; /* No se puede hacer clic cuando están ocultos */
+            transform: translate(0, 0) rotate(0deg);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            z-index: 10;
+        }
+        
+        .fan-menu .fan-item:hover {
+            background-color: var(--color-primary-blue);
+            transform-origin: center center;
+            transform: scale(1.1); /* Hacemos esto más específico abajo */
+        }
+
+
+        /* Magia del despliegue en abanico al hacer HOVER */
+        .fan-menu:hover .fan-trigger {
+            transform: scale(1.1);
+        }
+
+        .fan-menu:hover .fan-item {
+            opacity: 1;
+            pointer-events: auto; /* Se puede hacer clic al ser visibles */
+        }
+
+        /* Posicionamiento de cada item del abanico (5 items en un arco de 180 grados) */
+        .fan-menu:hover .fan-item:nth-child(1) { transform: rotate(0deg) translateX(var(--fan-radius)) rotate(0deg); transition-delay: 0.0s; }
+        .fan-menu:hover .fan-item:nth-child(2) { transform: rotate(45deg) translateX(var(--fan-radius)) rotate(-45deg); transition-delay: 0.05s; }
+        .fan-menu:hover .fan-item:nth-child(3) { transform: rotate(90deg) translateX(var(--fan-radius)) rotate(-90deg); transition-delay: 0.1s; }
+        .fan-menu:hover .fan-item:nth-child(4) { transform: rotate(135deg) translateX(var(--fan-radius)) rotate(-135deg); transition-delay: 0.15s; }
+        .fan-menu:hover .fan-item:nth-child(5) { transform: rotate(180deg) translateX(var(--fan-radius)) rotate(-180deg); transition-delay: 0.2s; }
+
+
+        /* Área de contenido (tablas) */
+        .content-area {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        /* Tabla */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: none; /* Inicialmente oculta */
+            background-color: var(--color-white);
+        }
+
+        thead {
+            background-color: var(--color-primary-blue);
+            color: var(--color-white);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        th:first-child, td:first-child { padding-left: 20px; }
+        th:last-child, td:last-child { padding-right: 20px; }
+        tbody tr:nth-child(even) { background-color: var(--color-background-light); }
+        tbody tr:hover { background-color: var(--color-background-medium); }
+
+        .link-cell a {
+            color: var(--color-primary-blue);
+            text-decoration: none;
+            font-weight: normal;
+            transition: color 0.2s ease;
+        }
+
+        .link-cell a:hover {
+            text-decoration: underline;
+            color: var(--color-darker-blue);
+        }
+
+        .description-cell {
+            word-wrap: break-word;
+            color: var(--color-text-medium);
+            font-size: 0.9em;
+        }
+
+        /* Scrollbar styles */
+        .content-area::-webkit-scrollbar { width: 8px; }
+        .content-area::-webkit-scrollbar-track { background: var(--color-background-light); border-radius: 10px; }
+        .content-area::-webkit-scrollbar-thumb { background-color: var(--color-border); border-radius: 10px; border: 2px solid var(--color-background-light); }
+        .content-area::-webkit-scrollbar-thumb:hover { background-color: var(--color-text-medium); }
+        .content-area { scrollbar-width: thin; scrollbar-color: var(--color-border) var(--color-background-light); }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .main-wrapper { margin: 10px; border-radius: 0; box-shadow: none; }
+            .menu-bar { padding: 10px 5px 25px; }
+            .fan-menu { margin: 0 10px; }
+            :root {
+                --fan-menu-size: 35px;
+                --fan-item-size: 30px;
+                --fan-radius: 65px;
+            }
+            .content-area { padding: 10px; }
+            th, td { padding: 8px; }
+            th:first-child, td:first-child { padding-left: 10px; }
+            th:last-child, td:last-child { padding-right: 10px; }
+            .description-cell { font-size: 0.8em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <h1>Links</h1>
+
+        <!-- Nueva barra de menú en la parte superior -->
+        <div class="menu-bar">
+            <!-- Menú 1: IAs -->
+            <div class="fan-menu">
+                <div class="fan-trigger">IAs</div>
+                <ul class="fan-options">
+                    <!-- Cada 'li' es una sub-opción. Hacen 'onclick' para mostrar la tabla. -->
+                    <li class="fan-item" onclick="toggleTable('table1')">Op 1</li>
+                    <li class="fan-item" onclick="toggleTable('table1')">Op 2</li>
+                    <li class="fan-item" onclick="toggleTable('table1')">Op 3</li>
+                    <li class="fan-item" onclick="toggleTable('table1')">Op 4</li>
+                    <li class="fan-item" onclick="toggleTable('table1')">Op 5</li>
+                </ul>
+                <div class="fan-menu-label">Inteligencia Artificial</div>
+            </div>
+
+            <!-- Menú 2: Stream -->
+            <div class="fan-menu">
+                <div class="fan-trigger">STR</div>
+                <ul class="fan-options">
+                    <li class="fan-item" onclick="toggleTable('table2')">Op 1</li>
+                    <li class="fan-item" onclick="toggleTable('table2')">Op 2</li>
+                    <li class="fan-item" onclick="toggleTable('table2')">Op 3</li>
+                    <li class="fan-item" onclick="toggleTable('table2')">Op 4</li>
+                    <li class="fan-item" onclick="toggleTable('table2')">Op 5</li>
+                </ul>
+                <div class="fan-menu-label">Stream & Media</div>
+            </div>
+
+            <!-- Menú 3: Wrk -->
+            <div class="fan-menu">
+                <div class="fan-trigger">WRK</div>
+                <ul class="fan-options">
+                    <li class="fan-item" onclick="toggleTable('table3')">Op 1</li>
+                    <li class="fan-item" onclick="toggleTable('table3')">Op 2</li>
+                    <li class="fan-item" onclick="toggleTable('table3')">Op 3</li>
+                    <li class="fan-item" onclick="toggleTable('table3')">Op 4</li>
+                    <li class="fan-item" onclick="toggleTable('table3')">Op 5</li>
+                </ul>
+                <div class="fan-menu-label">Trabajo</div>
+            </div>
+
+            <!-- Menú 4: Varios -->
+            <div class="fan-menu">
+                <div class="fan-trigger">VAR</div>
+                <ul class="fan-options">
+                    <li class="fan-item" onclick="toggleTable('table4')">Op 1</li>
+                    <li class="fan-item" onclick="toggleTable('table4')">Op 2</li>
+                    <li class="fan-item" onclick="toggleTable('table4')">Op 3</li>
+                    <li class="fan-item" onclick="toggleTable('table4')">Op 4</li>
+                    <li class="fan-item" onclick="toggleTable('table4')">Op 5</li>
+                </ul>
+                <div class="fan-menu-label">Varios</div>
+            </div>
+        </div>
+
+        <!-- Área de contenido desplazable para las tablas (sin cambios) -->
+        <div class="content-area">
+            <table id="table1">
+                <!-- Contenido de tabla 1 -->
+                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                <tbody>
+                    <tr><td class="link-cell"><a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a></td><td class="description-cell">Clásico IA de OpenAI</td></tr>
+                    <tr><td class="link-cell"><a href="https://suno.com/create?wid=default" target="_blank">Suno</a></td><td class="description-cell">IA para generar canciones.</td></tr>
+                    <tr><td class="link-cell"><a href="https://www.canva.com/" target="_blank">Canva</a></td><td class="description-cell">IA para generar imagenes.</td></tr>
+                    <tr><td class="link-cell"><a href="https://www.perplexity.ai/" target="_blank">Perplexity</a></td><td class="description-cell">IA que muestra el hilo de cómo consigue la información.</td></tr>
+                    <tr><td class="link-cell"><a href="https://labs.google/fx" target="_blank">Google labs</a></td><td class="description-cell">IA de google para generar varios tipos de ficharos.</td></tr>
+                    <tr><td class="link-cell"><a href="https://grok.com/" target="_blank">Grok</a></td><td class="description-cell">IA de Elon Mask. Siempre iteresante para resultados de texto</td></tr>
+                    <tr><td class="link-cell"><a href="https://notebooklm.google.com/" target="_blank">Google NotebookLM</a></td><td class="description-cell">Notebook LM. Imvestigación de fuentes y recursos</td></tr>
+                    <tr><td class="link-cell"><a href="https://aistudio.google.com/prompts/new_chat" target="_blank">Google AI Studio</a></td><td class="description-cell">IA avanzada de Google. Muy interesante y permite seleccionar varios modelos de generación</td></tr>
+                    <tr><td class="link-cell"><a href="https://gemini.google.com/app?hl=es" target="_blank">Google Gemini</a></td><td class="description-cell">IA Google. Permite Deep research para combinarlo con web</td></tr>
+                    <tr><td class="link-cell"><a href="https://firebase.google.com/?hl=es" target="_blank">Google Firebase</a></td><td class="description-cell">IA Google. Permite realizar aplicaciones con IA</td></tr>
+                    <tr><td class="link-cell"><a href="https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/" target="_blank">Gemini CLI</a></td><td class="description-cell">Geminy Code Assist. Permite realizar aplicaciones con IA y Visual Studio</td></tr>
+                    <tr><td class="link-cell"><a href="https://manus.im/app" target="_blank">Manus</a></td><td class="description-cell">IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder</td></tr>
+                    <tr><td class="link-cell"><a href="https://chat.qwen.ai/" target="_blank">Qwen</a></td><td class="description-cell">IA de Aliexpres. Una de las más potentes. Permite hacer de todo, incluso imagenes y videos. Varios motores</td></tr>
+                    <tr><td class="link-cell"><a href="https://ideal.house/es" target="_blank">Ideal House</a></td><td class="description-cell">IA de Interiorismo</td></tr>
+                    <tr><td class="link-cell"><a href="https://getimg.ai/text-to-image" target="_blank">getimg.ai</a></td><td class="description-cell">Generación de Imagenes</td></tr>
+                </tbody>
+            </table>
+            <table id="table2">
+                <!-- Contenido de tabla 2 -->
+                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                <tbody>
+                    <tr><td class="link-cell"><a href="https://www.youtube.com/" target="_blank">Youtube</a></td><td class="description-cell">Youtube</td></tr>
+                    <tr><td class="link-cell"><a href="https://www.twitch.tv/" target="_blank">Twitch</a></td><td class="description-cell">Twitch.</td></tr>
+                    <tr><td class="link-cell"><a href="https://es.kiosko.net/es/" target="_blank">Kiosko.net</a></td><td class="description-cell">Principales portadas prensa.</td></tr>
+                </tbody>
+            </table>
+            <table id="table3">
+                <!-- Contenido de tabla 3 -->
+                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                <tbody>
+                    <tr><td class="link-cell"><a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Office 365</a></td><td class="description-cell">Office 365 Seidor.</td></tr>
+                    <tr><td class="link-cell"><a href="https://teams.microsoft.com/v2/" target="_blank">Teams Web</a></td><td class="description-cell">Teams version navegador</td></tr>
+                    <tr><td class="link-cell"><a href="https://outlook.office.com/mail/" target="_blank">Outlook Web</a></td><td class="description-cell">Teams version navegador</td></tr>
+                    <tr><td class="link-cell"><a href="https://intranetnew.seidor.com/home" target="_blank">Intranet Seidor</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>
+                    <tr><td class="link-cell"><a href="https://intranet.seidor.es/sap/bc/ui2/flp" target="_blank">Intranet Seidor (old)</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>
+                    <tr><td class="link-cell"><a href="https://windows365.microsoft.com/" target="_blank">Cafosa</a></td><td class="description-cell">Maquina Virtual Cafosa</td></tr>
+                </tbody>
+            </table>
+            <table id="table4">
+                <!-- Contenido de tabla 4 -->
+                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                <tbody>
+                    <tr><td class="link-cell"><a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a></td><td class="description-cell">Diseño sencillo webs.</td></tr>
+                    <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a></td><td class="description-cell">SQL:Convertir Union a Diferencias</td></tr>
+                    <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias2.html" target="_blank">Convertir Union a Diferencias por campos</a></td><td class="description-cell">SQL:Convertir Union a Diferencias por campos</td></tr>
+                    <tr><td class="link-cell"><a href="DescubreCampos.html" target="_blank">Información de cada campo de una query</a></td><td class="description-cell">SQL:Información de cada campo de una query</td></tr>
+                    <tr><td class="link-cell"><a href="https://translate.google.es/" target="_blank">Google Translate</a></td><td class="description-cell">Traductor de Google</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Esta función sigue funcionando perfectamente, no necesita cambios.
+        function toggleTable(tableId) {
+            const table = document.getElementById(tableId);
+            document.querySelectorAll('.content-area table').forEach(t => {
+                if (t.id !== tableId && t.style.display !== 'none') {
+                    t.style.display = 'none';
+                }
+            });
+
+            if (table.style.display === 'none' || table.style.display === '') {
+                table.style.display = 'table';
+            } else {
+                table.style.display = 'none';
+            }
+            const contentArea = document.querySelector('.content-area');
+            if (contentArea) {
+                contentArea.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // La función de copiar sigue aquí por si la necesitas en el futuro.
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    alert(`Dirección copiada: ${text}`);
+                })
+                .catch(err => {
+                    console.error('Error al copiar el texto:', err);
+                    alert('Ocurrió un error al copiar el texto.');
+                });
+        }
+    </script>
+</body>
+</html>
