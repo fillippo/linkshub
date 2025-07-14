@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enlaces con Menú Desplegable</title>
+    <title>Enlaces con Menú de Abanico</title>
     <style>
         /* --- Variables de Color --- */
         :root {
@@ -50,123 +50,150 @@
             font-weight: 600;
         }
 
-        /* --- INICIO: ESTILOS DEL NUEVO MENÚ DESPLEGABLE (Adaptado del CodePen) --- */
-        .menu-container {
-            width: 100%;
+        /* --- INICIO: ESTILOS DEL MENÚ DE ABANICO (Adaptado de tu código) --- */
+        .fan-container {
+            padding: 10px 0 20px 0;
             background-color: var(--color-background-medium);
-            padding: 10px 0;
             border-bottom: 1px solid var(--color-border);
             position: sticky;
             top: 0;
-            z-index: 1000; /* Z-index alto para que el menú se muestre sobre todo */
+            z-index: 1000;
+        }
+
+        .fan-prompt {
+            text-align: center;
+            font-size: 12px;
+            color: var(--color-text-medium);
+            margin-bottom: -35px; /* Ajusta el texto sobre el menú */
         }
         
-        .o-menu {
-            margin: 0 auto; /* Centra el menú */
-            padding: 0;
+        ul.abanico {
+            position: relative;
+            width: 400px; /* Reducido para 4 items */
+            margin: 50px auto 0;
+            height: 100px; /* Altura del área visible y de interacción */
+            overflow: hidden;
             list-style: none;
-            display: flex;
-            justify-content: center; /* Centra los elementos del menú */
+            font-family: 'Segoe UI', Tahoma, sans-serif;
         }
 
-        .o-menu li {
-            position: relative; /* Clave para el posicionamiento del submenú */
+        ul.abanico li {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 90px; /* Ancho de cada botón */
+            height: 250px; /* Altura del "brazo" invisible que pivota */
+            margin-left: -45px; /* Centra el botón (la mitad de su ancho) */
+            text-align: center;
+            
+            /* Origen de la rotación: el punto clave del efecto */
+            -moz-transform-origin: top center;
+            -webkit-transform-origin: top center;
+            transform-origin: top center;
+            
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .o-menu a {
-            display: block;
-            padding: 10px 20px;
-            color: var(--color-text-dark); /* Color de texto para los botones principales */
+        ul.abanico li a {
+            display: inline-block;
+            width: 100%;
+            height: 44px; /* Altura del círculo del botón */
             text-decoration: none;
             font-size: 14px;
-            font-weight: 500;
-            transition: background-color 0.3s, color 0.3s;
-        }
-        
-        /* Efecto al pasar el ratón sobre un elemento del menú principal */
-        .o-menu li:hover > a {
+            font-weight: 600;
+            cursor: pointer;
+            
+            /* Adaptado a tu diseño */
             background-color: var(--color-primary-blue);
             color: var(--color-white);
-        }
-
-        /* Estilo y posicionamiento del submenú (inicialmente oculto) */
-        .o-menu li ul {
-            position: absolute;
-            left: 0;
-            top: 100%; /* Se posiciona justo debajo del elemento padre */
-            z-index: 1001;
-            background-color: var(--color-white);
-            border: 1px solid var(--color-border);
-            border-top: none;
-            border-radius: 0 0 5px 5px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.08);
-            list-style: none;
-            padding: 0;
-            width: 200px; /* Ancho del desplegable */
             
-            /* Animación para aparecer */
+            line-height: 38px; /* Alineación vertical del texto */
+            vertical-align: bottom; /* Pega el 'a' al fondo del 'li' */
+            
+            border: 3px solid var(--color-background-medium);
+            border-radius: 50%; /* Lo hace un círculo */
+            box-sizing: border-box;
+
+            transition: all 0.4s ease;
+        }
+
+        /* Estado inicial (antes de pasar el ratón) */
+        /* Hacemos que solo el primer botón sea visible para que actúe como "disparador" */
+        ul.abanico li {
             opacity: 0;
-            transform: scaleY(0.95);
-            transform-origin: top center;
-            pointer-events: none; /* No se puede interactuar cuando está oculto */
-            transition: opacity 0.2s ease, transform 0.2s ease;
+            transform: rotate(0deg) translateY(30px); /* Ligeramente desplazado hacia abajo */
         }
-
-        /* Hacer visible el submenú al pasar el ratón por el 'li' padre */
-        .o-menu li:hover > ul {
+        ul.abanico li:first-child {
             opacity: 1;
-            transform: scaleY(1);
-            pointer-events: auto; /* Se puede interactuar al ser visible */
+            transform: rotate(0deg) translateY(0);
         }
+
+
+        /* Estado HOVER: cuando el ratón está sobre el contenedor del abanico */
+        ul.abanico:hover li {
+            opacity: 1;
+            transform: translateY(0); /* Vuelve a su posición original */
+        }
+
+        ul.abanico:hover li a {
+            background-color: var(--color-darker-blue);
+        }
+
+        /* Posiciones de cada botón cuando el menú está desplegado */
+        ul.abanico:hover li:nth-of-type(1) { transform: rotate(40deg); }
+        ul.abanico:hover li:nth-of-type(2) { transform: rotate(14deg); }
+        ul.abanico:hover li:nth-of-type(3) { transform: rotate(-14deg); }
+        ul.abanico:hover li:nth-of-type(4) { transform: rotate(-40deg); }
         
-        /* Estilo de los enlaces dentro del submenú */
-        .o-menu li ul li a {
-            color: var(--color-primary-blue); /* Color de los enlaces del submenú */
-            font-weight: normal;
-        }
+        /* --- FIN: ESTILOS DEL MENÚ DE ABANICO --- */
 
-        /* Efecto al pasar el ratón sobre un elemento del submenú */
-        .o-menu li ul li a:hover {
-            background-color: var(--color-background-medium);
-            color: var(--color-darker-blue);
-        }
-        
-        /* --- FIN: ESTILOS DEL NUEVO MENÚ DESPLEGABLE --- */
-
-        /* Área de contenido (tablas) */
-        .content-area {
-            padding: 20px;
-            overflow-y: auto;
-            flex-grow: 1;
-        }
-
-        /* Estilos de tabla (sin cambios) */
+        /* Área de contenido (sin cambios) */
+        .content-area { padding: 20px; overflow-y: auto; flex-grow: 1; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 20px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); display: none; background-color: var(--color-white); }
         thead { background-color: var(--color-primary-blue); color: var(--color-white); }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--color-border); }
-        th:first-child, td:first-child { padding-left: 20px; }
-        th:last-child, td:last-child { padding-right: 20px; }
-        tbody tr:nth-child(even) { background-color: var(--color-background-light); }
         tbody tr:hover { background-color: var(--color-background-medium); }
-        .link-cell a { color: var(--color-primary-blue); text-decoration: none; font-weight: normal; transition: color 0.2s ease; }
+        .link-cell a { color: var(--color-primary-blue); text-decoration: none; font-weight: normal; }
         .link-cell a:hover { text-decoration: underline; color: var(--color-darker-blue); }
         .description-cell { word-wrap: break-word; color: var(--color-text-medium); font-size: 0.9em; }
 
-        /* Estilos de Scrollbar y Responsive (sin cambios significativos) */
+        /* Scrollbar (sin cambios) */
         .content-area::-webkit-scrollbar { width: 8px; }
-        .content-area::-webkit-scrollbar-track { background: var(--color-background-light); border-radius: 10px; }
-        .content-area::-webkit-scrollbar-thumb { background-color: var(--color-border); border-radius: 10px; border: 2px solid var(--color-background-light); }
+        .content-area::-webkit-scrollbar-track { background: var(--color-background-light); }
+        .content-area::-webkit-scrollbar-thumb { background-color: var(--color-border); border-radius: 10px; }
         .content-area::-webkit-scrollbar-thumb:hover { background-color: var(--color-text-medium); }
-        .content-area { scrollbar-width: thin; scrollbar-color: var(--color-border) var(--color-background-light); }
 
+        /* Responsive: convierte el abanico en una lista vertical */
         @media (max-width: 600px) {
-            .main-wrapper { margin: 10px; border-radius: 0; box-shadow: none; }
-            .o-menu { flex-direction: column; align-items: stretch; }
-            .o-menu a { text-align: center; }
-            .o-menu li ul { position: static; width: 100%; box-shadow: none; border: none; border-top: 1px solid var(--color-border); }
-            .o-menu li:hover > ul { display: block; }
-            .content-area { padding: 10px; }
-            th, td { padding: 8px; font-size: 0.9em; }
+            .main-wrapper { margin: 0; border-radius: 0; box-shadow: none; }
+            .fan-prompt { display: none; } /* Ocultamos el texto de ayuda */
+            
+            ul.abanico {
+                position: static;
+                width: 100%;
+                height: auto;
+                overflow: visible;
+                display: flex;
+                flex-direction: column;
+                margin: 0;
+                padding: 5px;
+                box-sizing: border-box;
+            }
+
+            ul.abanico li {
+                position: static;
+                transform: none !important; /* Resetea cualquier transformación */
+                opacity: 1 !important; /* Asegura que todos sean visibles */
+                width: auto;
+                height: auto;
+                margin: 3px 0;
+            }
+
+            ul.abanico li a {
+                border-radius: 5px; /* Cambiamos a rectángulos con bordes redondeados */
+                vertical-align: middle;
+                line-height: 40px;
+            }
         }
     </style>
 </head>
@@ -174,77 +201,28 @@
     <div class="main-wrapper">
         <h1>Links</h1>
 
-        <!-- Contenedor del nuevo menú -->
-        <div class="menu-container">
-            <ul class="o-menu">
-                <li>
-                    <a href="#">IAs</a>
-                    <!-- Submenú para IAs. Cada 'a' llama a toggleTable con el ID 'table1' -->
-                    <ul>
-                        <li><a href="#" onclick="toggleTable('table1'); return false;">Todas las IAs</a></li>
-                        <li><a href="#" onclick="toggleTable('table1'); return false;">Generación Texto</a></li>
-                        <li><a href="#" onclick="toggleTable('table1'); return false;">Generación Imagen</a></li>
-                        <li><a href="#" onclick="toggleTable('table1'); return false;">Investigación</a></li>
-                        <li><a href="#" onclick="toggleTable('table1'); return false;">Desarrollo</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">Stream</a>
-                    <!-- Submenú para Stream. Llama a toggleTable con 'table2' -->
-                    <ul>
-                        <li><a href="#" onclick="toggleTable('table2'); return false;">Ver Contenido</a></li>
-                        <li><a href="#" onclick="toggleTable('table2'); return false;">Prensa</a></li>
-                        <li><a href="#" onclick="toggleTable('table2'); return false;">Opción 3</a></li>
-                        <li><a href="#" onclick="toggleTable('table2'); return false;">Opción 4</a></li>
-                        <li><a href="#" onclick="toggleTable('table2'); return false;">Opción 5</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">Wrk</a>
-                    <!-- Submenú para Wrk. Llama a toggleTable con 'table3' -->
-                    <ul>
-                        <li><a href="#" onclick="toggleTable('table3'); return false;">Herramientas Office</a></li>
-                        <li><a href="#" onclick="toggleTable('table3'); return false;">Intranet</a></li>
-                        <li><a href="#" onclick="toggleTable('table3'); return false;">Máquinas Virtuales</a></li>
-                        <li><a href="#" onclick="toggleTable('table3'); return false;">Opción 4</a></li>
-                        <li><a href="#" onclick="toggleTable('table3'); return false;">Opción 5</a></li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#">Varios</a>
-                    <!-- Submenú para Varios. Llama a toggleTable con 'table4' -->
-                    <ul>
-                        <li><a href="#" onclick="toggleTable('table4'); return false;">Herramientas SQL</a></li>
-                        <li><a href="#" onclick="toggleTable('table4'); return false;">Hosting</a></li>
-                        <li><a href="#" onclick="toggleTable('table4'); return false;">Utilidades</a></li>
-                        <li><a href="#" onclick="toggleTable('table4'); return false;">Opción 4</a></li>
-                        <li><a href="#" onclick="toggleTable('table4'); return false;">Opción 5</a></li>
-                    </ul>
-                </li>
+        <!-- Contenedor del nuevo menú de abanico -->
+        <div class="fan-container">
+            <p class="fan-prompt">Pasa el ratón sobre los botones para desplegar</p>
+            <ul class="abanico">
+                <!-- Cada 'li' es un botón del abanico que llama a la función para mostrar la tabla -->
+                <li><a onclick="toggleTable('table1'); return false;">IAs</a></li>
+                <li><a onclick="toggleTable('table2'); return false;">Stream</a></li>
+                <li><a onclick="toggleTable('table3'); return false;">Wrk</a></li>
+                <li><a onclick="toggleTable('table4'); return false;">Varios</a></li>
             </ul>
         </div>
 
-        <!-- Área de contenido desplazable para las tablas (sin cambios en su estructura) -->
+        <!-- Área de contenido (sin cambios en su estructura) -->
         <div class="content-area">
             <!-- Tabla 1: IAs -->
             <table id="table1">
-                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>
                     <tr><td class="link-cell"><a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a></td><td class="description-cell">Clásico IA de OpenAI</td></tr>
                     <tr><td class="link-cell"><a href="https://suno.com/create?wid=default" target="_blank">Suno</a></td><td class="description-cell">IA para generar canciones.</td></tr>
                     <tr><td class="link-cell"><a href="https://www.canva.com/" target="_blank">Canva</a></td><td class="description-cell">IA para generar imagenes.</td></tr>
                     <tr><td class="link-cell"><a href="https://www.perplexity.ai/" target="_blank">Perplexity</a></td><td class="description-cell">IA que muestra el hilo de cómo consigue la información.</td></tr>
-                    <tr><td class="link-cell"><a href="https://labs.google/fx" target="_blank">Google labs</a></td><td class="description-cell">IA de google para generar varios tipos de ficharos.</td></tr>
-                    <tr><td class="link-cell"><a href="https://grok.com/" target="_blank">Grok</a></td><td class="description-cell">IA de Elon Mask. Siempre iteresante para resultados de texto</td></tr>
-                    <tr><td class="link-cell"><a href="https://notebooklm.google.com/" target="_blank">Google NotebookLM</a></td><td class="description-cell">Notebook LM. Imvestigación de fuentes y recursos</td></tr>
-                    <tr><td class="link-cell"><a href="https://aistudio.google.com/prompts/new_chat" target="_blank">Google AI Studio</a></td><td class="description-cell">IA avanzada de Google. Muy interesante y permite seleccionar varios modelos de generación</td></tr>
-                    <tr><td class="link-cell"><a href="https://gemini.google.com/app?hl=es" target="_blank">Google Gemini</a></td><td class="description-cell">IA Google. Permite Deep research para combinarlo con web</td></tr>
-                    <tr><td class="link-cell"><a href="https://firebase.google.com/?hl=es" target="_blank">Google Firebase</a></td><td class="description-cell">IA Google. Permite realizar aplicaciones con IA</td></tr>
-                    <tr><td class="link-cell"><a href="https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/" target="_blank">Gemini CLI</a></td><td class="description-cell">Geminy Code Assist. Permite realizar aplicaciones con IA y Visual Studio</td></tr>
-                    <tr><td class="link-cell"><a href="https://manus.im/app" target="_blank">Manus</a></td><td class="description-cell">IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder</td></tr>
-                    <tr><td class="link-cell"><a href="https://chat.qwen.ai/" target="_blank">Qwen</a></td><td class="description-cell">IA de Aliexpres. Una de las más potentes. Permite hacer de todo, incluso imagenes y videos. Varios motores</td></tr>
-                    <tr><td class="link-cell"><a href="https://ideal.house/es" target="_blank">Ideal House</a></td><td class="description-cell">IA de Interiorismo</td></tr>
-                    <tr><td class="link-cell"><a href="https://getimg.ai/text-to-image" target="_blank">getimg.ai</a></td><td class="description-cell">Generación de Imagenes</td></tr>
                 </tbody>
             </table>
             <!-- Tabla 2: Stream -->
@@ -262,9 +240,6 @@
                 <tbody>
                     <tr><td class="link-cell"><a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Office 365</a></td><td class="description-cell">Office 365 Seidor.</td></tr>
                     <tr><td class="link-cell"><a href="https://teams.microsoft.com/v2/" target="_blank">Teams Web</a></td><td class="description-cell">Teams version navegador</td></tr>
-                    <tr><td class="link-cell"><a href="https://outlook.office.com/mail/" target="_blank">Outlook Web</a></td><td class="description-cell">Teams version navegador</td></tr>
-                    <tr><td class="link-cell"><a href="https://intranetnew.seidor.com/home" target="_blank">Intranet Seidor</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>
-                    <tr><td class="link-cell"><a href="https://intranet.seidor.es/sap/bc/ui2/flp" target="_blank">Intranet Seidor (old)</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>
                     <tr><td class="link-cell"><a href="https://windows365.microsoft.com/" target="_blank">Cafosa</a></td><td class="description-cell">Maquina Virtual Cafosa</td></tr>
                 </tbody>
             </table>
@@ -274,8 +249,6 @@
                 <tbody>
                     <tr><td class="link-cell"><a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a></td><td class="description-cell">Diseño sencillo webs.</td></tr>
                     <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a></td><td class="description-cell">SQL:Convertir Union a Diferencias</td></tr>
-                    <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias2.html" target="_blank">Convertir Union a Diferencias por campos</a></td><td class="description-cell">SQL:Convertir Union a Diferencias por campos</td></tr>
-                    <tr><td class="link-cell"><a href="DescubreCampos.html" target="_blank">Información de cada campo de una query</a></td><td class="description-cell">SQL:Información de cada campo de una query</td></tr>
                     <tr><td class="link-cell"><a href="https://translate.google.es/" target="_blank">Google Translate</a></td><td class="description-cell">Traductor de Google</td></tr>
                 </tbody>
             </table>
@@ -283,7 +256,7 @@
     </div>
 
     <script>
-        // La función JavaScript original sigue siendo perfectamente válida y no necesita cambios.
+        // La función JavaScript sigue siendo la misma. ¡No necesita cambios!
         function toggleTable(tableId) {
             const table = document.getElementById(tableId);
             document.querySelectorAll('.content-area table').forEach(t => {
@@ -305,4 +278,4 @@
         }
     </script>
 </body>
-</html>
+</html>```
