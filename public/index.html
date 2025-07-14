@@ -72,7 +72,7 @@
             height: 120px;
             overflow: hidden;
             list-style: none;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font: normal 12px "Segoe UI", Tahoma, sans-serif;
         }
         
         ul.abanico li {
@@ -127,6 +127,7 @@
         }
 
         /* Posiciones de cada sub-opción cuando el menú está desplegado */
+        /* Ángulos ajustados para 5 items */
         ul.abanico:hover li:nth-of-type(1)  { transform: rotate(40deg); }
         ul.abanico:hover li:nth-of-type(2)  { transform: rotate(20deg); }
         ul.abanico:hover li:nth-of-type(3)  { transform: rotate(0deg); } /* Item central */
@@ -144,32 +145,28 @@
         .link-cell a:hover { text-decoration: underline; color: var(--color-darker-blue); }
         .description-cell { word-wrap: break-word; color: var(--color-text-medium); font-size: 0.9em; }
 
-        /* Scrollbar y Responsive (sin cambios) */
+        /* Scrollbar (sin cambios) */
         .content-area::-webkit-scrollbar { width: 8px; }
         .content-area::-webkit-scrollbar-track { background: var(--color-background-light); }
         .content-area::-webkit-scrollbar-thumb { background-color: var(--color-border); border-radius: 10px; }
-        @media (max-width: 750px) {
-            .fan-menu-bar { justify-content: space-around; }
-            ul.abanico { width: 140px; }
-        }
     </style>
 </head>
 <body>
     <div class="main-wrapper">
         <h1>Links</h1>
 
-        <!-- Barra con los 4 menús de abanico -->
+        <!-- Barra de botones reemplazada por la nueva barra de menús -->
         <div class="fan-menu-bar">
 
             <!-- 1. Menú IAs -->
             <ul class="abanico">
-                <!-- Las 5 sub-opciones que muestran la tabla 1 AL PASAR EL RATÓN -->
+                <!-- 5 sub-opciones. TODAS muestran la tabla 1 al pasar el ratón -->
                 <li><a onmouseover="showTable('table1')">Texto</a></li>
                 <li><a onmouseover="showTable('table1')">Imagen</a></li>
                 <li><a onmouseover="showTable('table1')">Música</a></li>
                 <li><a onmouseover="showTable('table1')">Código</a></li>
                 <li><a onmouseover="showTable('table1')">Invest.</a></li>
-                <!-- El botón principal que actúa como disparador del menú -->
+                <!-- 6º item: El botón principal visible -->
                 <li><a>IAs</a></li>
             </ul>
 
@@ -187,9 +184,9 @@
             <ul class="abanico">
                 <li><a onmouseover="showTable('table3')">Office</a></li>
                 <li><a onmouseover="showTable('table3')">Teams</a></li>
-                <li><a onmouseover="showTable('table3')">Outlook</a></li>
                 <li><a onmouseover="showTable('table3')">Intranet</a></li>
                 <li><a onmouseover="showTable('table3')">VMs</a></li>
+                <li><a onmouseover="showTable('table3')">Outlook</a></li>
                 <li><a>Wrk</a></li>
             </ul>
 
@@ -204,19 +201,21 @@
             </ul>
         </div>
 
-        <!-- Área de contenido desplazable para las tablas (sin cambios en su estructura) -->
+        <!-- Área de contenido con las tablas (sin cambios) -->
         <div class="content-area">
-            <!-- Todas tus tablas van aquí, sin cambios -->
             <table id="table1">
-                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                <!-- Contenido de la tabla 1 -->
+                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>
                     <tr><td class="link-cell"><a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a></td><td class="description-cell">Clásico IA de OpenAI</td></tr>
                     <tr><td class="link-cell"><a href="https://suno.com/create?wid=default" target="_blank">Suno</a></td><td class="description-cell">IA para generar canciones.</td></tr>
                     <tr><td class="link-cell"><a href="https://www.canva.com/" target="_blank">Canva</a></td><td class="description-cell">IA para generar imagenes.</td></tr>
+                    <tr><td class="link-cell"><a href="https://www.perplexity.ai/" target="_blank">Perplexity</a></td><td class="description-cell">IA que muestra el hilo de cómo consigue la información.</td></tr>
                 </tbody>
             </table>
             <table id="table2">
-                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                <!-- Contenido de la tabla 2 -->
+                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>
                     <tr><td class="link-cell"><a href="https://www.youtube.com/" target="_blank">Youtube</a></td><td class="description-cell">Youtube</td></tr>
                     <tr><td class="link-cell"><a href="https://www.twitch.tv/" target="_blank">Twitch</a></td><td class="description-cell">Twitch.</td></tr>
@@ -224,30 +223,34 @@
                 </tbody>
             </table>
             <table id="table3">
+                <!-- Contenido de la tabla 3 -->
                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>             
                     <tr><td class="link-cell"><a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Office 365</a></td><td class="description-cell">Office 365 Seidor.</td></tr>
-                    <tr><td class="link-cell"><a href="https://teams.microsoft.com/v2/" target="_blank">Teams Web</a></td><td class="description-cell">Teams version navegador</td></tr>
+                    <tr><td class="link-cell"><a href="https://teams.microsoft.com/v2/" target="_blank">Teams Web</a></td><td class="description-cell">Teams version navegador</td></tr>           
+                    <tr><td class="link-cell"><a href="https://outlook.office.com/mail/" target="_blank">Outlook Web</a></td><td class="description-cell">Teams version navegador</td></tr>                  
+                    <tr><td class="link-cell"><a href="https://intranetnew.seidor.com/home" target="_blank">Intranet Seidor</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>          
                     <tr><td class="link-cell"><a href="https://windows365.microsoft.com/" target="_blank">Cafosa</a></td><td class="description-cell">Maquina Virtual Cafosa</td></tr>  
                 </tbody>
             </table>
             <table id="table4">
+                <!-- Contenido de la tabla 4 -->
                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
                 <tbody>    
-                    <tr><td class="link-cell"><a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a></td><td class="description-cell">Diseño sencillo webs.</td></tr>
-                    <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a></td><td class="description-cell">SQL:Convertir Union a Diferencias</td></tr>
-                    <tr><td class="link-cell"><a href="https://translate.google.es/" target="_blank">Google Translate</a></td><td class="description-cell">Traductor de Google</td></tr>
+                    <tr><td class="link-cell"><a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a></td><td class="description-cell">Diseño sencillo webs.</td></tr>                  
+                    <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a></td><td class="description-cell">SQL:Convertir Union a Diferencias</td></tr>      
+                    <tr><td class="link-cell"><a href="https://translate.google.es/" target="_blank">Google Translate</a></td><td class="description-cell">Traductor de Google</td></tr>   
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // Función modificada para funcionar correctamente con 'onmouseover'
+        // Función optimizada para mostrar la tabla correcta al pasar el ratón, evitando parpadeos.
         function showTable(tableId) {
             const table = document.getElementById(tableId);
 
-            // Si la tabla que queremos mostrar NO está visible, la mostramos
+            // Solo actuamos si la tabla deseada no está ya visible
             if (table.style.display !== 'table') {
                 
                 // Primero, oculta todas las demás tablas
@@ -258,7 +261,7 @@
                 // Luego, muestra la tabla objetivo
                 table.style.display = 'table';
                 
-                // Y nos desplazamos al inicio del área de contenido
+                // Y nos desplazamos al inicio del área de contenido para asegurar que se vea
                 const contentArea = document.querySelector('.content-area');
                 if (contentArea) {
                     contentArea.scrollTo({ top: 0, behavior: 'smooth' });
