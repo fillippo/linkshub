@@ -107,6 +107,7 @@
             transform-origin: bottom center;
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Transición con efecto "rebote" */
             opacity: 0;
+            transform: rotate(0deg) scale(0.5); /* Inicia más pequeño y sin rotación */
             pointer-events: none;
         }
 
@@ -138,6 +139,7 @@
 
         ul.abanico li.fan-trigger {
             opacity: 1;
+            transform: scale(1);
             z-index: 10;
             pointer-events: auto;
         }
@@ -151,11 +153,13 @@
         ul.abanico.is-open li {
             opacity: 1;
             pointer-events: auto;
+            transform: scale(1); /* Vuelve al tamaño normal */
         }
 
         ul.abanico.is-open li.fan-trigger {
             opacity: 0;
             pointer-events: none;
+            transform: scale(0.5);
         }
         
         /* Rotación y retardo para efecto secuencial */
@@ -182,6 +186,8 @@
         }
         thead { background-color: var(--color-primary-blue); color: var(--color-white); }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--color-border); }
+        tbody tr:nth-child(even) { background-color: var(--color-background-light); }
+        tbody tr:hover { background-color: var(--color-background-medium); }
         .link-cell a { color: var(--color-primary-blue); text-decoration: none; }
         .link-cell a:hover { text-decoration: underline; color: var(--color-darker-blue); }
         .description-cell { color: var(--color-text-medium); font-size: 0.9em; }
@@ -242,33 +248,60 @@
 
         <div class="content-area">
             <table id="table1">
-                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                <thead>
+                    <tr>
+                        <th>Enlace</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
                 <tbody>
                     <tr><td class="link-cell"><a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a></td><td class="description-cell">Clásico IA de OpenAI</td></tr>
                     <tr><td class="link-cell"><a href="https://suno.com/create?wid=default" target="_blank">Suno</a></td><td class="description-cell">IA para generar canciones.</td></tr>
                     <tr><td class="link-cell"><a href="https://www.canva.com/" target="_blank">Canva</a></td><td class="description-cell">IA para generar imagenes.</td></tr>
-                    <!-- Contenido de la tabla IAs -->
+                    <tr><td class="link-cell"><a href="https://www.perplexity.ai/" target="_blank">Perplexity</a></td><td class="description-cell">IA que muestra el hilo de cómo consigue la información.</td></tr>
+                    <tr><td class="link-cell"><a href="https://labs.google/fx" target="_blank">Google labs</a></td><td class="description-cell">IA de google para generar varios tipos de ficharos.</td></tr>
+                    <tr><td class="link-cell"><a href="https://grok.com/" target="_blank">Grok</a></td><td class="description-cell">IA de Elon Mask. Siempre iteresante para resultados de texto</td></tr>
+                    <tr><td class="link-cell"><a href="https://notebooklm.google.com/" target="_blank">Google NotebookLM</a></td><td class="description-cell">Notebook LM. Imvestigación de fuentes y recursos</td></tr>
+                    <tr><td class="link-cell"><a href="https://aistudio.google.com/prompts/new_chat" target="_blank">Google AI Studio</a></td><td class="description-cell">IA avanzada de Google. Muy interesante y permite seleccionar varios modelos de generación</td></tr>
+                    <tr><td class="link-cell"><a href="https://gemini.google.com/app?hl=es" target="_blank">Google Gemini</a></td><td class="description-cell">IA Google. Permite Deep research para combinarlo con web</td></tr>
+                    <tr><td class="link-cell"><a href="https://firebase.google.com/?hl=es" target="_blank">Google Firebase</a></td><td class="description-cell">IA Google. Permite realizar aplicaciones con IA</td></tr>
+                    <tr><td class="link-cell"><a href="https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/" target="_blank">Gemini CLI</a></td><td class="description-cell">Geminy Code Assist. Permite realizar aplicaciones con IA y Visual Studio</td></tr>
+                    <tr><td class="link-cell"><a href="https://manus.im/app" target="_blank">Manus</a></td><td class="description-cell">IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder</td></tr>
+                    <tr><td class="link-cell"><a href="https://chat.qwen.ai/" target="_blank">Qwen</a></td><td class="description-cell">IA de Aliexpres. Una de las más potentes. Permite hacer de todo, incluso imagenes y videos. Varios motores</td></tr>
+                    <tr><td class="link-cell"><a href="https://ideal.house/es" target="_blank">Ideal House</a></td><td class="description-cell">IA de Interiorismo</td></tr>
+                    <tr><td class="link-cell"><a href="https://getimg.ai/text-to-image" target="_blank">getimg.ai</a></td><td class="description-cell">Generación de Imagenes</td></tr>
                 </tbody>
             </table>
+
             <table id="table2">
-                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
-                 <tbody>
+                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                <tbody>
                     <tr><td class="link-cell"><a href="https://www.youtube.com/" target="_blank">Youtube</a></td><td class="description-cell">Youtube</td></tr>
-                    <!-- Contenido de la tabla Stream -->
+                    <tr><td class="link-cell"><a href="https://www.twitch.tv/" target="_blank">Twitch</a></td><td class="description-cell">Twitch.</td></tr>
+                    <tr><td class="link-cell"><a href="https://es.kiosko.net/es/" target="_blank">Kiosko.net</a></td><td class="description-cell">Principales portadas prensa.</td></tr>
                 </tbody>
             </table>
+
             <table id="table3">
-                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
-                 <tbody>
+                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                <tbody>
                     <tr><td class="link-cell"><a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Office 365</a></td><td class="description-cell">Office 365 Seidor.</td></tr>
-                    <!-- Contenido de la tabla Wrk -->
+                    <tr><td class="link-cell"><a href="https://teams.microsoft.com/v2/" target="_blank">Teams Web</a></td><td class="description-cell">Teams version navegador</td></tr>
+                    <tr><td class="link-cell"><a href="https://outlook.office.com/mail/" target="_blank">Outlook Web</a></td><td class="description-cell">Teams version navegador</td></tr>
+                    <tr><td class="link-cell"><a href="https://intranetnew.seidor.com/home" target="_blank">Intranet Seidor</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>
+                    <tr><td class="link-cell"><a href="https://intranet.seidor.es/sap/bc/ui2/flp" target="_blank">Intranet Seidor (old)</a></td><td class="description-cell">Introducción Rapports, etc.</td></tr>
+                    <tr><td class="link-cell"><a href="https://windows365.microsoft.com/" target="_blank">Cafosa</a></td><td class="description-cell">Maquina Virtual Cafosa</td></tr>
                 </tbody>
             </table>
+
             <table id="table4">
-                 <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
-                 <tbody>
+                <thead><tr><th>Enlace</th><th>Descripción</th></tr></thead>
+                <tbody>
                     <tr><td class="link-cell"><a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a></td><td class="description-cell">Diseño sencillo webs.</td></tr>
-                    <!-- Contenido de la tabla Varios -->
+                    <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a></td><td class="description-cell">SQL:Convertir Union a Diferencias</td></tr>
+                    <tr><td class="link-cell"><a href="TransformaUnionEnDiferencias2.html" target="_blank">Convertir Union a Diferencias por campos</a></td><td class="description-cell">SQL:Convertir Union a Diferencias por campos</td></tr>
+                    <tr><td class="link-cell"><a href="DescubreCampos.html" target="_blank">Información de cada campo de una query</a></td><td class="description-cell">SQL:Información de cada campo de una query</td></tr>
+                    <tr><td class="link-cell"><a href="https://translate.google.es/" target="_blank">Google Translate</a></td><td class="description-cell">Traductor de Google</td></tr>
                 </tbody>
             </table>
         </div>
@@ -283,12 +316,13 @@
             overlay.classList.remove('is-active');
         }
 
-        // --- NUEVA FUNCIÓN: Alterna la visibilidad de un menú de abanico ---
         function toggleFan(fanId) {
             const fanToToggle = document.getElementById(fanId);
             const isOpening = !fanToToggle.classList.contains('is-open');
 
-            closeAllFans(); // Cierra todo primero
+            // Cierra siempre todos los menús ANTES de decidir si se abre uno nuevo.
+            // Esta es la clave para evitar el solapamiento.
+            closeAllFans();
 
             if (isOpening) {
                 fanToToggle.classList.add('is-open');
@@ -296,32 +330,29 @@
             }
         }
 
-        // --- FUNCIÓN MODIFICADA: Alterna visibilidad de la tabla ---
         function toggleTable(tableId) {
             const table = document.getElementById(tableId);
-            const contentArea = document.querySelector('.content-area');
-
-            // Cierra el abanico y el overlay
+            
+            // Al seleccionar una opción, siempre se cierran los menús.
             closeAllFans();
 
-            // Lógica para mostrar/ocultar la tabla
             const isHidden = table.style.display === 'none' || table.style.display === '';
 
-            // Oculta todas las tablas
+            // Oculta todas las tablas primero
             document.querySelectorAll('.content-area table').forEach(t => {
                 t.style.display = 'none';
             });
             
-            // Muestra la tabla seleccionada si estaba oculta
-            if(isHidden){
+            // Muestra la tabla deseada si estaba oculta, o la deja oculta si ya se estaba mostrando
+            if (isHidden) {
                 table.style.display = 'table';
-                // Opcional: Desplazarse a la tabla
-                table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Desplaza la vista a la tabla que se acaba de mostrar
+                table.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
 
-        // Añade un evento al overlay para cerrar los menús al hacer clic fuera
+        // Evento para cerrar menús al hacer clic en el fondo oscuro
         overlay.addEventListener('click', closeAllFans);
     </script>
 </body>
-</html>
+</html>```
