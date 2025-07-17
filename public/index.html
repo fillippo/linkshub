@@ -284,15 +284,18 @@
             <div class="menu-category relative group">
                 <button class="w-full md:w-auto px-4 py-2 text-lg font-semibold hover:bg-gray-600 focus:outline-none transition-colors duration-200">IAs</button>
                 <div class="submenu md:absolute md:top-full md:left-0 bg-gray-700 md:bg-gray-800 shadow-lg md:rounded-b-lg w-full md:w-48 z-10">
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table1_1">IAs</button>
+                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table1_1">IAs Google</button>
+                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table1_2">IAs Media</button>
+                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table1_3">IAs Otros</button>
                 </div>
             </div>
 
             <!-- Categoría 2: Stream -->
             <div class="menu-category relative group">
-                <button class="w-full md:w-auto px-4 py-2 text-lg font-semibold hover:bg-gray-600 focus:outline-none transition-colors duration-200">Stream</button>
+                <button class="w-full md:w-auto px-4 py-2 text-lg font-semibold hover:bg-gray-600 focus:outline-none transition-colors duration-200">Media</button>
                 <div class="submenu md:absolute md:top-full md:left-0 bg-gray-700 md:bg-gray-800 shadow-lg md:rounded-b-lg w-full md:w-48 z-10">
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table2_1">Stream</button>
+                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table2_1">Streaming</button>
+                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table2_2">Prensa</button>
                 </div>
             </div>
 
@@ -300,7 +303,8 @@
             <div class="menu-category relative group">
                 <button class="w-full md:w-auto px-4 py-2 text-lg font-semibold hover:bg-gray-600 focus:outline-none transition-colors duration-200">Wrk</button>
                 <div class="submenu md:absolute md:top-full md:left-0 bg-gray-700 md:bg-gray-800 shadow-lg md:rounded-b-lg w-full md:w-48 z-10">
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table3_1">Wrk</button>
+                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table3_1">Seidor</button>
+                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table3_2">Utils SQL</button>
                 </div>
             </div>
 
@@ -308,14 +312,15 @@
             <div class="menu-category relative group">
                 <button class="w-full md:w-auto px-4 py-2 text-lg font-semibold hover:bg-gray-600 focus:outline-none transition-colors duration-200">Varios</button>
                 <div class="submenu md:absolute md:top-full md:left-0 bg-gray-700 md:bg-gray-800 shadow-lg md:rounded-b-lg w-full md:w-48 z-10">
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table4_1">Varios</button>
+                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table4_1">Diseño Web</button>
+                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table4_2">Utilidades</button>
                 </div>
             </div>
         </div>
     </nav>
 
     <main class="container mx-auto mt-8 p-6 bg-white rounded-lg shadow-xl flex-grow">
-        <h2 class="text-3xl font-bold text-gray-800 mb-4">Bienvenido</h2>
+        <!-- <h2 class="text-3xl font-bold text-gray-800 mb-4">Bienvenido</h2> -->
         <div id="content-display" class="text-gray-700 text-lg"><p>Selecciona una opción del menú para ver su contenido aquí.</p></div>
     </main>
 
@@ -326,24 +331,36 @@
     <script>
         const tableData = {
             'table1_1': {
-                title: 'Inteligencias Artificiales',
+                title: 'Inteligencias Artificiales Google',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
-                    ['<a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a>', 'Clásico IA de OpenAI'],
-                    ['<a href="https://suno.com/create?wid=default" target="_blank">Suno</a>', 'IA para generar canciones.'],
-                    ['<a href="https://www.canva.com/" target="_blank">Canva</a>', 'IA para generar imagenes.'],
-                    ['<a href="https://www.perplexity.ai/" target="_blank">Perplexity</a>', 'IA que muestra el hilo de cómo consigue la información.'],
                     ['<a href="https://labs.google/fx" target="_blank">Google labs</a>', 'IA de google para generar varios tipos de ficharos.'],
-                    ['<a href="https://grok.com/" target="_blank">Grok</a>', 'IA de Elon Mask. Siempre iteresante para resultados de texto'],
                     ['<a href="https://notebooklm.google.com/" target="_blank">Google NotebookLM</a>', 'Notebook LM. Imvestigación de fuentes y recursos'],
                     ['<a href="https://aistudio.google.com/prompts/new_chat" target="_blank">Google AI Studio</a>', 'IA avanzada de Google. Muy interesante y permite seleccionar varios modelos de generación'],
                     ['<a href="https://gemini.google.com/app?hl=es" target="_blank">Google Gemini</a>', 'IA Google. Permite Deep research para combinarlo con web'],
                     ['<a href="https://firebase.google.com/?hl=es" target="_blank">Google Firebase</a>', 'IA Google. Permite realizar aplicaciones con IA'],
                     ['<a href="https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/" target="_blank">Gemini CLI</a>', 'Geminy Code Assist. Permite realizar aplicaciones con IA y Visual Studio'],
-                    ['<a href="https://manus.im/app" target="_blank">Manus</a>', 'IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder'],
-                    ['<a href="https://chat.qwen.ai/" target="_blank">Qwen</a>', 'IA de Aliexpres. Una de las más potentes. Permite hacer de todo, incluso imagenes y videos. Varios motores'],
+                ]
+            },
+            'table1_2': {
+                title: 'Inteligencias Artificiales Media',
+                headers: ['Enlace', 'Descripción'],
+                rows: [
+                    ['<a href="https://www.canva.com/" target="_blank">Canva</a>', 'IA para generar imagenes.'],
                     ['<a href="https://ideal.house/es" target="_blank">Ideal House</a>', 'IA de Interiorismo'],
                     ['<a href="https://getimg.ai/text-to-image" target="_blank">getimg.ai</a>', 'Generación de Imagenes']
+                ]
+            },
+            'table1_3': {
+                title: 'Inteligencias Artificiales Otras',
+                headers: ['Enlace', 'Descripción'],
+                rows: [
+                    ['<a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a>', 'Clásico IA de OpenAI'],
+                    ['<a href="https://suno.com/create?wid=default" target="_blank">Suno</a>', 'IA para generar canciones.'],
+                    ['<a href="https://www.perplexity.ai/" target="_blank">Perplexity</a>', 'IA que muestra el hilo de cómo consigue la información.'],
+                    ['<a href="https://grok.com/" target="_blank">Grok</a>', 'IA de Elon Mask. Siempre iteresante para resultados de texto'],
+                    ['<a href="https://manus.im/app" target="_blank">Manus</a>', 'IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder'],
+                    ['<a href="https://chat.qwen.ai/" target="_blank">Qwen</a>', 'IA de Aliexpres. Una de las más potentes. Permite hacer de todo, incluso imagenes y videos. Varios motores'],
                 ]
             },
             'table2_1': {
@@ -352,11 +369,17 @@
                 rows: [
                     ['<a href="https://www.youtube.com/" target="_blank">Youtube</a>', 'Youtube'],
                     ['<a href="https://www.twitch.tv/" target="_blank">Twitch</a>', 'Twitch.'],
+                ]
+            },
+            'table2_2': {
+                title: 'Plataformas de Prensa y Noticias',
+                headers: ['Enlace', 'Descripción'],
+                rows: [
                     ['<a href="https://es.kiosko.net/es/" target="_blank">Kiosko.net</a>', 'Principales portadas prensa.']
                 ]
             },
             'table3_1': {
-                title: 'Enlaces de Trabajo',
+                title: 'Seidor',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
                     ['<a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Office 365</a>', 'Office 365 Seidor.'],
@@ -367,14 +390,26 @@
                     ['<a href="https://windows365.microsoft.com/" target="_blank">Cafosa</a>', 'Maquina Virtual Cafosa']
                 ]
             },
-            'table4_1': {
-                title: 'Enlaces Varios',
+            'table3_2': {
+                title: 'Utiles SQL',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
-                    ['<a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a>', 'Diseño sencillo webs.'],
                     ['<a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a>', 'SQL:Convertir Union a Diferencias'],
                     ['<a href="TransformaUnionEnDiferencias2.html" target="_blank">Convertir Union a Diferencias por campos</a>', 'SQL:Convertir Union a Diferencias por campos'],
                     ['<a href="DescubreCampos.html" target="_blank">Información de cada campo de una query</a>', 'SQL:Información de cada campo de una query'],
+                ]
+            },
+            'table4_1': {
+                title: 'Diseño Web',
+                headers: ['Enlace', 'Descripción'],
+                rows: [
+                    ['<a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a>', 'Diseño sencillo webs.'],
+                ]
+            },
+            'table4_2': {
+                title: 'Utilidades',
+                headers: ['Enlace', 'Descripción'],
+                rows: [
                     ['<a href="https://translate.google.es/" target="_blank">Google Translate</a>', 'Traductor de Google']
                 ]
             }
