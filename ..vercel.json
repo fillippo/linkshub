@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "functions": {
+    "api/**/*.php": {
+      "runtime": "vercel-php@0.7.3"
+    }
+  },
+  "routes": [
+    // Regla para servir archivos estáticos (CSS, JS, imágenes, HTML, etc.) desde /public
+    {
+      "src": "/(css|js|images|favicon.ico|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.ico|.*\\.webp|.*\\.html)",
+      "dest": "/public/$1"
+    },
+    // Regla para cualquier archivo PHP en /api/ que se pida directamente
+    {
+      "src": "/(.*)\\.php$",
+      "dest": "/api/$1.php"
+    },
+    // Regla catch-all para dirigir cualquier otra cosa a api/index.php
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.php"
+    }
+  ]
+}
