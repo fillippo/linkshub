@@ -1,4 +1,4 @@
 <?php
-echo "good morning";
-//phpinfo();
+//echo "good morning";
+phpinfo();
 ?>
