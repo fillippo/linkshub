@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>50 Opciones para Trabajar con Listas de Objetos en VB.NET</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        pre { background-color: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        code { font-family: 'Courier New', Courier, monospace; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-6 text-center">50 Opciones para Trabajar con Listas de Objetos en VB.NET</h1>
+        <p class="mb-4">Esta página presenta 50 técnicas para manipular listas de objetos en VB.NET, organizadas por conceptos. Los ejemplos se basan en la siguiente clase y lista de ejemplo:</p>
+        
+        <pre><code>Public Class Persona
+    Public Property Id As Integer
+    Public Property Nombre As String
+    Public Property Edad As Integer
+    Public Property Ciudad As String
+    Public Property Salario As Double
+
+    Public Sub New(id As Integer, nombre As String, edad As Integer, ciudad As String, salario As Double)
+        Me.Id = id
+        Me.Nombre = nombre
+        Me.Edad = edad
+        Me.Ciudad = ciudad
+        Me.Salario = salario
+    End Sub
+End Class
+
+Dim personas As New List(Of Persona) From {
+    New Persona(1, "Juan", 30, "Madrid", 50000),
+    New Persona(2, "Ana", 25, "Barcelona", 45000),
+    New Persona(3, "Pedro", 40, "Madrid", 60000),
+    New Persona(4, "María", 35, "Valencia", 55000)
+}</code></pre>
+
+        <nav class="mb-6">
+            <h2 class="text-xl font-semibold mb-2">Índice</h2>
+            <ul class="list-disc pl-6">
+                <li><a href="#filtrado" class="text-blue-600 hover:underline">Filtrado</a></li>
+                <li><a href="#ordenacion" class="text-blue-600 hover:underline">Ordenación</a></li>
+                <li><a href="#proyeccion" class="text-blue-600 hover:underline">Proyección</a></li>
+                <li><a href="#agrupacion" class="text-blue-600 hover:underline">Agrupación</a></li>
+                <li><a href="#agregacion" class="text-blue-600 hover:underline">Agregación</a></li>
+                <li><a href="#modificacion" class="text-blue-600 hover:underline">Modificación</a></li>
+                <li><a href="#comparacion" class="text-blue-600 hover:underline">Comparación</a></li>
+                <li><a href="#serializacion" class="text-blue-600 hover:underline">Serialización</a></li>
+                <li><a href="#clonacion" class="text-blue-600 hover:underline">Clonación</a></li>
+                <li><a href="#paralelismo" class="text-blue-600 hover:underline">Paralelismo</a></li>
+            </ul>
+        </nav>
+
+        <!-- Filtrado -->
+        <section id="filtrado" class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Filtrado</h2>
+            
+            <h3 class="text-xl font-medium mb-2">1. Filtrar objetos con LINQ (Where)</h3>
+            <p>Filtra elementos de una lista según una condición específica utilizando LINQ.</p>
+            <pre><code>Dim mayoresDe30 = personas.Where(Function(p) p.Edad > 30).ToList()
+' Resultado: Lista con Pedro y María</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">2. Buscar un solo objeto con LINQ (First, FirstOrDefault)</h3>
+            <p>Obtiene el primer elemento que cumple una condición.</p>
+            <pre><code>Dim primeraPersonaMadrid = personas.FirstOrDefault(Function(p) p.Ciudad = "Madrid")
+' Resultado: Juan</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">3. Verificar si existe un elemento (Any)</h3>
+            <p>Comprueba si algún elemento cumple una condición.</p>
+            <pre><code>Dim hayMayoresDe35 = personas.Any(Function(p) p.Edad > 35)
+' Resultado: True (Pedro tiene 40)</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">4. Búsqueda por múltiples propiedades</h3>
+            <p>Filtra usando varias propiedades en una condición.</p>
+            <pre><code>Dim filtroComplejo = personas.Where(Function(p) p.Edad > 30 AndAlso p.Salario > 55000).ToList()
+' Resultado: Pedro</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">5. Filtrar con expresiones dinámicas</h3>
+            <p>Usa expresiones dinámicas para crear filtros en tiempo de ejecución (requiere System.Linq.Dynamic.Core).</p>
+            <pre><code>Dim filtroDinamico = personas.AsQueryable().Where("Edad > @0", 30).ToList()</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">6. Filtrar por subcadena en una propiedad de texto</h3>
+            <p>Filtra objetos según si una propiedad de texto contiene una subcadena.</p>
+            <pre><code>Dim nombresConA = personas.Where(Function(p) p.Nombre.Contains("a")).ToList()
+' Resultado: Ana, María</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">7. Filtrar por rango de valores</h3>
+            <p>Filtra elementos dentro de un rango numérico.</p>
+            <pre><code>Dim rangoEdad = personas.Where(Function(p) p.Edad >= 25 AndAlso p.Edad <= 35).ToList()
+' Resultado: Juan, Ana, María</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">8. Filtrar objetos nulos o vacíos</h3>
+            <p>Filtra elementos con propiedades nulas o vacías.</p>
+            <pre><code>Dim sinCiudadVacia = personas.Where(Function(p) Not String.IsNullOrEmpty(p.Ciudad)).ToList()
+' Resultado: Todos (ninguna ciudad es vacía en el ejemplo)</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">9. Filtrar por lista de valores</h3>
+            <p>Filtra objetos cuya propiedad coincide con una lista de valores.</p>
+            <pre><code>Dim ciudades As New List(Of String) From {"Madrid", "Valencia"}
+Dim enCiudades = personas.Where(Function(p) ciudades.Contains(p.Ciudad)).ToList()
+' Resultado: Juan, Pedro, María</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">10. Filtrar con expresiones regulares</h3>
+            <p>Filtra usando expresiones regulares en propiedades de texto.</p>
+            <pre><code>Dim nombresConVocal = personas.Where(Function(p) System.Text.RegularExpressions.Regex.IsMatch(p.Nombre, "[aeiou]")).ToList()
+' Resultado: Todos (todos los nombres contienen vocales)</code></pre>
+        </section>
+
+        <!-- Ordenación -->
+        <section id="ordenacion" class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Ordenación</h2>
+
+            <h3 class="text-xl font-medium mb-2">11. Ordenar por una propiedad con LINQ (OrderBy)</h3>
+            <p>Ordena los elementos de una lista según una propiedad.</p>
+            <pre><code>Dim ordenPorEdad = personas.OrderBy(Function(p) p.Edad).ToList()
+' Resultado: Ana (25), Juan (30), María (35), Pedro (40)</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">12. Ordenar por múltiples propiedades (OrderBy, ThenBy)</h3>
+            <p>Ordena por varias propiedades de forma consecutiva.</p>
+            <pre><code>Dim ordenPorCiudadYEdad = personas.OrderBy(Function(p) p.Ciudad).ThenBy(Function(p) p.Edad).ToList()
+' Resultado: Ana (Barcelona), Juan (Madrid), Pedro (Madrid), María (Valencia)</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">13. Ordenar en orden descendente (OrderByDescending)</h3>
+            <p>Ordena los elementos en orden descendente según una propiedad.</p>
+            <pre><code>Dim ordenPorSalarioDesc = personas.OrderByDescending(Function(p) p.Salario).ToList()
+' Resultado: Pedro (60000), María (55000), Juan (50000), Ana (45000)</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">14. Revertir el orden de la lista (Reverse)</h3>
+            <p>Invierte el orden de los elementos en la lista.</p>
+            <pre><code>personas.Reverse()
+' Resultado: María, Pedro, Ana, Juan</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">15. Ordenar con comparador personalizado</h3>
+            <p>Usa un comparador personalizado para ordenar objetos.</p>
+            <pre><code>Public Class PersonaNombreLengthComparer
+    Implements IComparer(Of Persona)
+    Public Function Compare(x As Persona, y As Persona) As Integer Implements IComparer(Of Persona).Compare
+        Return x.Nombre.Length.CompareTo(y.Nombre.Length)
+    End Function
+End Class
+Dim ordenPorLongitudNombre = personas.OrderBy(Function(p) p, New PersonaNombreLengthComparer()).ToList()
+' Resultado: Ordena por longitud del nombre</code></pre>
+        </section>
+
+        <!-- Proyección -->
+        <section id="proyeccion" class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Proyección</h2>
+
+            <h3 class="text-xl font-medium mb-2">16. Seleccionar propiedades específicas con LINQ (Select)</h3>
+            <p>Proyecta los objetos en una nueva forma, seleccionando solo ciertas propiedades.</p>
+            <pre><code>Dim nombres = personas.Select(Function(p) p.Nombre).ToList()
+' Resultado: {"Juan", "Ana", "Pedro", "María"}</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">17. Filtrar y proyectar simultáneamente</h3>
+            <p>Combina Where y Select para filtrar y transformar datos.</p>
+            <pre><code>Dim nombresMayores30 = personas.Where(Function(p) p.Edad > 30).Select(Function(p) p.Nombre).ToList()
+' Resultado: {"Pedro", "María"}</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">18. Proyectar a un tipo anónimo</h3>
+            <p>Proyecta los objetos a un tipo anónimo con propiedades seleccionadas.</p>
+            <pre><code>Dim anonimos = personas.Select(Function(p) New With {p.Nombre, p.Edad}).ToList()
+' Resultado: Lista de objetos anónimos con Nombre y Edad</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">19. Proyectar a un nuevo tipo de objeto</h3>
+            <p>Proyecta los objetos a una nueva clase personalizada.</p>
+            <pre><code>Public Class PersonaResumen
+    Public Property Nombre As String
+    Public Property Ciudad As String
+End Class
+Dim resumen = personas.Select(Function(p) New PersonaResumen With {.Nombre = p.Nombre, .Ciudad = p.Ciudad}).ToList()</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">20. Seleccionar con índice</h3>
+            <p>Usa el índice de cada elemento en la proyección.</p>
+            <pre><code>Dim conIndice = personas.Select(Function(p, i) New With {.Indice = i, .Nombre = p.Nombre}).ToList()
+' Resultado: {0, "Juan"}, {1, "Ana"}, {2, "Pedro"}, {3, "María"}</code></pre>
+        </section>
+
+        <!-- Agrupación -->
+        <section id="agrupacion" class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Agrupación</h2>
+
+            <h3 class="text-xl font-medium mb-2">21. Agrupar objetos por una propiedad (GroupBy)</h3>
+            <p>Agrupa los elementos de una lista según una propiedad.</p>
+            <pre><code>Dim porCiudad = personas.GroupBy(Function(p) p.Ciudad).ToList()
+For Each grupo In porCiudad
+    Console.WriteLine($"Ciudad: {grupo.Key}, Personas: {String.Join(", ", grupo.Select(Function(p) p.Nombre))}")
+Next</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">22. Combinar con GroupJoin</h3>
+            <p>Realiza una unión de tipo "group join" para relacionar listas.</p>
+            <pre><code>Dim otraLista As New List(Of Persona) From {New Persona(1, "Luis", 28, "Madrid", 48000)}
+Dim resultado = personas.GroupJoin(otraLista,
+    Function(p1) p1.Ciudad,
+    Function(p2) p2.Ciudad,
+    Function(p1, grupo) New With {p1.Ciudad, .Personas = grupo.Select(Function(p) p.Nombre)}).ToList()</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">23. Agrupar por rango de valores</h3>
+            <p>Agrupa elementos según rangos definidos de una propiedad.</p>
+            <pre><code>Dim porRangoEdad = personas.GroupBy(Function(p) Math.Floor(p.Edad / 10) * 10).ToList()
+' Resultado: Grupos por 20s, 30s, 40s</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">24. Agrupar por múltiples propiedades</h3>
+            <p>Agrupa por varias propiedades combinadas.</p>
+            <pre><code>Dim porCiudadYEdad = personas.GroupBy(Function(p) New With {p.Ciudad, p.Edad}).ToList()
+' Resultado: Grupos por combinaciones únicas de Ciudad y Edad</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">25. Contar elementos por grupo</h3>
+            <p>Cuenta los elementos en cada grupo después de agrupar.</p>
+            <pre><code>Dim conteoPorCiudad = personas.GroupBy(Function(p) p.Ciudad).Select(Function(g) New With {g.Key, .Conteo = g.Count()}).ToList()
+' Resultado: {Madrid, 2}, {Barcelona, 1}, {Valencia, 1}</code></pre>
+        </section>
+
+        <!-- Agregación -->
+        <section id="agregacion" class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Agregación</h2>
+
+            <h3 class="text-xl font-medium mb-2">26. Contar elementos que cumplen una condición (Count)</h3>
+            <p>Cuenta cuántos elementos cumplen una condición específica.</p>
+            <pre><code>Dim countMadrid = personas.Count(Function(p) p.Ciudad = "Madrid")
+' Resultado: 2</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">27. Sumar una propiedad numérica (Sum)</h3>
+            <p>Calcula la suma de una propiedad numérica.</p>
+            <pre><code>Dim totalSalarios = personas.Sum(Function(p) p.Salario)
+' Resultado: 210000</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">28. Promedio de una propiedad numérica (Average)</h3>
+            <p>Calcula el promedio de una propiedad numérica.</p>
+            <pre><code>Dim promedioEdad = personas.Average(Function(p) p.Edad)
+' Resultado: 32.5</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">29. Encontrar el máximo o mínimo (Max, Min)</h3>
+            <p>Encuentra el valor máximo o mínimo de una propiedad.</p>
+            <pre><code>Dim mayorSalario = personas.Max(Function(p) p.Salario)
+' Resultado: 60000 (Pedro)</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">30. Comprobar si todos cumplen una condición (All)</h3>
+            <p>Verifica si todos los elementos cumplen una condición.</p>
+            <pre><code>Dim todosMayoresDe20 = personas.All(Function(p) p.Edad > 20)
+' Resultado: True</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">31. Calcular mediana de una propiedad</h3>
+            <p>Calcula la mediana de una propiedad numérica ordenada.</p>
+            <pre><code>Dim edadesOrdenadas = personas.Select(Function(p) p.Edad).OrderBy(Function(e) e).ToList()
+Dim mediana = If(edadesOrdenadas.Count Mod 2 = 0,
+    (edadesOrdenadas(edadesOrdenadas.Count / 2 - 1) + edadesOrdenadas(edadesOrdenadas.Count / 2)) / 2,
+    edadesOrdenadas(edadesOrdenadas.Count / 2))
+' Resultado: 32.5</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">32. Agregación personalizada con Aggregate</h3>
+            <p>Realiza una agregación personalizada sobre la lista.</p>
+            <pre><code>Dim concatenacionNombres = personas.Aggregate("", Function(acc, p) acc & p.Nombre & ";")
+' Resultado: "Juan;Ana;Pedro;María;"</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">33. Suma condicional</h3>
+            <p>Suma una propiedad solo para elementos que cumplen una condición.</p>
+            <pre><code>Dim sumaSalariosMadrid = personas.Where(Function(p) p.Ciudad = "Madrid").Sum(Function(p) p.Salario)
+' Resultado: 110000</code></pre>
+        </section>
+
+        <!-- Modificación -->
+        <section id="modificacion" class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Modificación</h2>
+
+            <h3 class="text-xl font-medium mb-2">34. Actualizar propiedades con ForEach</h3>
+            <p>Modifica propiedades de todos los objetos en la lista.</p>
+            <pre><code>personas.ForEach(Sub(p) p.Salario *= 1.1) ' Aumenta el salario un 10%</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">35. Eliminar elementos con RemoveAll</h3>
+            <p>Elimina todos los elementos que cumplen una condición.</p>
+            <pre><code>personas.RemoveAll(Function(p) p.Edad < 30)
+' Resultado: Solo quedan Juan, Pedro y María</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">36. Agregar elementos a la lista</h3>
+            <p>Agrega nuevos objetos a la lista.</p>
+            <pre><code>personas.Add(New Persona(5, "Luis", 28, "Sevilla", 48000))
+' Resultado: Lista con un nuevo elemento</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">37. Reemplazar elementos</h3>
+            <p>Reemplaza un elemento en la lista según una condición.</p>
+            <pre><code>Dim indice = personas.FindIndex(Function(p) p.Id = 1)
+If indice >= 0 Then personas(indice) = New Persona(1, "Juan Modificado", 31, "Madrid", 52000)
+' Resultado: Juan es reemplazado</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">38. Insertar elemento en posición específica</h3>
+            <p>Inserta un objeto en una posición específica de la lista.</p>
+            <pre><code>personas.Insert(1, New Persona(5, "Luis", 28, "Sevilla", 48000))
+' Resultado: Luis se inserta en la posición 1</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">39. Limpiar la lista</h3>
+            <p>Elimina todos los elementos de la lista.</p>
+            <pre><code>personas.Clear()
+' Resultado: Lista vacía</code></pre>
+        </section>
+
+        <!-- Comparación -->
+        <section id="comparacion" class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Comparación</h2>
+
+            <h3 class="text-xl font-medium mb-2">40. Comparar listas</h3>
+            <p>Compara dos listas para encontrar diferencias.</p>
+            <pre><code>Dim otraLista As New List(Of Persona) From {New Persona(1, "Juan", 30, "Madrid", 50000)}
+Dim diferentes = personas.Except(otraLista, New PersonaEqualityComparer()).ToList()
+' Requiere implementar IEqualityComparer</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">41. Encontrar intersección de listas (Intersect)</h3>
+            <p>Encuentra elementos comunes entre dos listas.</p>
+            <pre><code>Dim otraLista As New List(Of Persona) From {New Persona(1, "Juan", 30, "Madrid", 50000)}
+Dim comunes = personas.Intersect(otraLista, New PersonaEqualityComparer()).ToList()</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">42. Encontrar unión de listas (Union)</h3>
+            <p>Combina dos listas eliminando duplicados.</p>
+            <pre><code>Dim otraLista As New List(Of Persona) From {New Persona(5, "Luis", 28, "Sevilla", 48000)}
+Dim union = personas.Union(otraLista, New PersonaEqualityComparer()).ToList()</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">43. Buscar índice de un elemento (FindIndex)</h3>
+            <p>Encuentra el índice del primer elemento que cumple una condición.</p>
+            <pre><code>Dim indice = personas.FindIndex(Function(p) p.Nombre = "Ana")
+' Resultado: 1</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">44. Comparar igualdad de listas</h3>
+            <p>Verifica si dos listas son idénticas en contenido y orden.</p>
+            <pre><code>Dim sonIguales = personas.SequenceEqual(otraLista, New PersonaEqualityComparer())
+' Resultado: False si las listas difieren</code></pre>
+        </section>
+
+        <!-- Serialización -->
+        <section id="serializacion" class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Serialización</h2>
+
+            <h3 class="text-xl font-medium mb-2">45. Serializar lista a JSON</h3>
+            <p>Convierte una lista de objetos a formato JSON (usando Newtonsoft.Json).</p>
+            <pre><code>Dim json = JsonConvert.SerializeObject(personas)
+' Resultado: JSON con los datos de la lista</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">46. Deserializar JSON a lista</h3>
+            <p>Convierte un JSON a una lista de objetos (usando Newtonsoft.Json).</p>
+            <pre><code>Dim json As String = "[{""Id"":1,""Nombre"":""Juan"",...}]"
+Dim lista = JsonConvert.DeserializeObject(Of List(Of Persona))(json)</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">47. Serializar a XML</h3>
+            <p>Convierte una lista de objetos a formato XML.</p>
+            <pre><code>Dim serializer As New XmlSerializer(GetType(List(Of Persona)))
+Using writer As New StringWriter()
+    serializer.Serialize(writer, personas)
+    Dim xml = writer.ToString()
+End Using</code></pre>
+        </section>
+
+        <!-- Clonación -->
+        <section id="clonacion" class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Clonación</h2>
+
+            <h3 class="text-xl font-medium mb-2">48. Clonar una lista de objetos</h3>
+            <p>Crea una copia profunda de una lista de objetos.</p>
+            <pre><code>Dim clon = personas.Select(Function(p) New Persona(p.Id, p.Nombre, p.Edad, p.Ciudad, p.Salario)).ToList()</code></pre>
+
+            <h3 class="text-xl font-medium mb-2">49. Clonar usando serialización</h3>
+            <p>Clona una lista serializando y deserializando (usando Newtonsoft.Json).</p>
+            <pre><code>Dim json = JsonConvert.SerializeObject(personas)
+Dim clon = JsonConvert.DeserializeObject(Of List(Of Persona))(json)</code></pre>
+        </section>
+
+        <!-- Paralelismo -->
+        <section id="paralelismo" class="mb-8">
+            <h2 class="text-2xl font-semibold mb-4">Paralelismo</h2>
+
+            <h3 class="text-xl font-medium mb-2">50. Ejecutar consultas paralelas con PLINQ</h3>
+            <p>Usa PLINQ para procesar listas grandes en paralelo.</p>
+            <pre><code>Dim grandesDatos = personas.AsParallel().Where(Function(p) p.Salario > 50000).ToList()</code></pre>
+        </section>
+    </div>
+</body>
+</html>
