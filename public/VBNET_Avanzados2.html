@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mejores Prácticas para Listas de Objetos en VB.NET: Interoperabilidad y APIs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        h2 {
+            color: #0066cc;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #444;
+            margin-top: 20px;
+        }
+        pre {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .section {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .practice {
+            margin-bottom: 15px;
+        }
+        .practice p {
+            margin: 5px 0;
+        }
+        .practice strong {
+            color: #0066cc;
+        }
+        nav {
+            background-color: #0066cc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Programación Avanzada: Mejores Prácticas para Listas de Objetos en VB.NET - Interoperabilidad y APIs</h1>
+    <nav>
+        <ul>
+            <li><a href="#rest-apis">Llamadas a APIs Externas</a></li>
+            <li><a href="#com-interop">Interoperabilidad con COM</a></li>
+            <li><a href="#dll-import">DLLs Externas</a></li>
+        </ul>
+    </nav>
+
+    <div class="section" id="rest-apis">
+        <h2>1. Llamadas a APIs Externas con HttpClient</h2>
+        <div class="practice">
+            <h3>1. Obtener lista de objetos desde API REST</h3>
+            <p>Usa HttpClient para obtener una lista de objetos desde un endpoint REST.</p>
+            <pre>
+Imports System.Net.Http
+Imports System.Text.Json
+
+Public Class Persona
+    Public Property Nombre As String
+    Public Property Edad As Integer
+End Class
+
+Public Async Function ObtenerPersonasAsync() As Task(Of List(Of Persona))
+    Using client As New HttpClient()
+        Dim response = Await client.GetStringAsync("https://api.example.com/personas")
+        Return JsonSerializer.Deserialize(Of List(Of Persona))(response)
+    End Using
+End Function
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>2. Enviar lista de objetos a API REST</h3>
+            <p>Envía una lista de objetos a un endpoint POST.</p>
+            <pre>
+Public Async Function EnviarPersonasAsync(lista As List(Of Persona)) As Task
+    Using client As New HttpClient()
+        Dim json = JsonSerializer.Serialize(lista)
+        Dim content = New StringContent(json, Encoding.UTF8, "application/json")
+        Await client.PostAsync("https://api.example.com/personas", content)
+    End Using
+End Function
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>3. Manejo de errores en llamadas HTTP</h3>
+            <p>Captura excepciones en solicitudes HTTP.</p>
+            <pre>
+Try
+    Using client As New HttpClient()
+        Dim response = Await client.GetAsync("https://api.example.com/personas")
+        response.EnsureSuccessStatusCode()
+        Dim json = Await response.Content.ReadAsStringAsync()
+        Return JsonSerializer.Deserialize(Of List(Of Persona))(json)
+    End Using
+Catch ex As HttpRequestException
+    Console.WriteLine("Error en la solicitud: " & ex.Message)
+    Return New List(Of Persona)
+End Try
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>4. Configurar HttpClient con base URL</h3>
+            <p>Configura una URL base para reutilizar HttpClient.</p>
+            <pre>
+Dim client As New HttpClient()
+client.BaseAddress = New Uri("https://api.example.com/")
+Dim response = Await client.GetStringAsync("personas")
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>5. Usar CancellationToken en solicitudes</h3>
+            <p>Permite cancelar solicitudes HTTP largas.</p>
+            <pre>
+Dim cts As New CancellationTokenSource()
+Try
+    Using client As New HttpClient()
+        Dim response = Await client.GetAsync("https://api.example.com/personas", cts.Token)
+    End Using
+Catch ex As TaskCanceledException
+    Console.WriteLine("Solicitud cancelada")
+End Try
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>6. Procesar respuestas paginadas</h3>
+            <p>Maneja APIs con paginación para listas grandes.</p>
+            <pre>
+Dim lista As New List(Of Persona)
+Dim page = 1
+While True
+    Dim response = Await client.GetStringAsync($"personas?page={page}")
+    Dim personas = JsonSerializer.Deserialize(Of List(Of Persona))(response)
+    If personas.Count = 0 Then Exit While
+    lista.AddRange(personas)
+    page += 1
+End While
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>7. Autenticación con token en API</h3>
+            <p>Agrega encabezados de autenticación para APIs seguras.</p>
+            <pre>
+client.DefaultRequestHeaders.Authorization = New AuthenticationHeaderValue("Bearer", "tu_token")
+Dim response = Await client.GetStringAsync("personas")
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>8. Reintentar solicitudes fallidas</h3>
+            <p>Implementa reintentos para manejar fallos temporales.</p>
+            <pre>
+For i = 1 To 3
+    Try
+        Dim response = Await client.GetStringAsync("personas")
+        Return JsonSerializer.Deserialize(Of List(Of Persona))(response)
+    Catch ex As HttpRequestException
+        If i = 3 Then Throw
+        Await Task.Delay(1000 * i)
+    End Try
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>9. Usar HttpClientFactory para instancias</h3>
+            <p>Usa IHttpClientFactory para gestionar HttpClient.</p>
+            <pre>
+Dim factory As IHttpClientFactory ' Inyectado vía DI
+Using client = factory.CreateClient()
+    Dim response = Await client.GetStringAsync("https://api.example.com/personas")
+End Using
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>10. Deserializar JSON con propiedades dinámicas</h3>
+            <p>Maneja JSON con estructuras dinámicas.</p>
+            <pre>
+Dim jsonDoc = JsonDocument.Parse(json)
+Dim lista As New List(Of Persona)
+For Each elem In jsonDoc.RootElement.EnumerateArray()
+    lista.Add(New Persona With {.Nombre = elem.GetProperty("nombre").GetString()})
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>11. Validar respuestas HTTP</h3>
+            <p>Verifica códigos de estado antes de procesar.</p>
+            <pre>
+Dim response = Await client.GetAsync("personas")
+If response.IsSuccessStatusCode Then
+    Dim json = Await response.Content.ReadAsStringAsync()
+    Return JsonSerializer.Deserialize(Of List(Of Persona))(json)
+End If
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>12. Enviar solicitudes PUT para actualizar</h3>
+            <p>Actualiza listas de objetos en la API.</p>
+            <pre>
+Dim json = JsonSerializer.Serialize(lista)
+Dim content = New StringContent(json, Encoding.UTF8, "application/json")
+Await client.PutAsync("personas", content)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>13. Usar PATCH para actualizaciones parciales</h3>
+            <p>Actualiza solo ciertas propiedades de la lista.</p>
+            <pre>
+Dim cambios = New With {.Edad = 25}
+Dim json = JsonSerializer.Serialize(cambios)
+Dim content = New StringContent(json, Encoding.UTF8, "application/json")
+Await client.PatchAsync("personas/1", content)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>14. Procesar respuestas asíncronas en lotes</h3>
+            <p>Divide listas grandes para enviarlas en lotes.</p>
+            <pre>
+Dim loteSize = 10
+For i = 0 To lista.Count - 1 Step loteSize
+    Dim lote = lista.Skip(i).Take(loteSize).ToList()
+    Await EnviarPersonasAsync(lote)
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>15. Configurar tiempos de espera</h3>
+            <p>Establece un timeout para evitar esperas largas.</p>
+            <pre>
+client.Timeout = TimeSpan.FromSeconds(30)
+Dim response = Await client.GetStringAsync("personas")
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>16. Usar Polly para resiliencia</h3>
+            <p>Implementa políticas de reintentos con Polly.</p>
+            <pre>
+Imports Polly
+
+Dim politica = Policy.Handle(Of HttpRequestException)().RetryAsync(3)
+Await politica.ExecuteAsync(Async Function() Await client.GetStringAsync("personas"))
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>17. Manejar respuestas comprimidas</h3>
+            <p>Configura HttpClient para respuestas comprimidas.</p>
+            <pre>
+client.DefaultRequestHeaders.AcceptEncoding.Add(New StringWithQualityHeaderValue("gzip"))
+Dim response = Await client.GetAsync("personas")
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>18. Usar query parameters</h3>
+            <p>Filtra listas con parámetros de consulta.</p>
+            <pre>
+Dim response = Await client.GetStringAsync("personas?edad=18")
+Dim lista = JsonSerializer.Deserialize(Of List(Of Persona))(response)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>19. Cachear respuestas de API</h3>
+            <p>Almacena listas en caché para reducir solicitudes.</p>
+            <pre>
+Imports System.Runtime.Caching
+
+Dim cache = MemoryCache.Default
+If Not cache.Contains("personas") Then
+    Dim lista = Await ObtenerPersonasAsync()
+    cache.Add("personas", lista, Date.Now.AddMinutes(10))
+End If
+Dim listaCacheada = cache.Get("personas")
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>20. Validar JSON antes de deserializar</h3>
+            <p>Comprueba la validez del JSON recibido.</p>
+            <pre>
+Try
+    JsonDocument.Parse(json)
+    Dim lista = JsonSerializer.Deserialize(Of List(Of Persona))(json)
+Catch ex As JsonException
+    Console.WriteLine("JSON inválido")
+End Try
+            </pre>
+        </div>
+    </div>
+
+    <div class="section" id="com-interop">
+        <h2>2. Interoperabilidad con COM</h2>
+        <div class="practice">
+            <h3>21. Crear lista de objetos desde COM</h3>
+            <p>Obtiene datos de un componente COM y los convierte en lista.</p>
+            <pre>
+Imports Microsoft.Office.Interop.Excel
+
+Dim excel As New Application
+Dim worksheet = excel.Workbooks.Open("datos.xlsx").Sheets(1)
+Dim lista As New List(Of Persona)
+For i = 2 To worksheet.UsedRange.Rows.Count
+    lista.Add(New Persona With {
+        .Nombre = worksheet.Cells(i, 1).Value,
+        .Edad = worksheet.Cells(i, 2).Value
+    })
+Next
+excel.Quit()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>22. Liberar recursos COM</h3>
+            <p>Libera objetos COM para evitar fugas de memoria.</p>
+            <pre>
+Imports System.Runtime.InteropServices
+
+Dim excel As Application = Nothing
+Try
+    excel = New Application
+    ' Procesar lista
+Finally
+    If excel IsNot Nothing Then Marshal.ReleaseComObject(excel)
+End Try
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>23. Usar COM para exportar listas</h3>
+            <p>Exporta una lista a Excel usando COM.</p>
+            <pre>
+Dim excel As New Application
+Dim worksheet = excel.Workbooks.Add().Sheets(1)
+For i = 0 To lista.Count - 1
+    worksheet.Cells(i + 1, 1).Value = lista(i).Nombre
+    worksheet.Cells(i + 1, 2).Value = lista(i).Edad
+Next
+excel.ActiveWorkbook.SaveAs("output.xlsx")
+excel.Quit()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>24. Manejo de excepciones COM</h3>
+            <p>Captura errores específicos de COM.</p>
+            <pre>
+Try
+    Dim excel As New Application
+    ' Procesar lista
+Catch ex As COMException
+    Console.WriteLine("Error COM: " & ex.Message)
+Finally
+    If excel IsNot Nothing Then Marshal.ReleaseComObject(excel)
+End Try
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>25. Usar COM con Word</h3>
+            <p>Exporta listas a un documento Word.</p>
+            <pre>
+Imports Microsoft.Office.Interop.Word
+
+Dim word As New Application
+Dim doc = word.Documents.Add()
+For Each persona In lista
+    doc.Content.Text &= $"{persona.Nombre}, {persona.Edad}{vbCrLf}"
+Next
+doc.SaveAs2("output.docx")
+word.Quit()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>26. Iterar colecciones COM</h3>
+            <p>Procesa colecciones COM como listas.</p>
+            <pre>
+Dim worksheet = excel.Workbooks.Open("datos.xlsx").Sheets(1)
+Dim lista As New List(Of Persona)
+For Each row In worksheet.UsedRange.Rows
+    lista.Add(New Persona With {
+        .Nombre = row.Cells(1, 1).Value,
+        .Edad = row.Cells(1, 2).Value
+    })
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>27. Usar COM con propiedades dinámicas</h3>
+            <p>Accede a propiedades dinámicas de objetos COM.</p>
+            <pre>
+Dim excel As New Application
+Dim worksheet = excel.Workbooks.Open("datos.xlsx").Sheets(1)
+Dim value = worksheet.Range("A1").Value
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>28. Crear instancias COM dinámicamente</h3>
+            <p>Usa Type.GetTypeFromProgID para instanciar COM.</p>
+            <pre>
+Dim type = Type.GetTypeFromProgID("Excel.Application")
+Dim excel = Activator.CreateInstance(type)
+Dim lista As New List(Of Persona)
+' Procesar datos
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>29. Manejar colecciones COM grandes</h3>
+            <p>Optimiza el procesamiento de colecciones grandes.</p>
+            <pre>
+Dim worksheet = excel.Workbooks.Open("datos.xlsx").Sheets(1)
+Dim range = worksheet.UsedRange
+Dim data = range.Value
+For i = 1 To data.GetLength(0)
+    lista.Add(New Persona With {
+        .Nombre = data(i, 1),
+        .Edad = data(i, 2)
+    })
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>30. Usar COM en hilos secundarios</h3>
+            <p>Configura COM para hilos STA.</p>
+            <pre>
+Dim thread As New Thread(Sub()
+    Thread.CurrentThread.SetApartmentState(ApartmentState.STA)
+    Dim excel As New Application
+    ' Procesar lista
+    excel.Quit()
+End Sub)
+thread.Start()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>31. Exportar listas a formato CSV con COM</h3>
+            <p>Usa Excel para exportar listas a CSV.</p>
+            <pre>
+Dim excel As New Application
+Dim worksheet = excel.Workbooks.Add().Sheets(1)
+For i = 0 To lista.Count - 1
+    worksheet.Cells(i + 1, 1).Value = lista(i).Nombre
+    worksheet.Cells(i + 1, 2).Value = lista(i).Edad
+Next
+excel.ActiveWorkbook.SaveAs("output.csv", XlFileFormat.xlCSV)
+excel.Quit()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>32. Validar datos desde COM</h3>
+            <p>Valida datos importados desde COM.</p>
+            <pre>
+Dim worksheet = excel.Workbooks.Open("datos.xlsx").Sheets(1)
+For i = 2 To worksheet.UsedRange.Rows.Count
+    If worksheet.Cells(i, 2).Value < 0 Then
+        Throw New Exception("Edad inválida")
+    End If
+    lista.Add(New Persona With {
+        .Nombre = worksheet.Cells(i, 1).Value,
+        .Edad = worksheet.Cells(i, 2).Value
+    })
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>33. Usar COM para generar reportes</h3>
+            <p>Genera reportes en Word con listas.</p>
+            <pre>
+Dim word As New Application
+Dim doc = word.Documents.Add()
+For Each persona In lista
+    doc.Content.Text &= $"{persona.Nombre}: {persona.Edad} años{vbCrLf}"
+Next
+doc.SaveAs2("reporte.docx")
+word.Quit()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>34. Configurar propiedades COM</h3>
+            <p>Configura propiedades de objetos COM.</p>
+            <pre>
+Dim excel As New Application
+excel.Visible = False
+excel.DisplayAlerts = False
+' Procesar lista
+excel.Quit()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>35. Manejar colecciones COM con LINQ</h3>
+            <p>Usa LINQ para procesar colecciones COM.</p>
+            <pre>
+Dim worksheet = excel.Workbooks.Open("datos.xlsx").Sheets(1)
+Dim lista = (From row In worksheet.UsedRange.Rows
+             Select New Persona With {
+                 .Nombre = row.Cells(1, 1).Value,
+                 .Edad = row.Cells(1, 2).Value
+             }).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>36. Usar COM para importar múltiples hojas</h3>
+            <p>Importa datos de múltiples hojas de Excel.</p>
+            <pre>
+Dim excel As New Application
+Dim workbook = excel.Workbooks.Open("datos.xlsx")
+Dim lista As New List(Of Persona)
+For Each sheet In workbook.Sheets
+    For i = 2 To sheet.UsedRange.Rows.Count
+        lista.Add(New Persona With {
+            .Nombre = sheet.Cells(i, 1).Value,
+            .Edad = sheet.Cells(i, 2).Value
+        })
+    Next
+Next
+excel.Quit()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>37. Optimizar acceso a COM</h3>
+            <p>Minimiza llamadas a objetos COM.</p>
+            <pre>
+Dim range = worksheet.UsedRange
+Dim data = range.Value
+Dim lista As New List(Of Persona)
+For i = 1 To data.GetLength(0)
+    lista.Add(New Persona With {
+        .Nombre = data(i, 1),
+        .Edad = data(i, 2)
+    })
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>38. Usar COM para gráficos</h3>
+            <p>Genera gráficos en Excel con listas.</p>
+            <pre>
+Dim worksheet = excel.Workbooks.Add().Sheets(1)
+For i = 0 To lista.Count - 1
+    worksheet.Cells(i + 1, 1).Value = lista(i).Nombre
+    worksheet.Cells(i + 1, 2).Value = lista(i).Edad
+Next
+worksheet.Shapes.AddChart().Chart.SetSourceData(worksheet.Range("A1:B" & lista.Count))
+excel.Quit()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>39. Manejar errores de COM no disponibles</h3>
+            <p>Verifica si el componente COM está disponible.</p>
+            <pre>
+Try
+    Dim excel = Type.GetTypeFromProgID("Excel.Application")
+    If excel Is Nothing Then Throw New Exception("Excel no instalado")
+Catch ex As Exception
+    Console.WriteLine("Error: " & ex.Message)
+End Try
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>40. Usar COM en modo batch</h3>
+            <p>Procesa listas en modo batch para mejorar rendimiento.</p>
+            <pre>
+Dim worksheet = excel.Workbooks.Add().Sheets(1)
+Dim data(,) As Object = New Object(lista.Count - 1, 1) {}
+For i = 0 To lista.Count - 1
+    data(i, 0) = lista(i).Nombre
+    data(i, 1) = lista(i).Edad
+Next
+worksheet.Range("A1").Resize(lista.Count, 2).Value = data
+excel.Quit()
+            </pre>
+        </div>
+    </div>
+
+    <div class="section" id="dll-import">
+        <h2>3. DLLs Externas con DllImport</h2>
+        <div class="practice">
+            <h3>41. Importar función de DLL para procesar listas</h3>
+            <p>Usa DllImport para invocar funciones nativas.</p>
+            <pre>
+Imports System.Runtime.InteropServices
+
+Public Class Persona
+    Public Property Nombre As String
+    Public Property Edad As Integer
+End Class
+
+&lt;DllImport("mylib.dll")&gt;
+Private Shared Sub ProcesarPersona(nombre As String, edad As Integer)
+End Sub
+
+For Each persona In lista
+    ProcesarPersona(persona.Nombre, persona.Edad)
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>42. Manejar estructuras con DLLs</h3>
+            <p>Define estructuras para pasar listas a DLLs.</p>
+            <pre>
+&lt;StructLayout(LayoutKind.Sequential)&gt;
+Public Structure PersonaStruct
+    Public Nombre As String
+    Public Edad As Integer
+End Structure
+
+&lt;DllImport("mylib.dll")&gt;
+Private Shared Sub ProcesarLista(personas As PersonaStruct(), count As Integer)
+End Sub
+
+Dim array(lista.Count - 1) As PersonaStruct
+For i = 0 To lista.Count - 1
+    array(i) = New PersonaStruct With {
+        .Nombre = lista(i).Nombre,
+        .Edad = lista(i).Edad
+    }
+Next
+ProcesarLista(array, lista.Count)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>43. Manejo de errores en DLLs</h3>
+            <p>Captura errores de funciones nativas.</p>
+            <pre>
+Try
+    &lt;DllImport("mylib.dll", SetLastError:=True)&gt;
+    Private Shared Sub ProcesarLista(personas As PersonaStruct(), count As Integer)
+    End Sub
+    ProcesarLista(array, lista.Count)
+    Dim errorCode = Marshal.GetLastWin32Error()
+    If errorCode <> 0 Then Throw New Win32Exception(errorCode)
+Catch ex As Win32Exception
+    Console.WriteLine("Error DLL: " & ex.Message)
+End Try
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>44. Usar punteros para listas grandes</h3>
+            <p>Pasa listas grandes usando punteros.</p>
+            <pre>
+&lt;DllImport("mylib.dll")&gt;
+Private Shared Sub ProcesarListaPuntero(personas As IntPtr, count As Integer)
+End Sub
+
+Dim array(lista.Count - 1) As PersonaStruct
+For i = 0 To lista.Count - 1
+    array(i) = New PersonaStruct With {
+        .Nombre = lista(i).Nombre,
+        .Edad = lista(i).Edad
+    }
+Next
+Dim ptr = Marshal.AllocHGlobal(Marshal.SizeOf(GetType(PersonaStruct)) * lista.Count)
+Marshal.StructureToPtr(array, ptr, False)
+ProcesarListaPuntero(ptr, lista.Count)
+Marshal.FreeHGlobal(ptr)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>45. Llamar funciones asíncronas en DLLs</h3>
+            <p>Invoca funciones nativas asíncronas.</p>
+            <pre>
+&lt;DllImport("mylib.dll")&gt;
+Private Shared Sub ProcesarAsync(personas As PersonaStruct(), count As Integer, callback As IntPtr)
+End Sub
+
+Dim callback As New Action(Sub() Console.WriteLine("Procesado"))
+ProcesarAsync(array, lista.Count, Marshal.GetFunctionPointerForDelegate(callback))
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>46. Usar DllImport con cadenas</h3>
+            <p>Maneja cadenas en funciones nativas.</p>
+            <pre>
+&lt;DllImport("mylib.dll", CharSet:=CharSet.Unicode)&gt;
+Private Shared Sub ProcesarNombre(nombre As String)
+End Sub
+
+For Each persona In lista
+    ProcesarNombre(persona.Nombre)
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>47. Optimizar paso de datos a DLL</h3>
+            <p>Usa buffers para pasar listas grandes.</p>
+            <pre>
+Dim buffer = New Byte(Marshal.SizeOf(GetType(PersonaStruct)) * lista.Count - 1) {}
+For i = 0 To lista.Count - 1
+    Dim ptr = Marshal.AllocHGlobal(Marshal.SizeOf(GetType(PersonaStruct)))
+    Marshal.StructureToPtr(New PersonaStruct With {
+        .Nombre = lista(i).Nombre,
+        .Edad = lista(i).Edad
+    }, ptr, False)
+    Marshal.Copy(ptr, buffer, i * Marshal.SizeOf(GetType(PersonaStruct)), Marshal.SizeOf(GetType(PersonaStruct)))
+    Marshal.FreeHGlobal(ptr)
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>48. Usar DllImport con retornos</h3>
+            <p>Obtiene listas desde funciones nativas.</p>
+            <pre>
+&lt;DllImport("mylib.dll")&gt;
+Private Shared Function ObtenerPersonas(count As Integer) As IntPtr
+End Function
+
+Dim ptr = ObtenerPersonas(lista.Count)
+Dim array(lista.Count - 1) As PersonaStruct
+For i = 0 To lista.Count - 1
+    array(i) = Marshal.PtrToStructure(ptr + i * Marshal.SizeOf(GetType(PersonaStruct)), GetType(PersonaStruct))
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>49. Validar estructuras para DLLs</h3>
+            <p>Valida datos antes de pasarlos a DLL.</p>
+            <pre>
+For Each persona In lista
+    If String.IsNullOrEmpty(persona.Nombre) Then Throw New Exception("Nombre inválido")
+Next
+ProcesarLista(array, lista.Count)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>50. Usar DllImport con enums</h3>
+            <p>Pasa enums a funciones nativas.</p>
+            <pre>
+Public Enum TipoPersona
+    Adulto
+    Menor
+End Enum
+
+&lt;DllImport("mylib.dll")&gt;
+Private Shared Sub ProcesarTipo(tipo As TipoPersona)
+End Sub
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>51. Manejar memoria no administrada</h3>
+            <p>Libera memoria asignada para listas.</p>
+            <pre>
+Dim ptr = Marshal.AllocHGlobal(Marshal.SizeOf(GetType(PersonaStruct)) * lista.Count)
+Try
+    ProcesarListaPuntero(ptr, lista.Count)
+Finally
+    Marshal.FreeHGlobal(ptr)
+End Try
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>52. Usar DllImport con callbacks</h3>
+            <p>Usa funciones de callback con listas.</p>
+            <pre>
+&lt;UnmanagedFunctionPointer(CallingConvention.Cdecl)&gt;
+Public Delegate Sub Callback(count As Integer)
+
+&lt;DllImport("mylib.dll")&gt;
+Private Shared Sub ProcesarConCallback(personas As PersonaStruct(), count As Integer, callback As Callback)
+End Sub
+
+Dim cb As New Callback(Sub(c) Console.WriteLine($"Procesadas {c} personas"))
+ProcesarConCallback(array, lista.Count, cb)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>53. Convertir listas a arreglos nativos</h3>
+            <p>Convierte listas a arreglos para DLLs.</p>
+            <pre>
+Dim array = lista.Select(Function(p) New PersonaStruct With {
+    .Nombre = p.Nombre,
+    .Edad = p.Edad
+}).ToArray()
+ProcesarLista(array, lista.Count)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>54. Usar DllImport con tipos complejos</h3>
+            <p>Pasa estructuras complejas a DLLs.</p>
+            <pre>
+&lt;StructLayout(LayoutKind.Sequential)&gt;
+Public Structure PersonaStruct
+    Public Nombre As String
+    Public Edad As Integer
+    Public Direccion As String
+End Structure
+
+&lt;DllImport("mylib.dll")&gt;
+Private Shared Sub ProcesarPersonaCompleja(persona As PersonaStruct)
+End Sub
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>55. Manejar errores de DLL no encontrada</h3>
+            <p>Captura excepciones cuando la DLL no se encuentra.</p>
+            <pre>
+Try
+    ProcesarLista(array, lista.Count)
+Catch ex As DllNotFoundException
+    Console.WriteLine("DLL no encontrada: " & ex.Message)
+End Try
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>56. Usar DllImport con cadenas ANSI</h3>
+            <p>Maneja cadenas ANSI en funciones nativas.</p>
+            <pre>
+&lt;DllImport("mylib.dll", CharSet:=CharSet.Ansi)&gt;
+Private Shared Sub ProcesarNombreAnsi(nombre As String)
+End Sub
+
+For Each persona In lista
+    ProcesarNombreAnsi(persona.Nombre)
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>57. Pasar arreglos de enteros</h3>
+            <p>Pasa arreglos de enteros derivados de listas.</p>
+            <pre>
+Dim edades = lista.Select(Function(p) p.Edad).ToArray()
+&lt;DllImport("mylib.dll")&gt;
+Private Shared Sub ProcesarEdades(edades As Integer(), count As Integer)
+End Sub
+ProcesarEdades(edades, edades.Length)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>58. Usar DllImport con estructuras anidadas</h3>
+            <p>Maneja estructuras anidadas en DLLs.</p>
+            <pre>
+&lt;StructLayout(LayoutKind.Sequential)&gt;
+Public Structure Direccion
+    Public Calle As String
+End Structure
+
+&lt;StructLayout(LayoutKind.Sequential)&gt;
+Public Structure PersonaStruct
+    Public Nombre As String
+    Public Direccion As Direccion
+End Structure
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>59. Optimizar llamadas a DLL</h3>
+            <p>Minimiza el número de llamadas a funciones nativas.</p>
+            <pre>
+Dim array = lista.Select(Function(p) New PersonaStruct With {
+    .Nombre = p.Nombre,
+    .Edad = p.Edad
+}).ToArray()
+ProcesarLista(array, lista.Count)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>60. Usar DllImport con retorno de estructuras</h3>
+            <p>Obtiene estructuras desde funciones nativas.</p>
+            <pre>
+&lt;DllImport("mylib.dll")&gt;
+Private Shared Function ObtenerPersona() As PersonaStruct
+End Function
+
+Dim personaStruct = ObtenerPersona()
+Dim persona As New Persona With {
+    .Nombre = personaStruct.Nombre,
+    .Edad = personaStruct.Edad
+}
+lista.Add(persona)
+            </pre>
+        </div>
+    </div>
+</body>
+</html>
