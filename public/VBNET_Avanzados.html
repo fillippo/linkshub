@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mejores Prácticas para Listas de Objetos en VB.NET</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        h2 {
+            color: #0066cc;
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 5px;
+        }
+        h3 {
+            color: #444;
+            margin-top: 20px;
+        }
+        pre {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .section {
+            background-color: #fff;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .practice {
+            margin-bottom: 15px;
+        }
+        .practice p {
+            margin: 5px 0;
+        }
+        .practice strong {
+            color: #0066cc;
+        }
+        nav {
+            background-color: #0066cc;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+        nav ul li {
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav ul li a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Programación Avanzada: Mejores Prácticas para Listas de Objetos en VB.NET</h1>
+    <nav>
+        <ul>
+            <li><a href="#multithreading">Multihilo y Tareas Asíncronas</a></li>
+            <li><a href="#delegates">Delegados y Eventos</a></li>
+            <li><a href="#lambda">Expresiones Lambda</a></li>
+            <li><a href="#reflection">Reflexión</a></li>
+            <li><a href="#serialization">Serialización</a></li>
+        </ul>
+    </nav>
+
+    <div class="section" id="multithreading">
+        <h2>1. Multihilo y Tareas Asíncronas</h2>
+        <div class="practice">
+            <h3>1. Usar Async/Await para procesar listas grandes</h3>
+            <p>Procesa listas de objetos de manera asíncrona para mejorar el rendimiento en operaciones intensivas.</p>
+            <pre>
+Imports System.Threading.Tasks
+
+Public Class Persona
+    Public Property Nombre As String
+    Public Property Edad As Integer
+End Class
+
+Public Async Function ProcesarListaAsync(lista As List(Of Persona)) As Task
+    For Each persona In lista
+        Await Task.Delay(100) ' Simula operación asíncrona
+        Console.WriteLine($"Procesando {persona.Nombre}")
+    Next
+End Function
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>2. Parallel.ForEach para procesamiento paralelo</h3>
+            <p>Usa Parallel.ForEach para procesar listas en paralelo, optimizando el uso de CPU.</p>
+            <pre>
+Imports System.Threading.Tasks
+
+Parallel.ForEach(lista, Sub(persona)
+    Console.WriteLine($"Procesando {persona.Nombre} en hilo {Thread.CurrentThread.ManagedThreadId}")
+End Sub)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>3. Evitar bloqueos con ConcurrentBag</h3>
+            <p>Usa ConcurrentBag para listas seguras en entornos multihilo.</p>
+            <pre>
+Imports System.Collections.Concurrent
+
+Dim listaConcurrente As New ConcurrentBag(Of Persona)
+listaConcurrente.Add(New Persona With {.Nombre = "Ana", .Edad = 30})
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>4. Task.WhenAll para operaciones asíncronas múltiples</h3>
+            <p>Ejecuta múltiples operaciones asíncronas en paralelo y espera su finalización.</p>
+            <pre>
+Dim tareas = lista.Select(Function(p) ProcesarPersonaAsync(p)).ToList()
+Await Task.WhenAll(tareas)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>5. Limitar concurrencia con SemaphoreSlim</h3>
+            <p>Controla el número de tareas simultáneas para evitar sobrecarga.</p>
+            <pre>
+Dim semaphore As New SemaphoreSlim(3)
+For Each persona In lista
+    Await semaphore.WaitAsync()
+    Try
+        Await ProcesarPersonaAsync(persona)
+    Finally
+        semaphore.Release()
+    End Try
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>6. Usar CancellationToken para cancelar tareas</h3>
+            <p>Permite cancelar operaciones asíncronas en listas.</p>
+            <pre>
+Dim cts As New CancellationTokenSource()
+Try
+    Await ProcesarListaAsync(lista, cts.Token)
+Catch ex As OperationCanceledException
+    Console.WriteLine("Operación cancelada")
+End Try
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>7. Evitar modificaciones concurrentes con Lock</h3>
+            <p>Usa bloqueos para proteger listas en operaciones multihilo.</p>
+            <pre>
+Dim lockObj As New Object
+SyncLock lockObj
+    lista.Add(New Persona With {.Nombre = "Luis", .Edad = 25})
+End SyncLock
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>8. Usar PLINQ para consultas paralelas</h3>
+            <p>Procesa consultas en listas de forma paralela con PLINQ.</p>
+            <pre>
+Dim resultados = lista.AsParallel().Where(Function(p) p.Edad > 18).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>9. Configurar grado de paralelismo</h3>
+            <p>Limita el número de hilos en Parallel.ForEach.</p>
+            <pre>
+Parallel.ForEach(lista, New ParallelOptions With {.MaxDegreeOfParallelism = 4}, Sub(persona)
+    Console.WriteLine(persona.Nombre)
+End Sub)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>10. Manejo de excepciones en tareas paralelas</h3>
+            <p>Captura excepciones en operaciones paralelas.</p>
+            <pre>
+Try
+    Parallel.ForEach(lista, Sub(persona)
+        If persona.Edad < 0 Then Throw New Exception("Edad inválida")
+    End Sub)
+Catch ex As AggregateException
+    For Each innerEx In ex.InnerExceptions
+        Console.WriteLine(innerEx.Message)
+    Next
+End Try
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>11. Usar ConcurrentDictionary para mapeos</h3>
+            <p>Almacena listas con claves en un diccionario concurrente.</p>
+            <pre>
+Imports System.Collections.Concurrent
+
+Dim diccionario As New ConcurrentDictionary(Of String, Persona)
+diccionario.TryAdd("Ana", New Persona With {.Nombre = "Ana", .Edad = 30})
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>12. Procesar listas en lotes asíncronos</h3>
+            <p>Divide listas en lotes para procesamiento asíncrono.</p>
+            <pre>
+Dim loteSize = 10
+For i = 0 To lista.Count - 1 Step loteSize
+    Dim lote = lista.Skip(i).Take(loteSize).ToList()
+    Await ProcesarLoteAsync(lote)
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>13. Usar Task.Run para operaciones pesadas</h3>
+            <p>Ejecuta operaciones intensivas en un hilo separado.</p>
+            <pre>
+Await Task.Run(Sub()
+    For Each persona In lista
+        ' Operación pesada
+        Console.WriteLine(persona.Nombre)
+    Next
+End Sub)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>14. Sincronización con Barrier</h3>
+            <p>Usa Barrier para coordinar múltiples hilos.</p>
+            <pre>
+Dim barrier As New Barrier(lista.Count)
+Parallel.ForEach(lista, Sub(persona)
+    Console.WriteLine(persona.Nombre)
+    barrier.SignalAndWait()
+End Sub)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>15. Evitar deadlocks con ConfigureAwait</h3>
+            <p>Usa ConfigureAwait(False) para evitar bloqueos en UI.</p>
+            <pre>
+Public Async Function ProcesarAsync() As Task
+    Await Task.Delay(100).ConfigureAwait(False)
+End Function
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>16. Usar ThreadPool para tareas cortas</h3>
+            <p>Encola tareas cortas en el ThreadPool.</p>
+            <pre>
+ThreadPool.QueueUserWorkItem(Sub(state)
+    For Each persona In lista
+        Console.WriteLine(persona.Nombre)
+    Next
+End Sub)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>17. Monitorear progreso en tareas asíncronas</h3>
+            <p>Notifica el progreso de procesamiento de listas.</p>
+            <pre>
+Dim progreso As New Progress(Of Integer)(Sub(i) Console.WriteLine($"Procesado {i}%"))
+For i = 0 To lista.Count - 1
+    Await ProcesarPersonaAsync(lista(i))
+    progreso.Report(CInt((i + 1) / lista.Count * 100))
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>18. Usar ConcurrentQueue para tareas en cola</h3>
+            <p>Procesa listas en una cola concurrente.</p>
+            <pre>
+Imports System.Collections.Concurrent
+
+Dim cola As New ConcurrentQueue(Of Persona)
+For Each persona In lista
+    cola.Enqueue(persona)
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>19. Limitar recursos con Task.Factory</h3>
+            <p>Controla la creación de tareas con opciones personalizadas.</p>
+            <pre>
+Task.Factory.StartNew(Sub()
+    For Each persona In lista
+        Console.WriteLine(persona.Nombre)
+    Next
+End Sub, TaskCreationOptions.LongRunning)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>20. Procesar listas con TPL Dataflow</h3>
+            <p>Usa TPL Dataflow para flujos de datos complejos.</p>
+            <pre>
+Imports System.Threading.Tasks.Dataflow
+
+Dim buffer As New BufferBlock(Of Persona)
+For Each persona In lista
+    buffer.Post(persona)
+Next
+            </pre>
+        </div>
+    </div>
+
+    <div class="section" id="delegates">
+        <h2>2. Delegados y Eventos</h2>
+        <div class="practice">
+            <h3>21. Definir un delegado para procesar listas</h3>
+            <p>Crea delegados personalizados para operaciones en listas.</p>
+            <pre>
+Public Delegate Sub ProcesarPersonaDelegate(persona As Persona)
+
+Public Sub ProcesarConDelegado(lista As List(Of Persona), procesar As ProcesarPersonaDelegate)
+    For Each persona In lista
+        procesar(persona)
+    Next
+End Sub
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>22. Usar Action para simplificar delegados</h3>
+            <p>Usa Action en lugar de delegados personalizados.</p>
+            <pre>
+Public Sub ProcesarConAction(lista As List(Of Persona), accion As Action(Of Persona))
+    For Each persona In lista
+        accion(persona)
+    Next
+End Sub
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>23. Crear eventos para notificar cambios</h3>
+            <p>Define eventos para notificar modificaciones en listas.</p>
+            <pre>
+Public Class GestorLista
+    Public Event ListaModificada As EventHandler
+    Private lista As New List(Of Persona)
+
+    Public Sub AgregarPersona(persona As Persona)
+        lista.Add(persona)
+        RaiseEvent ListaModificada(Me, EventArgs.Empty)
+    End Sub
+End Class
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>24. Suscripción a eventos con manejadores</h3>
+            <p>Suscribe manejadores a eventos de listas.</p>
+            <pre>
+Dim gestor As New GestorLista
+AddHandler gestor.ListaModificada, Sub(sender, e) Console.WriteLine("Lista modificada")
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>25. Usar EventHandler con argumentos personalizados</h3>
+            <p>Define eventos con datos específicos.</p>
+            <pre>
+Public Class PersonaEventArgs
+    Inherits EventArgs
+    Public Property Persona As Persona
+End Class
+
+Public Event PersonaAgregada As EventHandler(Of PersonaEventArgs)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>26. Usar delegados genéricos Func</h3>
+            <p>Usa Func para operaciones que retornan valores.</p>
+            <pre>
+Dim obtenerNombre As Func(Of Persona, String) = Function(p) p.Nombre
+Dim nombres = lista.Select(obtenerNombre).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>27. Combinar múltiples delegados</h3>
+            <p>Combina delegados para múltiples acciones.</p>
+            <pre>
+Dim accion1 As Action(Of Persona) = Sub(p) Console.WriteLine(p.Nombre)
+Dim accion2 As Action(Of Persona) = Sub(p) Console.WriteLine(p.Edad)
+Dim combinada As Action(Of Persona) = [Delegate].Combine(accion1, accion2)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>28. Eventos asíncronos</h3>
+            <p>Maneja eventos de forma asíncrona.</p>
+            <pre>
+Public Async Sub OnListaModificadaAsync(sender As Object, e As EventArgs)
+    Await Task.Delay(100)
+    Console.WriteLine("Evento procesado asíncronamente")
+End Sub
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>29. Remover manejadores de eventos</h3>
+            <p>Elimina manejadores para evitar fugas de memoria.</p>
+            <pre>
+RemoveHandler gestor.ListaModificada, AddressOf OnListaModificada
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>30. Usar delegados en colas de tareas</h3>
+            <p>Usa delegados para encolar tareas en listas.</p>
+            <pre>
+Dim tarea As Action = Sub() ProcesarLista(lista)
+Task.Run(tarea)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>31. Delegados con parámetros múltiples</h3>
+            <p>Usa delegados con múltiples parámetros.</p>
+            <pre>
+Public Delegate Sub ProcesarPersonaConIndiceDelegate(persona As Persona, indice As Integer)
+Dim procesar As ProcesarPersonaConIndiceDelegate = Sub(p, i) Console.WriteLine($"{i}: {p.Nombre}")
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>32. Eventos con multicast</h3>
+            <p>Soporta múltiples suscriptores a un evento.</p>
+            <pre>
+AddHandler gestor.ListaModificada, Sub(sender, e) Console.WriteLine("Suscriptor 1")
+AddHandler gestor.ListaModificada, Sub(sender, e) Console.WriteLine("Suscriptor 2")
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>33. Delegados para validaciones</h3>
+            <p>Usa delegados para validar objetos en listas.</p>
+            <pre>
+Dim validar As Predicate(Of Persona) = Function(p) p.Edad > 18
+Dim validos = lista.FindAll(validar)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>34. Eventos para notificar errores</h3>
+            <p>Define eventos para errores en procesamiento.</p>
+            <pre>
+Public Event ErrorProcesamiento As EventHandler(Of ErrorEventArgs)
+RaiseEvent ErrorProcesamiento(Me, New ErrorEventArgs With {.ErrorMessage = "Error"})
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>35. Delegados en operaciones encadenadas</h3>
+            <p>Encadena delegados para procesar listas secuencialmente.</p>
+            <pre>
+Dim procesar As Action(Of Persona) = Sub(p) p.Edad += 1
+procesar += Sub(p) Console.WriteLine(p.Nombre)
+For Each persona In lista
+    procesar(persona)
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>36. Usar delegados con Task</h3>
+            <p>Combina delegados con tareas asíncronas.</p>
+            <pre>
+Dim tarea As Func(Of Task) = Async Function() Await ProcesarListaAsync(lista)
+Await tarea()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>37. Delegados para filtrado dinámico</h3>
+            <p>Usa delegados para filtros personalizados.</p>
+            <pre>
+Dim filtro As Func(Of Persona, Boolean) = Function(p) p.Nombre.StartsWith("A")
+Dim filtrados = lista.Where(filtro).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>38. Eventos para progreso de procesamiento</h3>
+            <p>Notifica progreso mediante eventos.</p>
+            <pre>
+Public Event Progreso As EventHandler(Of Integer)
+For i = 0 To lista.Count - 1
+    RaiseEvent Progreso(Me, i)
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>39. Delegados para transformaciones</h3>
+            <p>Usa delegados para transformar objetos.</p>
+            <pre>
+Dim transformar As Func(Of Persona, String) = Function(p) p.Nombre.ToUpper()
+Dim resultados = lista.Select(transformar).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>40. Manejo seguro de eventos</h3>
+            <p>Evita excepciones en eventos con invocación segura.</p>
+            <pre>
+Public Event ListaModificada As EventHandler
+Protected Overridable Sub OnListaModificada()
+    ListaModificada?.Invoke(Me, EventArgs.Empty)
+End Sub
+            </pre>
+        </div>
+    </div>
+
+    <div class="section" id="lambda">
+        <h2>3. Expresiones Lambda</h2>
+        <div class="practice">
+            <h3>41. Filtrar listas con lambda</h3>
+            <p>Usa expresiones lambda con LINQ para filtrar listas.</p>
+            <pre>
+Dim adultos = lista.Where(Function(p) p.Edad >= 18).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>42. Ordenar listas con lambda</h3>
+            <p>Ordena listas usando lambda en OrderBy.</p>
+            <pre>
+Dim ordenados = lista.OrderBy(Function(p) p.Nombre).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>43. Transformar listas con Select</h3>
+            <p>Usa lambda para transformar objetos en listas.</p>
+            <pre>
+Dim nombres = lista.Select(Function(p) p.Nombre).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>44. Agrupar con GroupBy</h3>
+            <p>Usa lambda para agrupar objetos por propiedades.</p>
+            <pre>
+Dim grupos = lista.GroupBy(Function(p) p.Edad).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>45. Combinar lambda con eventos</h3>
+            <p>Usa lambda como manejadores de eventos.</p>
+            <pre>
+AddHandler gestor.ListaModificada, Sub(sender, e) Console.WriteLine("Modificado")
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>46. Usar lambda en búsquedas complejas</h3>
+            <p>Combina condiciones en Where con lambda.</p>
+            <pre>
+Dim filtrados = lista.Where(Function(p) p.Edad > 18 AndAlso p.Nombre.StartsWith("A")).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>47. Lambda en operaciones de agregación</h3>
+            <p>Usa lambda con Aggregate para cálculos personalizados.</p>
+            <pre>
+Dim sumaEdades = lista.Aggregate(0, Function(total, p) total + p.Edad)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>48. Lambda con FirstOrDefault</h3>
+            <p>Busca el primer elemento que cumple una condición.</p>
+            <pre>
+Dim persona = lista.FirstOrDefault(Function(p) p.Nombre = "Ana")
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>49. Lambda en expresiones anidadas</h3>
+            <p>Usa lambda para consultas anidadas.</p>
+            <pre>
+Dim resultado = lista.Select(Function(p) New With { .Nombre = p.Nombre, .EdadDoble = p.Edad * 2 }).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>50. Lambda con TakeWhile</h3>
+            <p>Selecciona elementos hasta que se cumpla una condición.</p>
+            <pre>
+Dim jovenes = lista.TakeWhile(Function(p) p.Edad < 30).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>51. Lambda con SkipWhile</h3>
+            <p>Omite elementos hasta que se cumpla una condición.</p>
+            <pre>
+Dim mayores = lista.SkipWhile(Function(p) p.Edad < 30).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>52. Lambda para ordenación múltiple</h3>
+            <p>Ordena por múltiples criterios con lambda.</p>
+            <pre>
+Dim ordenados = lista.OrderBy(Function(p) p.Edad).ThenBy(Function(p) p.Nombre).ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>53. Lambda con Any</h3>
+            <p>Verifica si algún elemento cumple una condición.</p>
+            <pre>
+Dim tieneAdultos = lista.Any(Function(p) p.Edad >= 18)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>54. Lambda con All</h3>
+            <p>Verifica si todos los elementos cumplen una condición.</p>
+            <pre>
+Dim todosAdultos = lista.All(Function(p) p.Edad >= 18)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>55. Lambda con Distinct</h3>
+            <p>Elimina duplicados basados en una propiedad.</p>
+            <pre>
+Dim edadesUnicas = lista.Select(Function(p) p.Edad).Distinct().ToList()
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>56. Lambda con Count</h3>
+            <p>Cuenta elementos que cumplen una condición.</p>
+            <pre>
+Dim conteo = lista.Count(Function(p) p.Edad > 18)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>57. Lambda con Sum</h3>
+            <p>Calcula la suma de una propiedad.</p>
+            <pre>
+Dim sumaEdades = lista.Sum(Function(p) p.Edad)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>58. Lambda con Max</h3>
+            <p>Encuentra el valor máximo de una propiedad.</p>
+            <pre>
+Dim edadMaxima = lista.Max(Function(p) p.Edad)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>59. Lambda con Min</h3>
+            <p>Encuentra el valor mínimo de una propiedad.</p>
+            <pre>
+Dim edadMinima = lista.Min(Function(p) p.Edad)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>60. Lambda con Average</h3>
+            <p>Calcula el promedio de una propiedad.</p>
+            <pre>
+Dim promedioEdad = lista.Average(Function(p) p.Edad)
+            </pre>
+        </div>
+    </div>
+
+    <div class="section" id="reflection">
+        <h2>4. Reflexión</h2>
+        <div class="practice">
+            <h3>61. Obtener propiedades de objetos en lista</h3>
+            <p>Usa reflexión para inspeccionar propiedades de objetos.</p>
+            <pre>
+Imports System.Reflection
+
+Dim propiedades = GetType(Persona).GetProperties()
+For Each prop In propiedades
+    Console.WriteLine(prop.Name)
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>62. Modificar propiedades dinámicamente</h3>
+            <p>Cambia valores de propiedades en tiempo de ejecución.</p>
+            <pre>
+Dim prop = GetType(Persona).GetProperty("Nombre")
+For Each persona In lista
+    prop.SetValue(persona, "NuevoNombre")
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>63. Filtrar objetos por atributos</h3>
+            <p>Usa reflexión para buscar objetos con atributos específicos.</p>
+            <pre>
+Dim tipo = GetType(Persona)
+If tipo.GetCustomAttributes(False).Any(Function(a) TypeOf a Is ObsoleteAttribute) Then
+    Console.WriteLine("Clase obsoleta")
+End If
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>64. Crear instancias dinámicamente</h3>
+            <p>Crea objetos en listas usando reflexión.</p>
+            <pre>
+Dim tipo = GetType(Persona)
+Dim nuevaPersona = Activator.CreateInstance(tipo)
+lista.Add(nuevaPersona)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>65. Invocar métodos dinámicamente</h3>
+            <p>Ejecuta métodos de objetos en listas con reflexión.</p>
+            <pre>
+Dim metodo = GetType(Persona).GetMethod("ToString")
+For Each persona In lista
+    Console.WriteLine(metodo.Invoke(persona, Nothing))
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>66. Inspeccionar tipos genéricos</h3>
+            <p>Verifica si una lista es de un tipo genérico específico.</p>
+            <pre>
+If lista.GetType().IsGenericType AndAlso lista.GetType().GetGenericTypeDefinition() = GetType(List(Of )) Then
+    Console.WriteLine("Es una lista genérica")
+End If
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>67. Obtener valores de propiedades</h3>
+            <p>Lee valores de propiedades dinámicamente.</p>
+            <pre>
+Dim prop = GetType(Persona).GetProperty("Edad")
+For Each persona In lista
+    Console.WriteLine(prop.GetValue(persona))
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>68. Validar propiedades con reflexión</h3>
+            <p>Comprueba si las propiedades cumplen ciertas condiciones.</p>
+            <pre>
+Dim prop = GetType(Persona).GetProperty("Nombre")
+If prop.PropertyType = GetType(String) Then
+    Console.WriteLine("Propiedad es string")
+End If
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>69. Usar reflexión para clonar objetos</h3>
+            <p>Copia propiedades de un objeto a otro.</p>
+            <pre>
+Public Function ClonarPersona(persona As Persona) As Persona
+    Dim nueva = New Persona
+    For Each prop In GetType(Persona).GetProperties()
+        prop.SetValue(nueva, prop.GetValue(persona))
+    Next
+    Return nueva
+End Function
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>70. Reflexión para serialización dinámica</h3>
+            <p>Construye un diccionario de propiedades para serialización.</p>
+            <pre>
+Dim diccionario As New Dictionary(Of String, Object)
+For Each prop In GetType(Persona).GetProperties()
+    diccionario.Add(prop.Name, prop.GetValue(persona))
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>71. Inspeccionar métodos con parámetros</h3>
+            <p>Obtiene métodos con parámetros específicos.</p>
+            <pre>
+Dim metodos = GetType(Persona).GetMethods().Where(Function(m) m.GetParameters().Length > 0)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>72. Reflexión para validación de tipos</h3>
+            <p>Valida si los objetos cumplen con un tipo esperado.</p>
+            <pre>
+Dim tipoEsperado = GetType(Persona)
+For Each item In lista
+    If Not item.GetType() = tipoEsperado Then Throw New Exception("Tipo no válido")
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>73. Obtener atributos personalizados</h3>
+            <p>Lee atributos personalizados de propiedades.</p>
+            <pre>
+Dim prop = GetType(Persona).GetProperty("Nombre")
+Dim atributos = prop.GetCustomAttributes(False)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>74. Reflexión para copiar listas</h3>
+            <p>Copia una lista completa usando reflexión.</p>
+            <pre>
+Dim nuevaLista As New List(Of Persona)
+For Each persona In lista
+    nuevaLista.Add(ClonarPersona(persona))
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>75. Inspeccionar interfaces implementadas</h3>
+            <p>Verifica interfaces implementadas por objetos.</p>
+            <pre>
+Dim interfaces = GetType(Persona).GetInterfaces()
+For Each i In interfaces
+    Console.WriteLine(i.Name)
+Next
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>76. Reflexión para invocar constructores</h3>
+            <p>Crea instancias con constructores específicos.</p>
+            <pre>
+Dim constructor = GetType(Persona).GetConstructor({GetType(String), GetType(Integer)})
+Dim persona = constructor.Invoke({"Ana", 30})
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>77. Validar propiedades requeridas</h3>
+            <p>Comprueba propiedades marcadas como requeridas.</p>
+            <pre>
+Dim prop = GetType(Persona).GetProperty("Nombre")
+If prop.GetCustomAttributes().Any(Function(a) TypeOf a Is RequiredAttribute) Then
+    Console.WriteLine("Propiedad requerida")
+End If
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>78. Reflexión para comparar objetos</h3>
+            <p>Compara propiedades de dos objetos.</p>
+            <pre>
+Public Function SonIguales(p1 As Persona, p2 As Persona) As Boolean
+    For Each prop In GetType(Persona).GetProperties()
+        If Not Object.Equals(prop.GetValue(p1), prop.GetValue(p2)) Then Return False
+    Next
+    Return True
+End Function
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>79. Inspeccionar campos privados</h3>
+            <p>Accede a campos privados con reflexión.</p>
+            <pre>
+Dim campo = GetType(Persona).GetField("nombre", BindingFlags.NonPublic Or BindingFlags.Instance)
+Dim valor = campo.GetValue(persona)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>80. Reflexión para serialización condicional</h3>
+            <p>Serializa solo propiedades marcadas.</p>
+            <pre>
+Dim props = GetType(Persona).GetProperties().Where(Function(p) p.GetCustomAttributes().Any(Function(a) TypeOf a Is SerializableAttribute))
+            </pre>
+        </div>
+    </div>
+
+    <div class="section" Asc="serialization">
+        <h2>5. Serialización</h2>
+        <div class="practice">
+            <h3>81. Serializar lista a JSON</h3>
+            <p>Convierte una lista a JSON usando System.Text.Json.</p>
+            <pre>
+Imports System.Text.Json
+
+Dim json = JsonSerializer.Serialize(lista)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>82. Deserializar JSON a lista</h3>
+            <p>Restaura una lista desde JSON.</p>
+            <pre>
+Dim listaRestaurada = JsonSerializer.Deserialize(Of List(Of Persona))(json)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>83. Serializar a XML</h3>
+            <p>Convierte una lista a XML usando XmlSerializer.</p>
+            <pre>
+Imports System.Xml.Serialization
+
+Dim serializer As New XmlSerializer(GetType(List(Of Persona)))
+Using writer As New StringWriter()
+    serializer.Serialize(writer, lista)
+    Dim xml = writer.ToString()
+End Using
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>84. Deserializar XML a lista</h3>
+            <p>Restaura una lista desde XML.</p>
+            <pre>
+Using reader As New StringReader(xml)
+    Dim listaRestaurada = serializer.Deserialize(reader)
+End Using
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>85. Personalizar serialización JSON</h3>
+            <p>Usa atributos para controlar la serialización.</p>
+            <pre>
+Imports System.Text.Json.Serialization
+
+Public Class Persona
+    <JsonPropertyName("nombreCompleto")>
+    Public Property Nombre As String
+    Public Property Edad As Integer
+End Class
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>86. Ignorar propiedades en serialización</h3>
+            <p>Excluye propiedades específicas durante la serialización.</p>
+            <pre>
+Public Class Persona
+    Public Property Nombre As String
+    <JsonIgnore>
+    Public Property Edad As Integer
+End Class
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>87. Serialización condicional</h3>
+            <p>Serializa propiedades según condiciones.</p>
+            <pre>
+Public Class Persona
+    Public Property Nombre As String
+    Public Property Edad As Integer
+    Public Function ShouldSerializeEdad() As Boolean
+        Return Edad > 0
+    End Function
+End Class
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>88. Serializar a archivo</h3>
+            <p>Guarda una lista en un archivo JSON.</p>
+            <pre>
+File.WriteAllText("lista.json", JsonSerializer.Serialize(lista))
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>89. Deserializar desde archivo</h3>
+            <p>Restaura una lista desde un archivo JSON.</p>
+            <pre>
+Dim json = File.ReadAllText("lista.json")
+Dim listaRestaurada = JsonSerializer.Deserialize(Of List(Of Persona))(json)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>90. Manejo de errores en deserialización</h3>
+            <p>Maneja excepciones durante la deserialización.</p>
+            <pre>
+Try
+    Dim listaRestaurada = JsonSerializer.Deserialize(Of List(Of Persona))(json)
+Catch ex As JsonException
+    Console.WriteLine("Error en deserialización: " & ex.Message)
+End Try
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>91. Serializar con formato legible</h3>
+            <p>Genera JSON con formato indentado.</p>
+            <pre>
+Dim options As New JsonSerializerOptions With {.WriteIndented = True}
+Dim json = JsonSerializer.Serialize(lista, options)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>92. Serializar propiedades nulas</h3>
+            <p>Incluye propiedades nulas en la serialización.</p>
+            <pre>
+Dim options As New JsonSerializerOptions With {.IgnoreNullValues = False}
+Dim json = JsonSerializer.Serialize(lista, options)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>93. Usar Newtonsoft.Json para compatibilidad</h3>
+            <p>Usa Newtonsoft.Json para serialización avanzada.</p>
+            <pre>
+Imports Newtonsoft.Json
+
+Dim json = JsonConvert.SerializeObject(lista)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>94. Deserializar con tolerancia a errores</h3>
+            <p>Maneja datos incompletos durante la deserialización.</p>
+            <pre>
+Dim settings As New JsonSerializerSettings With {.MissingMemberHandling = MissingMemberHandling.Ignore}
+Dim listaRestaurada = JsonConvert.DeserializeObject(Of List(Of Persona))(json, settings)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>95. Serializar con nombres personalizados</h3>
+            <p>Usa atributos para renombrar propiedades en JSON.</p>
+            <pre>
+Imports Newtonsoft.Json
+
+Public Class Persona
+    <JsonProperty("nombreCompleto")>
+    Public Property Nombre As String
+End Class
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>96. Serializar colecciones anidadas</h3>
+            <p>Serializa listas dentro de objetos.</p>
+            <pre>
+Public Class Grupo
+    Public Property Personas As List(Of Persona)
+End Class
+Dim json = JsonSerializer.Serialize(grupo)
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>97. Validar JSON antes de deserializar</h3>
+            <p>Comprueba la validez del JSON.</p>
+            <pre>
+Try
+    JsonDocument.Parse(json)
+    Dim listaRestaurada = JsonSerializer.Deserialize(Of List(Of Persona))(json)
+Catch ex As JsonException
+    Console.WriteLine("JSON inválido")
+End Try
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>98. Serializar con conversores personalizados</h3>
+            <p>Usa conversores para formatos personalizados.</p>
+            <pre>
+Public Class PersonaConverter
+    Inherits JsonConverter(Of Persona)
+    ' Implementar métodos de serialización personalizada
+End Class
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>99. Serializar a XML con atributos</h3>
+            <p>Usa atributos XML para personalizar la serialización.</p>
+            <pre>
+Imports System.Xml.Serialization
+
+Public Class Persona
+    <XmlAttribute>
+    Public Property Nombre As String
+End Class
+            </pre>
+        </div>
+        <div class="practice">
+            <h3>100. Comprimir datos serializados</h3>
+            <p>Comprime el JSON para ahorrar espacio.</p>
+            <pre>
+Imports System.IO.Compression
+
+Using ms As New MemoryStream()
+    Using gzip As New GZipStream(ms, CompressionMode.Compress)
+        Dim bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(lista))
+        gzip.Write(bytes, 0, bytes.Length)
+    End Using
+End Using
+            </pre>
+        </div>
+    </div>
+</body>
+</html>
