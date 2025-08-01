@@ -590,6 +590,7 @@
     </footer>
 
     <script>
+        // Datos de las tablas
         const tableData = {
             'table1_1': {
                 title: 'Inteligencias Artificiales de Google',
@@ -688,71 +689,57 @@
             }
         };
 
-        // Variables globales
-        let mobileMenuButton;
-        let mainNavigation;
-        let menuCategories;
-        let submenuItems;
-        let contentDisplay;
-        let searchButton;
-        let searchBar;
-        let viewToggle;
-        let darkModeToggle;
-        let darkModeIcon;
-        let notification;
-        let isDarkMode = false;
-        let isCardView = false;
+        // Estado de la aplicación
+        const state = {
+            isDarkMode: false,
+            isCardView: false,
+            currentContentKey: null
+        };
 
+        // Elementos del DOM
+        const elements = {
+            mobileMenuButton: document.getElementById('mobile-menu-button'),
+            mainNavigation: document.getElementById('main-navigation'),
+            menuCategories: document.querySelectorAll('.menu-category'),
+            submenuItems: document.querySelectorAll('.submenu-item'),
+            contentDisplay: document.getElementById('content-display'),
+            searchButton: document.getElementById('search-button'),
+            searchBar: document.getElementById('search-bar'),
+            viewToggle: document.getElementById('view-toggle'),
+            darkModeToggle: document.getElementById('dark-mode-toggle'),
+            darkModeIcon: document.getElementById('dark-mode-icon'),
+            notification: document.getElementById('notification'),
+            notificationMessage: document.getElementById('notification-message')
+        };
+
+        // Inicialización
         document.addEventListener('DOMContentLoaded', () => {
-            // Inicializar elementos
-            initializeElements();
-            
-            // Configurar event listeners
             setupEventListeners();
-            
-            // Verificar el modo oscuro del sistema
             checkSystemDarkMode();
-            
-            // Verificar ajuste del menú
             checkMenuFit();
-            
-            // Mostrar animación de bienvenida
             showWelcomeAnimation();
         });
 
-        function initializeElements() {
-            mobileMenuButton = document.getElementById('mobile-menu-button');
-            mainNavigation = document.getElementById('main-navigation');
-            menuCategories = document.querySelectorAll('.menu-category');
-            submenuItems = document.querySelectorAll('.submenu-item');
-            contentDisplay = document.getElementById('content-display');
-            searchButton = document.getElementById('search-button');
-            searchBar = document.getElementById('search-bar');
-            viewToggle = document.getElementById('view-toggle');
-            darkModeToggle = document.getElementById('dark-mode-toggle');
-            darkModeIcon = document.getElementById('dark-mode-icon');
-            notification = document.getElementById('notification');
-        }
-
+        // Configuración de event listeners
         function setupEventListeners() {
             // Menú móvil
-            mobileMenuButton.addEventListener('click', toggleMobileMenu);
+            elements.mobileMenuButton.addEventListener('click', toggleMobileMenu);
             
             // Búsqueda
-            searchButton.addEventListener('click', toggleSearchBar);
+            elements.searchButton.addEventListener('click', toggleSearchBar);
             
-            // Cambiar vista (tabla/tarjetas)
-            viewToggle.addEventListener('click', toggleViewMode);
+            // Cambiar vista
+            elements.viewToggle.addEventListener('click', toggleViewMode);
             
             // Modo oscuro
-            darkModeToggle.addEventListener('click', toggleDarkMode);
+            elements.darkModeToggle.addEventListener('click', toggleDarkMode);
             
             // Categorías del menú
-            menuCategories.forEach(category => {
+            elements.menuCategories.forEach(category => {
                 const categoryButton = category.querySelector('button');
                 const submenu = category.querySelector('.submenu');
                 
-                // Comportamiento hover para desktop
+                // Desktop hover
                 category.addEventListener('mouseenter', () => {
                     if (window.innerWidth >= 768) {
                         openSubmenu(submenu);
@@ -765,7 +752,7 @@
                     }
                 });
                 
-                // Comportamiento click para móvil
+                // Mobile click
                 categoryButton.addEventListener('click', () => {
                     if (window.innerWidth < 768) {
                         toggleSubmenu(category, submenu);
@@ -774,7 +761,7 @@
             });
             
             // Items del submenú
-            submenuItems.forEach(item => {
+            elements.submenuItems.forEach(item => {
                 item.addEventListener('click', () => {
                     selectMenuItem(item);
                 });
@@ -787,105 +774,55 @@
             window.addEventListener('resize', handleResize);
         }
 
+        // Funciones de interacción
         function toggleMobileMenu() {
-            mainNavigation.classList.toggle('hidden');
-            // Cerrar la barra de búsqueda si está abierta
-            if (searchBar.classList.contains('active')) {
-                searchBar.classList.remove('active');
+            elements.mainNavigation.classList.toggle('hidden');
+            if (elements.searchBar.classList.contains('active')) {
+                elements.searchBar.classList.remove('active');
             }
         }
 
         function toggleSearchBar() {
-            searchBar.classList.toggle('active');
-            if (searchBar.classList.contains('active')) {
-                searchBar.querySelector('input').focus();
+            elements.searchBar.classList.toggle('active');
+            if (elements.searchBar.classList.contains('active')) {
+                elements.searchBar.querySelector('input').focus();
             }
-            // Cerrar el menú móvil si está abierto
-            if (!mainNavigation.classList.contains('hidden') && window.innerWidth < 768) {
-                mainNavigation.classList.add('hidden');
+            if (!elements.mainNavigation.classList.contains('hidden') && window.innerWidth < 768) {
+                elements.mainNavigation.classList.add('hidden');
             }
         }
 
         function toggleViewMode() {
-            isCardView = !isCardView;
+            state.isCardView = !state.isCardView;
             
-            if (isCardView) {
-                viewToggle.innerHTML = '<i class="fas fa-th-large"></i>';
-                viewToggle.querySelector('.tooltip-text').textContent = 'Vista de tabla';
-                // Convertir la tabla actual a tarjetas
-                if (contentDisplay.querySelector('table')) {
-                    convertTableToCards();
+            if (state.isCardView) {
+                elements.viewToggle.innerHTML = '<i class="fas fa-th-large"></i>';
+                elements.viewToggle.querySelector('.tooltip-text').textContent = 'Vista de tabla';
+                if (state.currentContentKey) {
+                    displayCards(state.currentContentKey);
                 }
             } else {
-                viewToggle.innerHTML = '<i class="fas fa-table"></i>';
-                viewToggle.querySelector('.tooltip-text').textContent = 'Vista de tarjetas';
-                // Convertir las tarjetas actuales a tabla
-                if (contentDisplay.querySelector('.card-container')) {
-                    convertCardsToTable();
+                elements.viewToggle.innerHTML = '<i class="fas fa-table"></i>';
+                elements.viewToggle.querySelector('.tooltip-text').textContent = 'Vista de tarjetas';
+                if (state.currentContentKey) {
+                    displayTable(state.currentContentKey);
                 }
             }
             
-            showNotification(`Modo ${isCardView ? 'tarjetas' : 'tabla'} activado`);
-        }
-
-        function convertTableToCards() {
-            const table = contentDisplay.querySelector('table');
-            if (!table) return;
-            
-            const title = contentDisplay.querySelector('h2').textContent;
-            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent);
-            const rows = Array.from(table.querySelectorAll('tbody tr')).map(tr => 
-                Array.from(tr.querySelectorAll('td')).map(td => td.innerHTML)
-            );
-            
-            let cardsHTML = `<h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-6 text-center">${title}</h2>`;
-            cardsHTML += '<div class="card-container">';
-            
-            rows.forEach(row => {
-                cardsHTML += `
-                    <div class="card animate__animated animate__fadeInUp dark:bg-slate-700 dark:border-slate-600">
-                        <h3 class="card-title dark:text-indigo-300">${row[0].replace('<a', '<a class="dark:text-indigo-300"')}</h3>
-                        <p class="card-description dark:text-gray-300">${row[1]}</p>
-                    </div>
-                `;
-            });
-            
-            cardsHTML += '</div>';
-            
-            // Añadir clase para el modo de tarjetas
-            contentDisplay.classList.add('card-view');
-            contentDisplay.innerHTML = cardsHTML;
-        }
-
-        function convertCardsToTable() {
-            const cardContainer = contentDisplay.querySelector('.card-container');
-            if (!cardContainer) return;
-            
-            const title = contentDisplay.querySelector('h2').textContent;
-            const cards = Array.from(contentDisplay.querySelectorAll('.card'));
-            
-            // Reconstruimos la tabla con los datos originales
-            const activeItem = document.querySelector('.submenu-item.active');
-            if (activeItem) {
-                const key = activeItem.dataset.contentKey;
-                displayTable(key);
-            }
-            
-            // Quitamos la clase de modo tarjetas
-            contentDisplay.classList.remove('card-view');
+            showNotification(`Modo ${state.isCardView ? 'tarjetas' : 'tabla'} activado`);
         }
 
         function toggleDarkMode() {
-            isDarkMode = !isDarkMode;
+            state.isDarkMode = !state.isDarkMode;
             
-            if (isDarkMode) {
+            if (state.isDarkMode) {
                 document.documentElement.classList.add('dark');
-                darkModeIcon.classList.replace('fa-moon', 'fa-sun');
+                elements.darkModeIcon.classList.replace('fa-moon', 'fa-sun');
                 localStorage.setItem('darkMode', 'enabled');
                 showNotification('Modo oscuro activado');
             } else {
                 document.documentElement.classList.remove('dark');
-                darkModeIcon.classList.replace('fa-sun', 'fa-moon');
+                elements.darkModeIcon.classList.replace('fa-sun', 'fa-moon');
                 localStorage.setItem('darkMode', 'disabled');
                 showNotification('Modo claro activado');
             }
@@ -896,9 +833,9 @@
             const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             
             if (savedMode === 'enabled' || (savedMode === null && systemPrefersDark)) {
-                isDarkMode = true;
+                state.isDarkMode = true;
                 document.documentElement.classList.add('dark');
-                darkModeIcon.classList.replace('fa-moon', 'fa-sun');
+                elements.darkModeIcon.classList.replace('fa-moon', 'fa-sun');
             }
         }
 
@@ -911,55 +848,43 @@
         }
 
         function toggleSubmenu(category, submenu) {
-            // Cerrar otros submenús
-            menuCategories.forEach(otherCategory => {
+            elements.menuCategories.forEach(otherCategory => {
                 if (otherCategory !== category) {
                     otherCategory.querySelector('.submenu').classList.remove('open');
                 }
             });
-            
-            // Alternar el submenú actual
             submenu.classList.toggle('open');
         }
 
         function selectMenuItem(item) {
-            // Quitar clase active de todos los items
-            submenuItems.forEach(sub => sub.classList.remove('active'));
-            
-            // Añadir clase active al item seleccionado
+            elements.submenuItems.forEach(sub => sub.classList.remove('active'));
             item.classList.add('active');
             
-            // Mostrar contenido
             const key = item.dataset.contentKey;
-            displayContent(key);
+            state.currentContentKey = key;
             
-            // Cerrar todos los submenús
-            menuCategories.forEach(category => {
-                category.querySelector('.submenu').classList.remove('open');
-            });
-            
-            // Ocultar menú móvil después de selección
-            if (window.innerWidth < 768) {
-                mainNavigation.classList.add('hidden');
-            }
-            
-            // Mostrar notificación
-            showNotification(`Mostrando: ${item.textContent.trim()}`);
-        }
-
-        function displayContent(key) {
-            if (isCardView) {
+            if (state.isCardView) {
                 displayCards(key);
             } else {
                 displayTable(key);
             }
+            
+            elements.menuCategories.forEach(category => {
+                category.querySelector('.submenu').classList.remove('open');
+            });
+            
+            if (window.innerWidth < 768) {
+                elements.mainNavigation.classList.add('hidden');
+            }
+            
+            showNotification(`Mostrando: ${item.textContent.trim()}`);
         }
 
         function displayTable(key) {
             const data = tableData[key];
             
             if (!data) {
-                contentDisplay.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 py-12">Contenido no disponible.</p>`;
+                elements.contentDisplay.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 py-12">Contenido no disponible.</p>`;
                 return;
             }
             
@@ -989,14 +914,14 @@
             });
             
             tableHTML += '</tbody></table></div>';
-            contentDisplay.innerHTML = tableHTML;
+            elements.contentDisplay.innerHTML = tableHTML;
         }
 
         function displayCards(key) {
             const data = tableData[key];
             
             if (!data) {
-                contentDisplay.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 py-12">Contenido no disponible.</p>`;
+                elements.contentDisplay.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 py-12">Contenido no disponible.</p>`;
                 return;
             }
             
@@ -1013,28 +938,24 @@
             });
             
             cardsHTML += '</div>';
-            
-            // Añadir clase para el modo de tarjetas
-            contentDisplay.classList.add('card-view');
-            contentDisplay.innerHTML = cardsHTML;
+            elements.contentDisplay.classList.add('card-view');
+            elements.contentDisplay.innerHTML = cardsHTML;
         }
 
         function handleOutsideClick(event) {
-            // Cerrar menú móvil si se hace click fuera
             if (window.innerWidth < 768 && 
-                !mainNavigation.contains(event.target) && 
-                !mobileMenuButton.contains(event.target)) {
-                mainNavigation.classList.add('hidden');
-                menuCategories.forEach(category => {
+                !elements.mainNavigation.contains(event.target) && 
+                !elements.mobileMenuButton.contains(event.target)) {
+                elements.mainNavigation.classList.add('hidden');
+                elements.menuCategories.forEach(category => {
                     category.querySelector('.submenu').classList.remove('open');
                 });
             }
             
-            // Cerrar barra de búsqueda si se hace click fuera
-            if (!searchBar.contains(event.target) {
-                const searchInput = searchBar.querySelector('input');
-                if (searchInput && searchInput.value === '' && searchBar.classList.contains('active')) {
-                    searchBar.classList.remove('active');
+            if (!elements.searchBar.contains(event.target)) {
+                const searchInput = elements.searchBar.querySelector('input');
+                if (searchInput && searchInput.value === '' && elements.searchBar.classList.contains('active')) {
+                    elements.searchBar.classList.remove('active');
                 }
             }
         }
@@ -1042,11 +963,10 @@
         function handleResize() {
             checkMenuFit();
             
-            // En móvil, asegurarse de que el menú está oculto
             if (window.innerWidth < 768) {
-                mainNavigation.classList.add('hidden');
+                elements.mainNavigation.classList.add('hidden');
             } else {
-                mainNavigation.classList.remove('hidden');
+                elements.mainNavigation.classList.remove('hidden');
             }
         }
 
@@ -1055,51 +975,47 @@
             
             if (!mainMenu) return;
             
-            // Temporarily make main menu visible to measure
-            mainNavigation.style.display = 'flex';
-            mainNavigation.classList.remove('hidden');
-            mobileMenuButton.style.display = 'none';
+            elements.mainNavigation.style.display = 'flex';
+            elements.mainNavigation.classList.remove('hidden');
+            elements.mobileMenuButton.style.display = 'none';
             
             const isOverflowing = mainMenu.scrollWidth > mainMenu.clientWidth;
             
             if (isOverflowing) {
-                mobileMenuButton.style.display = 'block';
-                mainNavigation.classList.add('hidden');
+                elements.mobileMenuButton.style.display = 'block';
+                elements.mainNavigation.classList.add('hidden');
             } else {
-                mobileMenuButton.style.display = 'none';
-                mainNavigation.classList.remove('hidden');
+                elements.mobileMenuButton.style.display = 'none';
+                elements.mainNavigation.classList.remove('hidden');
             }
             
-            // Reset for mobile
             if (window.innerWidth < 768) {
                 if (isOverflowing) {
-                    mainNavigation.classList.add('hidden');
-                    mobileMenuButton.style.display = 'block';
+                    elements.mainNavigation.classList.add('hidden');
+                    elements.mobileMenuButton.style.display = 'block';
                 } else {
-                    mainNavigation.classList.add('hidden');
-                    mobileMenuButton.style.display = 'block';
+                    elements.mainNavigation.classList.add('hidden');
+                    elements.mobileMenuButton.style.display = 'block';
                 }
             }
         }
 
         function showNotification(message) {
-            const notificationMessage = document.getElementById('notification-message');
-            notificationMessage.textContent = message;
+            elements.notificationMessage.textContent = message;
             
-            notification.classList.remove('hidden');
-            notification.classList.add('show');
+            elements.notification.classList.remove('hidden');
+            elements.notification.classList.add('show');
             
             setTimeout(() => {
-                notification.classList.remove('show');
+                elements.notification.classList.remove('show');
                 setTimeout(() => {
-                    notification.classList.add('hidden');
+                    elements.notification.classList.add('hidden');
                 }, 300);
             }, 3000);
         }
 
         function showWelcomeAnimation() {
-            // Animación inicial de los elementos
-            const welcomeElements = contentDisplay.querySelectorAll('*');
+            const welcomeElements = elements.contentDisplay.querySelectorAll('*');
             welcomeElements.forEach((el, index) => {
                 el.style.opacity = '0';
                 el.style.transform = 'translateY(20px)';
