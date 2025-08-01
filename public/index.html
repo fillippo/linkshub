@@ -1,313 +1,48 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Links - Menú Interactivo</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-        }
-        .menu-item.active {
-            background-color: #4a5568;
-            color: white;
-        }
-        .submenu {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        .submenu.open {
-            max-height: 500px; /* Adjust as needed */
-            transition: max-height 0.3s ease-in;
-        }
-        @media (max-width: 767px) {
-            .main-menu {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .menu-category {
-                width: 100%;
-            }
-            .menu-category > button {
-                width: 100%;
-                text-align: left;
-            }
-            #main-navigation {
-                display: none; /* Hidden by default on mobile */
-            }
-            #mobile-menu-button {
-                display: block; /* Visible on mobile */
-            }
-        }
-
-        @media (min-width: 768px) {
-            #main-navigation {
-                display: flex; /* Visible on desktop */
-            }
-            #mobile-menu-button {
-                display: none; /* Hidden on desktop */
-            }
-        }
-
-        /* Estilos de opciones.html */
-        /* --- Variables de Color (Opcional pero útil para consistencia) --- */
-        /* Puedes ajustar estos valores para refinar la paleta */
-        :root {
-            --color-primary-blue: #4a7ba0; /* Azul principal, ligeramente muted */
-            --color-darker-blue: #3a6380; /* Azul más oscuro para hover */
-            --color-text-dark: #212529;   /* Negro/Gris muy oscuro para texto principal */
-            --color-text-medium: #495057; /* Gris medio para texto secundario */
-            --color-background-light: #f8f9fa; /* Gris muy claro para fondos */
-            --color-background-medium: #e9ecef; /* Gris medio claro para barras/hover */
-            --color-border: #dee2e6;     /* Gris claro para bordes */
-            --color-white: #ffffff;      /* Blanco puro */
-        }
-
-        /* Estilos generales */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--color-background-light); /* Fondo más suave */
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-            
-            color: var(--color-text-dark); /* Color de texto por defecto */
-        }
-
-        .main-wrapper {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            max-width: 800px;
-            margin: 20px auto;
-            background: var(--color-white); /* Fondo blanco */
-            border-radius: 10px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        h1 {
-            color: var(--color-text-dark);
-            text-align: center;
-            padding: 20px 0 10px;
-            margin: 0;
-            font-weight: 600; /* Ligeramente más negrita */
-        }
-
-        /* Barra de botones (navegación) */
-        .button-bar {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding: 10px;
-            background-color: var(--color-background-medium); /* Fondo gris medio */
-            border-bottom: 1px solid var(--color-border); /* Separador */
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .toggleButton {
-            background-color: var(--color-primary-blue); /* Azul principal */
-            color: var(--color-white); /* Texto blanco */
-            border: none;
-            padding: 8px 15px;
-            font-size: 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-            margin: 4px;
-            flex-shrink: 0;
-        }
-
-        .toggleButton:hover {
-            background-color: var(--color-darker-blue); /* Azul más oscuro al hover */
-        }
-
-        .toggleButton:active {
-            transform: scale(0.98);
-        }
-
-        /* Área de contenido (tablas) */
-        .content-area {
-            padding: 20px;
-            overflow-y: auto; /* Permite el scroll solo en esta área */
-            flex-grow: 1;
-        }
-
-        /* Tabla */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            background-color: var(--color-white); /* Fondo blanco para la tabla */
-        }
-
-        .hidden-table {
-            display: none; /* Clase para ocultar tablas */
-        }
-
-        thead {
-            background-color: var(--color-primary-blue); /* Azul principal para encabezado */
-            color: var(--color-white); /* Texto blanco */
-        }
-
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid var(--color-border); /* Borde gris claro */
-            font-weight: bold;
-        }
-
-        th:first-child, td:first-child {
-            padding-left: 20px;
-        }
-        th:last-child, td:last-child {
-            padding-right: 20px;
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: var(--color-background-light); /* Gris muy claro para fila par */
-        }
-
-        tbody tr:hover {
-            background-color: var(--color-background-medium); /* Gris medio claro al hover */
-        }
-
-        /* Estilo especial para enlaces */
-        .link-cell a {
-            color: var(--color-primary-blue); /* Azul principal para enlaces */
-            text-decoration: none;
-            font-weight: normal;
-            transition: color 0.2s ease;
-            font-weight: bold;
-        }
-
-        .link-cell a:hover {
-            text-decoration: underline;
-            color: var(--color-darker-blue); /* Azul más oscuro al hover */
-        }
-
-        /* Descripción */
-        .description-cell {
-            word-wrap: break-word;
-            color: var(--color-text-medium); /* Gris medio para descripción */
-            font-size: 0.9em;
-        }
-
-        /* Mejoras de Scrollbar (WebKit/Blink - Chrome, Safari, Edge) */
-        .content-area::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .content-area::-webkit-scrollbar-track {
-            background: var(--color-background-light); /* Fondo claro del track */
-            border-radius: 10px;
-        }
-
-        .content-area::-webkit-scrollbar-thumb {
-            background-color: var(--color-border); /* Color del thumb (gris borde) */
-            border-radius: 10px;
-            border: 2px solid var(--color-background-light); /* Espacio alrededor */
-        }
-
-        .content-area::-webkit-scrollbar-thumb:hover {
-            background-color: var(--color-text-medium); /* Gris medio al hover */
-        }
-
-        /* Mejoras de Scrollbar (Firefox) */
-        .content-area {
-            scrollbar-width: thin;
-            scrollbar-color: var(--color-border) var(--color-background-light); /* color_thumb color_track */
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            .main-wrapper {
-                margin: 10px;
-                border-radius: 0;
-                box-shadow: none;
-            }
-
-            .button-bar {
-                padding: 5px;
-            }
-
-            .toggleButton {
-                padding: 6px 10px;
-                font-size: 12px;
-                margin: 3px;
-            }
-
-            .content-area {
-                padding: 10px;
-            }
-
-            th, td {
-                padding: 8px;
-            }
-
-            th:first-child, td:first-child {
-                padding-left: 10px;
-            }
-            th:last-child, td:last-child {
-                padding-right: 10px;
-            }
-
-            .description-cell {
-                font-size: 0.8em;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="flex flex-col min-h-screen">
+<body>
 
-    <header class="bg-gray-800 text-white p-4 shadow-md" style="height: 10px;">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold">Links</h1>
-            <button id="mobile-menu-button" class="text-white focus:outline-none">
+    <header class="site-header">
+        <div class="container">
+            <h1 class="site-title">Links</h1>
+            <button id="mobile-menu-button" class="mobile-menu-button" aria-label="Abrir menú" aria-expanded="false" aria-controls="main-navigation">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
         </div>
     </header>
 
-    <nav id="main-navigation" class="bg-gray-700 text-white shadow-lg">
-        <div class="container mx-auto py-2 px-4 flex flex-col md:flex-row md:justify-center flex-wrap main-menu">
+    <nav id="main-navigation" class="main-nav">
+        <div class="container main-menu">
             <!-- Categoría 1: IAs -->
-            <div class="menu-category relative group">
-                <button class="w-full md:w-auto px-4 py-2 text-lg font-semibold hover:bg-gray-600 focus:outline-none transition-colors duration-200">IAs</button>
-                <div class="submenu md:absolute md:top-full md:left-0 bg-gray-700 md:bg-gray-800 shadow-lg md:rounded-b-lg w-full md:w-48 z-10">
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table1_1">IAs Google</button>
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table1_2">IAs Media</button>
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table1_3">IAs Otros</button>
+            <div class="menu-category">
+                <button class="menu-category-button" aria-expanded="false">IAs</button>
+                <div class="submenu">
+                    <button class="submenu-item" data-content-key="table1_1">IAs Google</button>
+                    <button class="submenu-item" data-content-key="table1_2">IAs Media</button>
+                    <button class="submenu-item" data-content-key="table1_3">IAs Otros</button>
                 </div>
             </div>
 
             <!-- Categoría 2: Stream -->
-            <div class="menu-category relative group">
-                <button class="w-full md:w-auto px-4 py-2 text-lg font-semibold hover:bg-gray-600 focus:outline-none transition-colors duration-200">Media</button>
-                <div class="submenu md:absolute md:top-full md:left-0 bg-gray-700 md:bg-gray-800 shadow-lg md:rounded-b-lg w-full md:w-48 z-10">
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table2_1">Streaming</button>
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table2_2">Prensa</button>
+            <div class="menu-category">
+                <button class="menu-category-button" aria-expanded="false">Media</button>
+                <div class="submenu">
+                    <button class="submenu-item" data-content-key="table2_1">Streaming</button>
+                    <button class="submenu-item" data-content-key="table2_2">Prensa</button>
                 </div>
             </div>
 
             <!-- Categoría 3: Wrk -->
-            <div class="menu-category relative group">
-                <button class="w-full md:w-auto px-4 py-2 text-lg font-semibold hover:bg-gray-600 focus:outline-none transition-colors duration-200">Wrk</button>
-                <div class="submenu md:absolute md:top-full md:left-0 bg-gray-700 md:bg-gray-800 shadow-lg md:rounded-b-lg w-full md:w-48 z-10">
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table3_1">Seidor</button>
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table3_2">Utils SQL</button>
+            <div class="menu-category">
+                <button class="menu-category-button" aria-expanded="false">Wrk</button>
+                <div class="submenu">
+                    <button class="submenu-item" data-content-key
                 </div>
             </div>
 
