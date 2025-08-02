@@ -1,0 +1,175 @@
+{
+  "menu": [
+    {
+      "name": "IAs",
+      "icon": "fas fa-robot",
+      "items": [
+        {
+          "name": "IAs Google",
+          "icon": "fab fa-google",
+          "key": "table1_1"
+        },
+        {
+          "name": "IAs Media",
+          "icon": "fas fa-photo-film",
+          "key": "table1_2"
+        },
+        {
+          "name": "IAs Otros",
+          "icon": "fas fa-ellipsis",
+          "key": "table1_3"
+        }
+      ]
+    },
+    {
+      "name": "Media",
+      "icon": "fas fa-film",
+      "items": [
+        {
+          "name": "Streaming",
+          "icon": "fas fa-play",
+          "key": "table2_1"
+        },
+        {
+          "name": "Prensa",
+          "icon": "fas fa-newspaper",
+          "key": "table2_2"
+        }
+      ]
+    },
+    {
+      "name": "Wrk",
+      "icon": "fas fa-briefcase",
+      "items": [
+        {
+          "name": "Seidor",
+          "icon": "fas fa-building",
+          "key": "table3_1"
+        },
+        {
+          "name": "Utils SQL",
+          "icon": "fas fa-database",
+          "key": "table3_2"
+        }
+      ]
+    },
+    {
+      "name": "Varios",
+      "icon": "fas fa-th-large",
+      "items": [
+        {
+          "name": "Diseño Web",
+          "icon": "fas fa-code",
+          "key": "table4_1"
+        },
+        {
+          "name": "Utilidades",
+          "icon": "fas fa-tools",
+          "key": "table4_2"
+        },
+        {
+          "name": "VB.NET",
+          "icon": "fas fa-laptop-code",
+          "key": "table4_3"
+        }
+      ]
+    }
+  ],
+  "tables": {
+    "table1_1": {
+      "title": "Inteligencias Artificiales de Google",
+      "headers": ["Enlace", "Descripción"],
+      "rows": [
+        ["<a href=\"https://labs.google/fx\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Google Labs</a>", "IA de Google para generar varios tipos de ficharos."],
+        ["<a href=\"https://notebooklm.google.com/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Google NotebookLM</a>", "Notebook LM. Investigación de fuentes y recursos"],
+        ["<a href=\"https://aistudio.google.com/prompts/new_chat\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Google AI Studio</a>", "IA avanzada de Google. Muy interesante y permite seleccionar varios modelos de generación"],
+        ["<a href=\"https://gemini.google.com/app?hl=es\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Google Gemini</a>", "IA Google. Permite Deep research para combinarlo con web"],
+        ["<a href=\"https://firebase.google.com/?hl=es\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Google Firebase</a>", "IA Google. Permite realizar aplicaciones con IA"],
+        ["<a href=\"https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Gemini CLI</a>", "Gemini Code Assist. Permite realizar aplicaciones con IA y Visual Studio"]
+      ]
+    },
+    "table1_2": {
+      "title": "Inteligencias Artificiales para Multimedia",
+      "headers": ["Enlace", "Descripción"],
+      "rows": [
+        ["<a href=\"https://www.canva.com/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Canva</a>", "IA para generar imágenes."],
+        ["<a href=\"https://ideal.house/es\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Ideal House</a>", "IA de Interiorismo"],
+        ["<a href=\"https://getimg.ai/text-to-image\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> getimg.ai</a>", "Generación de Imágenes"]
+      ]
+    },
+    "table1_3": {
+      "title": "Otras Inteligencias Artificiales",
+      "headers": ["Enlace", "Descripción"],
+      "rows": [
+        ["<a href=\"https://chatgpt.com/?oai-dm=1\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> ChatGPT</a>", "Clásico IA de OpenAI"],
+        ["<a href=\"https://suno.com/create?wid=default\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Suno</a>", "IA para generar canciones."],
+        ["<a href=\"https://www.perplexity.ai/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Perplexity</a>", "IA que muestra el hilo de cómo consigue la información."],
+        ["<a href=\"https://grok.com/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Grok</a>", "IA de Elon Musk. Siempre interesante para resultados de texto"],
+        ["<a href=\"https://manus.im/app\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Manus</a>", "IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder"],
+        ["<a href=\"https://chat.qwen.ai/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Qwen</a>", "IA de Aliexpress. Una de las más potentes. Permite hacer de todo, incluso imágenes y videos. Varios motores"], 
+        ["<a href=\"https://chat.deepseek.com/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> DeepSeek</a>", "IA china"]
+      ]
+    },
+    "table2_1": {
+      "title": "Plataformas de Streaming",
+      "headers": ["Enlace", "Descripción"],
+      "rows": [
+        ["<a href=\"https://www.youtube.com/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Youtube</a>", "Youtube"],
+        ["<a href=\"https://www.twitch.tv/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Twitch</a>", "Twitch."]
+      ]
+    },
+    "table2_2": {
+      "title": "Plataformas de Prensa y Noticias",
+      "headers": ["Enlace", "Descripción"],
+      "rows": [
+        ["<a href=\"https://es.kiosko.net/es/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Kiosko.net</a>", "Principales portadas prensa."]
+      ]
+    },
+    "table3_1": {
+      "title": "Recursos de Seidor",
+      "headers": ["Enlace", "Descripción"],
+      "rows": [
+        ["<a href=\"https://m365.cloud.microsoft/?auth=2\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Office 365</a>", "Office 365 Seidor."],
+        ["<a href=\"https://teams.microsoft.com/v2/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Teams Web</a>", "Teams versión navegador"],
+        ["<a href=\"https://outlook.office.com/mail/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Outlook Web</a>", "Teams versión navegador"],
+        ["<a href=\"https://intranetnew.seidor.com/home\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Intranet Seidor</a>", "Introducción Rapports, etc."],
+        ["<a href=\"https://intranet.seidor.es/sap/bc/ui2/flp\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Intranet Seidor (old)</a>", "Introducción Rapports, etc."],
+        ["<a href=\"https://windows365.microsoft.com/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Cafosa</a>", "Máquina Virtual Cafosa"]
+      ]
+    },
+    "table3_2": {
+      "title": "Utilidades SQL",
+      "headers": ["Enlace", "Descripción"],
+      "rows": [
+        ["<a href=\"TransformaUnionEnDiferencias.html\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Convertir Union a Diferencias</a>", "SQL: Convertir Union a Diferencias"],
+        ["<a href=\"TransformaUnionEnDiferencias2.html\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Convertir Union a Diferencias por campos</a>", "SQL: Convertir Union a Diferencias por campos"],
+        ["<a href=\"DescubreCampos.html\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Información de cada campo de una query</a>", "SQL: Información de cada campo de una query"]
+      ]
+    },
+    "table4_1": {
+      "title": "Diseño Web",
+      "headers": ["Enlace", "Descripción"],
+      "rows": [
+        ["<a href=\"https://vercel.com/alvars-projects-71ba2373/linkshub/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Vercel</a>", "Diseño sencillo webs."],                    
+        ["<a href=\"info.php\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> PhpInfo()</a>",  "Información php"],                  
+        ["<a href=\"php/test.php\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Test()</a>",  "Prueba php"]
+      ]
+    },
+    "table4_2": {
+      "title": "Utilidades Varias",
+      "headers": ["Enlace", "Descripción"],
+      "rows": [
+        ["<a href=\"https://translate.google.es/\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Google Translate</a>", "Traductor de Google"]
+      ]
+    },
+    "table4_3": {
+      "title": "Programación VB.NET",
+      "headers": ["Enlace", "Descripción"],
+      "rows": [
+        ["<a href=\"ManejoDeListas.html\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Manejo de Listas</a>", "Manejo de Listas de objetos, LINQ, Búsquedas ..."],
+        ["<a href=\"VBNET_Avanzados.html\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Conceptos avanzados</a>", "Multihilo y tareas asíncronas, Delegados y eventos, Expresiones lambda, Reflexión, Serialización ..."] ,
+        ["<a href=\"VBNET_Avanzados2.html\" target=\"_blank\"><i class=\"fas fa-external-link-alt mr-1\"></i> Conceptos avanzados II</a>", "Interoperabilidad y APIs ..."]
+      ]
+    }
+  }
+}
