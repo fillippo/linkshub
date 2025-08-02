@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinksHub - Portal de Recursos Inteligente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --color-primary: #4f46e5;
+            --color-primary-dark: #4338ca;
+            --color-primary-light: #6366f1;
+            --color-secondary: #10b981;
+            --color-accent: #f59e0b;
+            --color-dark: #1e293b;
+            --color-light: #f8fafc;
+            --color-gray: #64748b;
+            --color-gray-light: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--color-light);
+            color: var(--color-dark);
+            transition: background-color 0.3s ease;
+        }
+
+        /* Dark mode */
+        .dark body {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .dark .main-wrapper {
+            background-color: #1e293b;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark .button-bar {
+            background-color: #334155;
+            border-bottom-color: #475569;
+        }
+
+        .dark .toggleButton {
+            background-color: #4f46e5;
+        }
+
+        .dark .toggleButton:hover {
+            background-color: #4338ca;
+        }
+
+        .dark table {
+            background-color: #1e293b;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark thead {
+            background-color: #4f46e5;
+        }
+
+        .dark tbody tr:nth-child(even) {
+            background-color: #334155;
+        }
+
+        .dark tbody tr:hover {
+            background-color: #475569;
+        }
+
+        .dark .link-cell a {
+            color: #818cf8;
+        }
+
+        .dark .link-cell a:hover {
+            color: #6366f1;
+        }
+
+        .dark .description-cell {
+            color: #94a3b8;
+        }
+
+        /* Animaciones y transiciones */
+        .menu-item.active {
+            background-color: var(--color-primary);
+            color: white;
+            transform: scale(1.02);
+        }
+
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .submenu.open {
+            max-height: 500px;
+            opacity: 1;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
+
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Scroll personalizado */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-gray-light);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--color-primary);
+            border-radius: 10px;
+            border: 2px solid var(--color-gray-light);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: var(--color-primary-dark);
+        }
+
+        /* Efecto de neón para elementos destacados */
+        .neon-effect {
+            text-shadow: 0 0 5px rgba(79, 70, 229, 0.5), 0 0 10px rgba(79, 70, 229, 0.3);
+        }
+
+        .neon-border {
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.3), 0 0 20px rgba(79, 70, 229, 0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 767px) {
+            .main-menu {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .menu-category {
+                width: 100%;
+            }
+            
+            .menu-category > button {
+                width: 100%;
+                text-align: left;
+            }
+            
+            #main-navigation {
+                display: none;
+            }
+            
+            #mobile-menu-button {
+                display: block;
+            }
+        }
+
+        @media (min-width: 768px) {
+            #main-navigation {
+                display: flex;
+            }
+            
+            #mobile-menu-button {
+                display: none;
+            }
+        }
+
+        /* Estilos mejorados para tablas */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+
+        thead {
+            background-color: var(--color-primary);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--color-gray-light);
+        }
+
+        th {
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: rgba(241, 245, 249, 0.5);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(226, 232, 240, 0.7);
+            transform: scale(1.005);
+        }
+
+        .link-cell a {
+            color: var(--color-primary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .link-cell a:hover {
+            color: var(--color-primary-dark);
+            text-decoration: underline;
+        }
+
+        .link-cell a i {
+            font-size: 0.8em;
+        }
+
+        /* Estilo para el modo de tarjetas */
+        .card-view .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+
+        .card-view .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid var(--color-gray-light);
+        }
+
+        .card-view .card:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .card-view .card-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--color-primary);
+        }
+
+        .card-view .card-description {
+            color: var(--color-gray);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .card-view .card-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: var(--color-primary);
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .card-view .card-link:hover {
+            color: var(--color-primary-dark);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen transition-colors duration-300">
+
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center p-4">
+            <div class="flex items-center">
+                <h1 class="text-2xl font-bold flex items-center">
+                    <i class="fas fa-link mr-2"></i>
+                    <span class="neon-effect">LinksHub</span>
+                </h1>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Botón móvil -->
+                <button id="mobile-menu-button" class="text-white focus:outline-none md:hidden">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <nav id="main-navigation" class="bg-indigo-700 text-white shadow-md">
+        <div class="container mx-auto py-2 px-4 flex flex-col md:flex-row md:justify-center flex-wrap main-menu">
+            <!-- Las categorías del menú se generarán dinámicamente desde JavaScript -->
+        </div>
+    </nav>
+
+    <main class="container mx-auto my-6 px-4 flex-grow">
+        <div id="content-display" class="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 dark:bg-slate-800">
+            <div class="text-center py-12 animate__animated animate__fadeIn">
+                <i class="fas fa-link text-6xl text-indigo-500 mb-6 floating"></i>
+                <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-4">Bienvenido a LinksHub</h2>
+                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    Selecciona una categoría del menú para descubrir una colección de recursos útiles organizados para ti.
+                </p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Estado de la aplicación
+        const state = {
+            isDarkMode: false,
+            isCardView: false,
+            currentContentKey: null,
+            menuData: null,
+            tableData: null
+        };
+
+        // Elementos del DOM
+        const elements = {
+            mobileMenuButton: document.getElementById('mobile-menu-button'),
+            mainNavigation: document.getElementById('main-navigation'),
+            contentDisplay: document.getElementById('content-display'),
+            menuContainer: document.querySelector('.main-menu')
+        };
+
+        // Cargar datos desde el archivo JSON
+        async function loadData() {
+            try {
+                const response = await fetch('data.json');
+                const data = await response.json();
+                state.menuData = data.menu;
+                state.tableData = data.tables;
+                initializeMenu();
+            } catch (error) {
+                console.error('Error al cargar los datos:', error);
+                elements.contentDisplay.innerHTML = `
+                    <div class="text-center py-12 text-red-500">
+                        <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+                        <p>Error al cargar los datos. Por favor, verifica el archivo data.json</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Inicializar el menú con los datos cargados
+        function initializeMenu() {
+            if (!state.menuData) return;
+
+            // Limpiar el menú existente
+            elements.menuContainer.innerHTML = '';
+
+            // Generar las categorías del menú
+            state.menuData.forEach(category => {
+                const categoryElement = document.createElement('div');
+                categoryElement.className = 'menu-category relative group';
+
+                const categoryButton = document.createElement('button');
+                categoryButton.className = 'w-full md:w-auto px-4 py-3 text-lg font-semibold hover:bg-indigo-600 focus:outline-none transition-colors duration-200 flex items-center';
+                categoryButton.innerHTML = `
+                    <i class="${category.icon} mr-2"></i> ${category.name}
+                    <i class="fas fa-chevron-down ml-2 text-xs transform transition-transform duration-200 group-hover:rotate-180"></i>
+                `;
+
+                const submenu = document.createElement('div');
+                submenu.className = 'submenu md:absolute md:top-full md:left-0 bg-indigo-700 md:bg-indigo-800 shadow-lg md:rounded-b-lg w-full md:w-56 z-10';
+
+                // Agregar items al submenú
+                category.items.forEach(item => {
+                    const itemButton = document.createElement('button');
+                    itemButton.className = 'submenu-item block w-full text-left px-4 py-3 hover:bg-indigo-600 transition-colors duration-200 flex items-center';
+                    itemButton.dataset.contentKey = item.key;
+                    itemButton.innerHTML = `
+                        <i class="${item.icon} mr-2"></i> ${item.name}
+                    `;
+                    submenu.appendChild(itemButton);
+                });
+
+                categoryElement.appendChild(categoryButton);
+                categoryElement.appendChild(submenu);
+                elements.menuContainer.appendChild(categoryElement);
+            });
+
+            // Configurar event listeners para el menú dinámico
+            setupMenuEventListeners();
+        }
+
+        // Configurar event listeners para el menú
+        function setupMenuEventListeners() {
+            const menuCategories = document.querySelectorAll('.menu-category');
+            const submenuItems = document.querySelectorAll('.submenu-item');
+
+            // Menú móvil
+            elements.mobileMenuButton.addEventListener('click', toggleMobileMenu);
+            
+            // Categorías del menú
+            menuCategories.forEach(category => {
+                const categoryButton = category.querySelector('button');
+                const submenu = category.querySelector('.submenu');
+                
+                // Desktop hover
+                category.addEventListener('mouseenter', () => {
+                    if (window.innerWidth >= 768) {
+                        openSubmenu(submenu);
+                    }
+                });
+                
+                category.addEventListener('mouseleave', () => {
+                    if (window.innerWidth >= 768) {
+                        closeSubmenu(submenu);
+                    }
+                });
+                
+                // Mobile click
+                categoryButton.addEventListener('click', (e) => {
+                    if (window.innerWidth < 768) {
+                        e.stopPropagation();
+                        toggleSubmenu(category, submenu);
+                    }
+                });
+            });
+            
+            // Items del submenú
+            submenuItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    selectMenuItem(item);
+                });
+            });
+            
+            // Cerrar menú al hacer click fuera
+            document.addEventListener('click', handleOutsideClick);
+            
+            // Redimensionamiento
+            window.addEventListener('resize', handleResize);
+        }
+
+        // Funciones de interacción
+        function toggleMobileMenu() {
+            elements.mainNavigation.classList.toggle('hidden');
+        }
+
+        function openSubmenu(submenu) {
+            submenu.classList.add('open');
+        }
+
+        function closeSubmenu(submenu) {
+            submenu.classList.remove('open');
+        }
+
+        function toggleSubmenu(category, submenu) {
+            document.querySelectorAll('.menu-category .submenu').forEach(sm => {
+                if (sm !== submenu) sm.classList.remove('open');
+            });
+            submenu.classList.toggle('open');
+        }
+
+        function selectMenuItem(item) {
+            document.querySelectorAll('.submenu-item').forEach(sub => sub.classList.remove('active'));
+            item.classList.add('active');
+            
+            const key = item.dataset.contentKey;
+            state.currentContentKey = key;
+            
+            displayTable(key);
+            
+            document.querySelectorAll('.menu-category .submenu').forEach(submenu => {
+                submenu.classList.remove('open');
+            });
+            
+            if (window.innerWidth < 768) {
+                elements.mainNavigation.classList.add('hidden');
+            }
+        }
+
+        function displayTable(key) {
+            const data = state.tableData[key];
+            
+            if (!data) {
+                elements.contentDisplay.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 py-12">Contenido no disponible.</p>`;
+                return;
+            }
+            
+            let tableHTML = `<h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-6 text-center animate__animated animate__fadeIn">${data.title}</h2>`;
+            tableHTML += '<div class="overflow-x-auto animate__animated animate__fadeIn"><table class="min-w-full">';
+            tableHTML += '<thead><tr class="uppercase text-sm leading-normal">';
+            
+            data.headers.forEach(header => {
+                tableHTML += `<th class="py-3 px-6 text-left">${header}</th>`;
+            });
+            
+            tableHTML += '</tr></thead>';
+            tableHTML += '<tbody class="text-sm font-light">';
+            
+            data.rows.forEach((row, index) => {
+                tableHTML += `<tr class="border-b border-gray-200 dark:border-slate-600 animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.05}s">`;
+                
+                row.forEach(cell => {
+                    if (typeof cell === 'string' && cell.startsWith('<a') && cell.endsWith('>')) {
+                        tableHTML += `<td class="py-3 px-6 text-left whitespace-nowrap link-cell">${cell}</td>`;
+                    } else {
+                        tableHTML += `<td class="py-3 px-6 text-left dark:text-gray-300">${cell}</td>`;
+                    }
+                });
+                
+                tableHTML += '</tr>';
+            });
+            
+            tableHTML += '</tbody></table></div>';
+            elements.contentDisplay.innerHTML = tableHTML;
+        }
+
+        function handleOutsideClick(event) {
+            if (window.innerWidth < 768 && 
+                !elements.mainNavigation.contains(event.target) && 
+                !elements.mobileMenuButton.contains(event.target)) {
+                elements.mainNavigation.classList.add('hidden');
+                document.querySelectorAll('.menu-category .submenu').forEach(submenu => {
+                    submenu.classList.remove('open');
+                });
+            }
+        }
+
+        function handleResize() {
+            checkMenuFit();
+            
+            if (window.innerWidth < 768) {
+                elements.mainNavigation.classList.add('hidden');
+            } else {
+                elements.mainNavigation.classList.remove('hidden');
+            }
+        }
+
+        function checkMenuFit() {
+            const mainMenu = document.querySelector('.main-menu');
+            
+            if (!mainMenu) return;
+            
+            elements.mainNavigation.style.display = 'flex';
+            elements.mainNavigation.classList.remove('hidden');
+            elements.mobileMenuButton.style.display = 'none';
+            
+            const isOverflowing = mainMenu.scrollWidth > mainMenu.clientWidth;
+            
+            if (isOverflowing) {
+                elements.mobileMenuButton.style.display = 'block';
+                elements.mainNavigation.classList.add('hidden');
+            } else {
+                elements.mobileMenuButton.style.display = 'none';
+                elements.mainNavigation.classList.remove('hidden');
+            }
+            
+            if (window.innerWidth < 768) {
+                elements.mainNavigation.classList.add('hidden');
+                elements.mobileMenuButton.style.display = 'block';
+            }
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            checkSystemDarkMode();
+            checkMenuFit();
+        });
+
+        function checkSystemDarkMode() {
+            const savedMode = localStorage.getItem('darkMode');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedMode === 'enabled' || (savedMode === null && systemPrefersDark)) {
+                state.isDarkMode = true;
+                document.documentElement.classList.add('dark');
+            }
+        }
+    </script>
+</body>
+</html>
