@@ -1,605 +1,1152 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Links - Menú Interactivo</title>
+    <title>LinksHub - Portal de Recursos Inteligente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --color-primary: #4f46e5;
+            --color-primary-dark: #4338ca;
+            --color-primary-light: #6366f1;
+            --color-secondary: #10b981;
+            --color-accent: #f59e0b;
+            --color-dark: #1e293b;
+            --color-light: #f8fafc;
+            --color-gray: #64748b;
+            --color-gray-light: #e2e8f0;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--color-light);
+            color: var(--color-dark);
+            transition: background-color 0.3s ease;
         }
+
+        /* Dark mode */
+        .dark body {
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+
+        .dark .main-wrapper {
+            background-color: #1e293b;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark .button-bar {
+            background-color: #334155;
+            border-bottom-color: #475569;
+        }
+
+        .dark .toggleButton {
+            background-color: #4f46e5;
+        }
+
+        .dark .toggleButton:hover {
+            background-color: #4338ca;
+        }
+
+        .dark table {
+            background-color: #1e293b;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark thead {
+            background-color: #4f46e5;
+        }
+
+        .dark tbody tr:nth-child(even) {
+            background-color: #334155;
+        }
+
+        .dark tbody tr:hover {
+            background-color: #475569;
+        }
+
+        .dark .link-cell a {
+            color: #818cf8;
+        }
+
+        .dark .link-cell a:hover {
+            color: #6366f1;
+        }
+
+        .dark .description-cell {
+            color: #94a3b8;
+        }
+
+        /* Animaciones y transiciones */
         .menu-item.active {
-            background-color: #4a5568;
+            background-color: var(--color-primary);
             color: white;
+            transform: scale(1.02);
         }
+
         .submenu {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s ease-out;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0;
         }
+
         .submenu.open {
-            max-height: 500px; /* Adjust as needed */
-            transition: max-height 0.3s ease-in;
+            max-height: 500px;
+            opacity: 1;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
         }
+        
+        /* --- NUEVO: Estilos para el contenedor del submenú de clic sostenido --- */
+        .long-press-submenu-container {
+            position: absolute;
+            z-index: 1000;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            padding: 1rem;
+            min-width: 350px;
+            border: 1px solid var(--color-gray-light);
+        }
+
+        .dark .long-press-submenu-container {
+            background-color: #0f172a; /* Un poco más oscuro que el fondo de la tabla para distinguirlo */
+            border-color: #475569;
+        }
+        
+        .long-press-submenu-container table {
+            margin-bottom: 0; /* Anulamos el margen inferior para que se ajuste al contenedor */
+        }
+        
+        .long-press-submenu-container h2 {
+            font-size: 1.25rem; /* Título un poco más pequeño */
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* Scroll personalizado */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-gray-light);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--color-primary);
+            border-radius: 10px;
+            border: 2px solid var(--color-gray-light);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: var(--color-primary-dark);
+        }
+
+        /* Efecto de neón para elementos destacados */
+        .neon-effect {
+            text-shadow: 0 0 5px rgba(79, 70, 229, 0.5), 0 0 10px rgba(79, 70, 229, 0.3);
+        }
+
+        .neon-border {
+            box-shadow: 0 0 10px rgba(79, 70, 229, 0.3), 0 0 20px rgba(79, 70, 229, 0.2);
+        }
+
+        /* Responsive */
         @media (max-width: 767px) {
             .main-menu {
                 flex-direction: column;
                 align-items: flex-start;
             }
+            
             .menu-category {
                 width: 100%;
             }
+            
             .menu-category > button {
                 width: 100%;
                 text-align: left;
             }
+            
             #main-navigation {
-                display: none; /* Hidden by default on mobile */
+                display: none;
             }
+            
             #mobile-menu-button {
-                display: block; /* Visible on mobile */
+                display: block;
             }
         }
 
         @media (min-width: 768px) {
             #main-navigation {
-                display: flex; /* Visible on desktop */
+                display: flex;
             }
-            #mobile-menu-button {
-                display: none; /* Hidden on desktop */
-            }
-        }
-
-        /* Estilos de opciones.html */
-        /* --- Variables de Color (Opcional pero útil para consistencia) --- */
-        /* Puedes ajustar estos valores para refinar la paleta */
-        :root {
-            --color-primary-blue: #4a7ba0; /* Azul principal, ligeramente muted */
-            --color-darker-blue: #3a6380; /* Azul más oscuro para hover */
-            --color-text-dark: #212529;   /* Negro/Gris muy oscuro para texto principal */
-            --color-text-medium: #495057; /* Gris medio para texto secundario */
-            --color-background-light: #f8f9fa; /* Gris muy claro para fondos */
-            --color-background-medium: #e9ecef; /* Gris medio claro para barras/hover */
-            --color-border: #dee2e6;     /* Gris claro para bordes */
-            --color-white: #ffffff;      /* Blanco puro */
-        }
-
-        /* Estilos generales */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--color-background-light); /* Fondo más suave */
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
             
-            color: var(--color-text-dark); /* Color de texto por defecto */
+            #mobile-menu-button {
+                display: none;
+            }
         }
 
-        .main-wrapper {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            max-width: 800px;
-            margin: 20px auto;
-            background: var(--color-white); /* Fondo blanco */
-            border-radius: 10px;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        h1 {
-            color: var(--color-text-dark);
-            text-align: center;
-            padding: 20px 0 10px;
-            margin: 0;
-            font-weight: 600; /* Ligeramente más negrita */
-        }
-
-        /* Barra de botones (navegación) */
-        .button-bar {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            padding: 10px;
-            background-color: var(--color-background-medium); /* Fondo gris medio */
-            border-bottom: 1px solid var(--color-border); /* Separador */
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .toggleButton {
-            background-color: var(--color-primary-blue); /* Azul principal */
-            color: var(--color-white); /* Texto blanco */
-            border: none;
-            padding: 8px 15px;
-            font-size: 14px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.1s ease;
-            margin: 4px;
-            flex-shrink: 0;
-        }
-
-        .toggleButton:hover {
-            background-color: var(--color-darker-blue); /* Azul más oscuro al hover */
-        }
-
-        .toggleButton:active {
-            transform: scale(0.98);
-        }
-
-        /* Área de contenido (tablas) */
-        .content-area {
-            padding: 20px;
-            overflow-y: auto; /* Permite el scroll solo en esta área */
-            flex-grow: 1;
-        }
-
-        /* Tabla */
+        /* Estilos mejorados para tablas */
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-            border-radius: 8px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 2rem;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            background-color: var(--color-white); /* Fondo blanco para la tabla */
-        }
-
-        .hidden-table {
-            display: none; /* Clase para ocultar tablas */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            background-color: white;
+            transition: all 0.3s ease;
         }
 
         thead {
-            background-color: var(--color-primary-blue); /* Azul principal para encabezado */
-            color: var(--color-white); /* Texto blanco */
+            background-color: var(--color-primary);
+            color: white;
+            position: sticky;
+            top: 0;
         }
 
         th, td {
-            padding: 12px;
+            padding: 1rem;
             text-align: left;
-            border-bottom: 1px solid var(--color-border); /* Borde gris claro */
-            font-weight: bold;
+            border-bottom: 1px solid var(--color-gray-light);
         }
 
-        th:first-child, td:first-child {
-            padding-left: 20px;
+        th {
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
-        th:last-child, td:last-child {
-            padding-right: 20px;
+
+        tbody tr {
+            transition: all 0.2s ease;
         }
 
         tbody tr:nth-child(even) {
-            background-color: var(--color-background-light); /* Gris muy claro para fila par */
+            background-color: rgba(241, 245, 249, 0.5);
         }
 
         tbody tr:hover {
-            background-color: var(--color-background-medium); /* Gris medio claro al hover */
+            background-color: rgba(226, 232, 240, 0.7);
+            transform: scale(1.005);
         }
 
-        /* Estilo especial para enlaces */
         .link-cell a {
-            color: var(--color-primary-blue); /* Azul principal para enlaces */
+            color: var(--color-primary);
             text-decoration: none;
-            font-weight: normal;
-            transition: color 0.2s ease;
-            font-weight: bold;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         .link-cell a:hover {
+            color: var(--color-primary-dark);
             text-decoration: underline;
-            color: var(--color-darker-blue); /* Azul más oscuro al hover */
         }
 
-        /* Descripción */
-        .description-cell {
-            word-wrap: break-word;
-            color: var(--color-text-medium); /* Gris medio para descripción */
-            font-size: 0.9em;
+        .link-cell a i {
+            font-size: 0.8em;
         }
 
-        /* Mejoras de Scrollbar (WebKit/Blink - Chrome, Safari, Edge) */
-        .content-area::-webkit-scrollbar {
-            width: 8px;
+        /* Estilo para el modo de tarjetas */
+        .card-view .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
         }
 
-        .content-area::-webkit-scrollbar-track {
-            background: var(--color-background-light); /* Fondo claro del track */
-            border-radius: 10px;
+        .card-view .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border: 1px solid var(--color-gray-light);
         }
 
-        .content-area::-webkit-scrollbar-thumb {
-            background-color: var(--color-border); /* Color del thumb (gris borde) */
-            border-radius: 10px;
-            border: 2px solid var(--color-background-light); /* Espacio alrededor */
+        .card-view .card:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
         }
 
-        .content-area::-webkit-scrollbar-thumb:hover {
-            background-color: var(--color-text-medium); /* Gris medio al hover */
+        .card-view .card-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--color-primary);
         }
 
-        /* Mejoras de Scrollbar (Firefox) */
-        .content-area {
-            scrollbar-width: thin;
-            scrollbar-color: var(--color-border) var(--color-background-light); /* color_thumb color_track */
+        .card-view .card-description {
+            color: var(--color-gray);
+            font-size: 0.9rem;
+            line-height: 1.5;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            .main-wrapper {
-                margin: 10px;
-                border-radius: 0;
-                box-shadow: none;
-            }
+        .card-view .card-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: var(--color-primary);
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
 
-            .button-bar {
-                padding: 5px;
-            }
+        .card-view .card-link:hover {
+            color: var(--color-primary-dark);
+            text-decoration: underline;
+        }
 
-            .toggleButton {
-                padding: 6px 10px;
-                font-size: 12px;
-                margin: 3px;
-            }
+        /* Efecto de carga */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
 
-            .content-area {
-                padding: 10px;
-            }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
 
-            th, td {
-                padding: 8px;
-            }
+        /* Botón flotante */
+        .floating-action-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--color-primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
 
-            th:first-child, td:first-child {
-                padding-left: 10px;
-            }
-            th:last-child, td:last-child {
-                padding-right: 10px;
-            }
+        .floating-action-btn:hover {
+            background-color: var(--color-primary-dark);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 25px rgba(79, 70, 229, 0.4);
+        }
 
-            .description-cell {
-                font-size: 0.8em;
-            }
+        /* Barra de búsqueda */
+        .search-bar {
+            transition: all 0.3s ease;
+            max-width: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+
+        .search-bar.active {
+            max-width: 300px;
+            opacity: 1;
+            padding: 0 0.5rem;
+        }
+
+        /* Notificaciones */
+        .notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            background-color: var(--color-primary);
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 120px;
+            background-color: var(--color-dark);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8rem;
+        }
+
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
         }
     </style>
 </head>
-<body class="flex flex-col min-h-screen">
+<body class="flex flex-col min-h-screen transition-colors duration-300">
 
-    <header class="bg-gray-800 text-white p-4 shadow-md" style="height: 10px;">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold">Links</h1>
-            <button id="mobile-menu-button" class="text-white focus:outline-none">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-            </button>
+    <!-- El resto del body (header, nav, etc.) se mantiene igual... -->
+        <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+        <div class="container mx-auto flex justify-between items-center p-4">
+            <div class="flex items-center">
+                <h1 class="text-2xl font-bold flex items-center">
+                    <i class="fas fa-link mr-2"></i>
+                    <span class="neon-effect">LinksHub</span>
+                </h1>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <!-- Barra de búsqueda -->
+                <div id="search-bar" class="search-bar">
+                    <input type="text" placeholder="Buscar recursos..." 
+                           class="px-3 py-2 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 w-full">
+                </div>
+                
+                <!-- Botón de búsqueda -->
+                <button id="search-button" class="text-white hover:text-indigo-200 transition-colors">
+                    <i class="fas fa-search"></i>
+                </button>
+                
+                <!-- Botón de vista (tabla/tarjetas) -->
+                <button id="view-toggle" class="text-white hover:text-indigo-200 transition-colors tooltip">
+                    <i class="fas fa-table"></i>
+                    <span class="tooltip-text">Cambiar vista</span>
+                </button>
+                
+                <!-- Botón móvil -->
+                <button id="mobile-menu-button" class="text-white focus:outline-none md:hidden">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
     </header>
 
-    <nav id="main-navigation" class="bg-gray-700 text-white shadow-lg">
+    <nav id="main-navigation" class="bg-indigo-700 text-white shadow-md">
         <div class="container mx-auto py-2 px-4 flex flex-col md:flex-row md:justify-center flex-wrap main-menu">
             <!-- Categoría 1: IAs -->
             <div class="menu-category relative group">
-                <button class="w-full md:w-auto px-4 py-2 text-lg font-semibold hover:bg-gray-600 focus:outline-none transition-colors duration-200">IAs</button>
-                <div class="submenu md:absolute md:top-full md:left-0 bg-gray-700 md:bg-gray-800 shadow-lg md:rounded-b-lg w-full md:w-48 z-10">
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table1_1">IAs Google</button>
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table1_2">IAs Media</button>
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table1_3">IAs Otros</button>
+                <button class="w-full md:w-auto px-4 py-3 text-lg font-semibold hover:bg-indigo-600 focus:outline-none transition-colors duration-200 flex items-center">
+                    <i class="fas fa-robot mr-2"></i> IAs
+                    <i class="fas fa-chevron-down ml-2 text-xs transform transition-transform duration-200 group-hover:rotate-180"></i>
+                </button>
+                <div class="submenu md:absolute md:top-full md:left-0 bg-indigo-700 md:bg-indigo-800 shadow-lg md:rounded-b-lg w-full md:w-56 z-10">
+                    <button class="submenu-item block w-full text-left px-4 py-3 hover:bg-indigo-600 transition-colors duration-200 flex items-center" data-content-key="table1_1">
+                        <i class="fab fa-google mr-2"></i> IAs Google
+                    </button>
+                    <button class="submenu-item block w-full text-left px-4 py-3 hover:bg-indigo-600 transition-colors duration-200 flex items-center" data-content-key="table1_2">
+                        <i class="fas fa-photo-film mr-2"></i> IAs Media
+                    </button>
+                    <button class="submenu-item block w-full text-left px-4 py-3 hover:bg-indigo-600 transition-colors duration-200 flex items-center" data-content-key="table1_3">
+                        <i class="fas fa-ellipsis mr-2"></i> IAs Otros
+                    </button>
                 </div>
             </div>
 
             <!-- Categoría 2: Stream -->
             <div class="menu-category relative group">
-                <button class="w-full md:w-auto px-4 py-2 text-lg font-semibold hover:bg-gray-600 focus:outline-none transition-colors duration-200">Media</button>
-                <div class="submenu md:absolute md:top-full md:left-0 bg-gray-700 md:bg-gray-800 shadow-lg md:rounded-b-lg w-full md:w-48 z-10">
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table2_1">Streaming</button>
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table2_2">Prensa</button>
+                <button class="w-full md:w-auto px-4 py-3 text-lg font-semibold hover:bg-indigo-600 focus:outline-none transition-colors duration-200 flex items-center">
+                    <i class="fas fa-film mr-2"></i> Media
+                    <i class="fas fa-chevron-down ml-2 text-xs transform transition-transform duration-200 group-hover:rotate-180"></i>
+                </button>
+                <div class="submenu md:absolute md:top-full md:left-0 bg-indigo-700 md:bg-indigo-800 shadow-lg md:rounded-b-lg w-full md:w-56 z-10">
+                    <button class="submenu-item block w-full text-left px-4 py-3 hover:bg-indigo-600 transition-colors duration-200 flex items-center" data-content-key="table2_1">
+                        <i class="fas fa-play mr-2"></i> Streaming
+                    </button>
+                    <button class="submenu-item block w-full text-left px-4 py-3 hover:bg-indigo-600 transition-colors duration-200 flex items-center" data-content-key="table2_2">
+                        <i class="fas fa-newspaper mr-2"></i> Prensa
+                    </button>
                 </div>
             </div>
 
             <!-- Categoría 3: Wrk -->
             <div class="menu-category relative group">
-                <button class="w-full md:w-auto px-4 py-2 text-lg font-semibold hover:bg-gray-600 focus:outline-none transition-colors duration-200">Wrk</button>
-                <div class="submenu md:absolute md:top-full md:left-0 bg-gray-700 md:bg-gray-800 shadow-lg md:rounded-b-lg w-full md:w-48 z-10">
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table3_1">Seidor</button>
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table3_2">Utils SQL</button>
+                <button class="w-full md:w-auto px-4 py-3 text-lg font-semibold hover:bg-indigo-600 focus:outline-none transition-colors duration-200 flex items-center">
+                    <i class="fas fa-briefcase mr-2"></i> Wrk
+                    <i class="fas fa-chevron-down ml-2 text-xs transform transition-transform duration-200 group-hover:rotate-180"></i>
+                </button>
+                <div class="submenu md:absolute md:top-full md:left-0 bg-indigo-700 md:bg-indigo-800 shadow-lg md:rounded-b-lg w-full md:w-56 z-10">
+                    <button class="submenu-item block w-full text-left px-4 py-3 hover:bg-indigo-600 transition-colors duration-200 flex items-center" data-content-key="table3_1">
+                        <i class="fas fa-building mr-2"></i> Seidor
+                    </button>
+                    <button class="submenu-item block w-full text-left px-4 py-3 hover:bg-indigo-600 transition-colors duration-200 flex items-center" data-content-key="table3_2">
+                        <i class="fas fa-database mr-2"></i> Utils SQL
+                    </button>
                 </div>
             </div>
 
             <!-- Categoría 4: Varios -->
             <div class="menu-category relative group">
-                <button class="w-full md:w-auto px-4 py-2 text-lg font-semibold hover:bg-gray-600 focus:outline-none transition-colors duration-200">Varios</button>
-                <div class="submenu md:absolute md:top-full md:left-0 bg-gray-700 md:bg-gray-800 shadow-lg md:rounded-b-lg w-full md:w-48 z-10">
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table4_1">Diseño Web</button> 
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table4_2">Utilidades</button>
-                    <button class="submenu-item block w-full text-left px-4 py-2 hover:bg-gray-600 transition-colors duration-200" data-content-key="table4_3">VB.NET</button>
-                    
+                <button class="w-full md:w-auto px-4 py-3 text-lg font-semibold hover:bg-indigo-600 focus:outline-none transition-colors duration-200 flex items-center">
+                    <i class="fas fa-th-large mr-2"></i> Varios
+                    <i class="fas fa-chevron-down ml-2 text-xs transform transition-transform duration-200 group-hover:rotate-180"></i>
+                </button>
+                <div class="submenu md:absolute md:top-full md:left-0 bg-indigo-700 md:bg-indigo-800 shadow-lg md:rounded-b-lg w-full md:w-56 z-10">
+                    <button class="submenu-item block w-full text-left px-4 py-3 hover:bg-indigo-600 transition-colors duration-200 flex items-center" data-content-key="table4_1">
+                        <i class="fas fa-code mr-2"></i> Diseño Web
+                    </button>
+                    <button class="submenu-item block w-full text-left px-4 py-3 hover:bg-indigo-600 transition-colors duration-200 flex items-center" data-content-key="table4_2">
+                        <i class="fas fa-tools mr-2"></i> Utilidades
+                    </button>
+                    <button class="submenu-item block w-full text-left px-4 py-3 hover:bg-indigo-600 transition-colors duration-200 flex items-center" data-content-key="table4_3">
+                        <i class="fas fa-laptop-code mr-2"></i> VB.NET
+                    </button>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="container mx-auto mt-8 p-6 bg-white rounded-lg shadow-xl flex-grow">
-        <!-- <h2 class="text-3xl font-bold text-gray-800 mb-4">Bienvenido</h2> -->
-        <div id="content-display" class="text-gray-700 text-lg"><p>Selecciona una opción del menú para ver su contenido aquí.</p></div>
+    <main class="container mx-auto my-6 px-4 flex-grow">
+        <div id="content-display" class="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 dark:bg-slate-800">
+            <div class="text-center py-12 animate__animated animate__fadeIn">
+                <i class="fas fa-link text-6xl text-indigo-500 mb-6 floating"></i>
+                <h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-4">Bienvenido a LinksHub</h2>
+                <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                    Selecciona una categoría del menú para descubrir una colección de recursos útiles organizados para ti.
+                </p>
+                <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+                    <div class="bg-indigo-50 dark:bg-slate-700 p-4 rounded-lg text-center">
+                        <i class="fas fa-robot text-3xl text-indigo-600 dark:text-indigo-400 mb-2"></i>
+                        <p class="font-medium dark:text-white">IAs</p>
+                    </div>
+                    <div class="bg-indigo-50 dark:bg-slate-700 p-4 rounded-lg text-center">
+                        <i class="fas fa-film text-3xl text-indigo-600 dark:text-indigo-400 mb-2"></i>
+                        <p class="font-medium dark:text-white">Media</p>
+                    </div>
+                    <div class="bg-indigo-50 dark:bg-slate-700 p-4 rounded-lg text-center">
+                        <i class="fas fa-briefcase text-3xl text-indigo-600 dark:text-indigo-400 mb-2"></i>
+                        <p class="font-medium dark:text-white">Trabajo</p>
+                    </div>
+                    <div class="bg-indigo-50 dark:bg-slate-700 p-4 rounded-lg text-center">
+                        <i class="fas fa-th-large text-3xl text-indigo-600 dark:text-indigo-400 mb-2"></i>
+                        <p class="font-medium dark:text-white">Varios</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </main>
 
-    <footer class="bg-gray-800 text-white p-4 mt-8 text-center">
-        <p>&copy; 2025 Links. Todos los derechos reservados.</p>
+    <footer class="bg-gray-800 text-white py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <h3 class="text-xl font-bold flex items-center">
+                        <i class="fas fa-link mr-2"></i> LinksHub
+                    </h3>
+                    <p class="text-gray-400 mt-1">Tu portal de recursos inteligente</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fab fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-6 pt-6 text-center md:text-left">
+                <p class="text-gray-400 text-sm">© 2025 LinksHub. Todos los derechos reservados.</p>
+            </div>
+        </div>
     </footer>
 
+
     <script>
+        // Datos de las tablas
         const tableData = {
             'table1_1': {
-                title: 'Inteligencias Artificiales Google',
+                title: 'Inteligencias Artificiales de Google',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
-                    ['<a href="https://labs.google/fx" target="_blank">Google labs</a>', 'IA de google para generar varios tipos de ficharos.'],
-                    ['<a href="https://notebooklm.google.com/" target="_blank">Google NotebookLM</a>', 'Notebook LM. Imvestigación de fuentes y recursos'],
-                    ['<a href="https://aistudio.google.com/prompts/new_chat" target="_blank">Google AI Studio</a>', 'IA avanzada de Google. Muy interesante y permite seleccionar varios modelos de generación'],
-                    ['<a href="https://gemini.google.com/app?hl=es" target="_blank">Google Gemini</a>', 'IA Google. Permite Deep research para combinarlo con web'],
-                    ['<a href="https://firebase.google.com/?hl=es" target="_blank">Google Firebase</a>', 'IA Google. Permite realizar aplicaciones con IA'],
-                    ['<a href="https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/" target="_blank">Gemini CLI</a>', 'Geminy Code Assist. Permite realizar aplicaciones con IA y Visual Studio'],
+                    ['<a href="https://labs.google/fx" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Google Labs</a>', 'IA de Google para generar varios tipos de ficharos.'],
+                    ['<a href="https://notebooklm.google.com/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Google NotebookLM</a>', 'Notebook LM. Investigación de fuentes y recursos'],
+                    ['<a href="https://aistudio.google.com/prompts/new_chat" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Google AI Studio</a>', 'IA avanzada de Google. Muy interesante y permite seleccionar varios modelos de generación'],
+                    ['<a href="https://gemini.google.com/app?hl=es" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Google Gemini</a>', 'IA Google. Permite Deep research para combinarlo con web'],
+                    ['<a href="https://firebase.google.com/?hl=es" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Google Firebase</a>', 'IA Google. Permite realizar aplicaciones con IA'],
+                    ['<a href="https://blog.google/technology/developers/introducing-gemini-cli-open-source-ai-agent/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Gemini CLI</a>', 'Gemini Code Assist. Permite realizar aplicaciones con IA y Visual Studio'],
                 ]
             },
             'table1_2': {
-                title: 'Inteligencias Artificiales Media',
+                title: 'Inteligencias Artificiales para Multimedia',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
-                    ['<a href="https://www.canva.com/" target="_blank">Canva</a>', 'IA para generar imagenes.'],
-                    ['<a href="https://ideal.house/es" target="_blank">Ideal House</a>', 'IA de Interiorismo'],
-                    ['<a href="https://getimg.ai/text-to-image" target="_blank">getimg.ai</a>', 'Generación de Imagenes']
+                    ['<a href="https://www.canva.com/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Canva</a>', 'IA para generar imágenes.'],
+                    ['<a href="https://ideal.house/es" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Ideal House</a>', 'IA de Interiorismo'],
+                    ['<a href="https://getimg.ai/text-to-image" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> getimg.ai</a>', 'Generación de Imágenes']
                 ]
             },
             'table1_3': {
-                title: 'Inteligencias Artificiales Otras',
+                title: 'Otras Inteligencias Artificiales',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
-                    ['<a href="https://chatgpt.com/?oai-dm=1" target="_blank">ChatGPT</a>', 'Clásico IA de OpenAI'],
-                    ['<a href="https://suno.com/create?wid=default" target="_blank">Suno</a>', 'IA para generar canciones.'],
-                    ['<a href="https://www.perplexity.ai/" target="_blank">Perplexity</a>', 'IA que muestra el hilo de cómo consigue la información.'],
-                    ['<a href="https://grok.com/" target="_blank">Grok</a>', 'IA de Elon Mask. Siempre iteresante para resultados de texto'],
-                    ['<a href="https://manus.im/app" target="_blank">Manus</a>', 'IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder'],
-                    ['<a href="https://chat.qwen.ai/" target="_blank">Qwen</a>', 'IA de Aliexpres. Una de las más potentes. Permite hacer de todo, incluso imagenes y videos. Varios motores'], 
-                    ['<a href="https://chat.deepseek.com/" target="_blank">DeepSeek</a>', 'IA chinitis'],
+                    ['<a href="https://chatgpt.com/?oai-dm=1" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> ChatGPT</a>', 'Clásico IA de OpenAI'],
+                    ['<a href="https://suno.com/create?wid=default" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Suno</a>', 'IA para generar canciones.'],
+                    ['<a href="https://www.perplexity.ai/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Perplexity</a>', 'IA que muestra el hilo de cómo consigue la información.'],
+                    ['<a href="https://grok.com/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Grok</a>', 'IA de Elon Musk. Siempre interesante para resultados de texto'],
+                    ['<a href="https://manus.im/app" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Manus</a>', 'IA japonesa muy interesante pero a día de hoy se necesita invitación para acceder'],
+                    ['<a href="https://chat.qwen.ai/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Qwen</a>', 'IA de Aliexpress. Una de las más potentes. Permite hacer de todo, incluso imágenes y videos. Varios motores'], 
+                    ['<a href="https://chat.deepseek.com/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> DeepSeek</a>', 'IA china'],
                 ]
             },
             'table2_1': {
-                title: 'Plataformas de Stream',
+                title: 'Plataformas de Streaming',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
-                    ['<a href="https://www.youtube.com/" target="_blank">Youtube</a>', 'Youtube'],
-                    ['<a href="https://www.twitch.tv/" target="_blank">Twitch</a>', 'Twitch.'],
+                    ['<a href="https://www.youtube.com/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Youtube</a>', 'Youtube'],
+                    ['<a href="https://www.twitch.tv/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Twitch</a>', 'Twitch.'],
                 ]
             },
             'table2_2': {
                 title: 'Plataformas de Prensa y Noticias',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
-                    ['<a href="https://es.kiosko.net/es/" target="_blank">Kiosko.net</a>', 'Principales portadas prensa.']
+                    ['<a href="https://es.kiosko.net/es/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Kiosko.net</a>', 'Principales portadas prensa.']
                 ]
             },
             'table3_1': {
-                title: 'Seidor',
+                title: 'Recursos de Seidor',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
-                    ['<a href="https://m365.cloud.microsoft/?auth=2" target="_blank">Office 365</a>', 'Office 365 Seidor.'],
-                    ['<a href="https://teams.microsoft.com/v2/" target="_blank">Teams Web</a>', 'Teams version navegador'],
-                    ['<a href="https://outlook.office.com/mail/" target="_blank">Outlook Web</a>', 'Teams version navegador'],
-                    ['<a href="https://intranetnew.seidor.com/home" target="_blank">Intranet Seidor</a>', 'Introducción Rapports, etc.'],
-                    ['<a href="https://intranet.seidor.es/sap/bc/ui2/flp" target="_blank">Intranet Seidor (old)</a>', 'Introducción Rapports, etc.'],
-                    ['<a href="https://windows365.microsoft.com/" target="_blank">Cafosa</a>', 'Maquina Virtual Cafosa']
+                    ['<a href="https://m365.cloud.microsoft/?auth=2" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Office 365</a>', 'Office 365 Seidor.'],
+                    ['<a href="https://teams.microsoft.com/v2/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Teams Web</a>', 'Teams versión navegador'],
+                    ['<a href="https://outlook.office.com/mail/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Outlook Web</a>', 'Outlook versión navegador'], 
+                    ['<a href="https://app.fabric.microsoft.com/home?experience=fabric-developer" target="_blank" data-long-press-submenu="table3_1_4"><i class="fas fa-external-link-alt mr-1"></i>Fabrik</a>', 'Fabrik'],
+                    ['<a href="https://intranetnew.seidor.com/home" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Intranet Seidor</a>', 'Introducción Rapports, etc.'],
+                    ['<a href="https://intranet.seidor.es/sap/bc/ui2/flp" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Intranet Seidor (old)</a>', 'Introducción Rapports, etc.'],
+                    ['<a href="https://windows365.microsoft.com/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Cafosa</a>', 'Máquina Virtual Cafosa']
+                ]
+            },
+            // --- NUEVO: Datos para la tabla del submenú con dos columnas ---
+            'table3_1_4': {
+                title: 'Opciones de Fabrik',
+                headers: ['Enlace', 'Descripción'],
+                rows: [
+                    ['<a href="https://app.powerbi.com/home?experience=power-bi" target="_blank">Power BI</a>', 'Visualización de datos'],
+                    ['<a href="https://app.fabric.microsoft.com/home?experience=data-factory" target="_blank">Data Factory</a>', 'Orquestación de datos']
                 ]
             },
             'table3_2': {
-                title: 'Utiles SQL',
+                title: 'Utilidades SQL',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
-                    ['<a href="TransformaUnionEnDiferencias.html" target="_blank">Convertir Union a Diferencias</a>', 'SQL:Convertir Union a Diferencias'],
-                    ['<a href="TransformaUnionEnDiferencias2.html" target="_blank">Convertir Union a Diferencias por campos</a>', 'SQL:Convertir Union a Diferencias por campos'],
-                    ['<a href="DescubreCampos.html" target="_blank">Información de cada campo de una query</a>', 'SQL:Información de cada campo de una query'],
+                    ['<a href="TransformaUnionEnDiferencias.html" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Convertir Union a Diferencias</a>', 'SQL: Convertir Union a Diferencias'],
+                    ['<a href="TransformaUnionEnDiferencias2.html" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Convertir Union a Diferencias por campos</a>', 'SQL: Convertir Union a Diferencias por campos'],
+                    ['<a href="DescubreCampos.html" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Información de cada campo de una query</a>', 'SQL: Información de cada campo de una query'],
                 ]
             },
             'table4_1': {
                 title: 'Diseño Web',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
-                    ['<a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank">Vercel</a>', 'Diseño sencillo webs.'],                    
-                    ['<a href="info.php" target="_blank">PhpInfo()</a>',  'Informacion php'],                  
-                    ['<a href="php/test.php" target="_blank">Test()</a>',  'Prueba php'],
+                    ['<a href="https://vercel.com/alvars-projects-71ba2373/linkshub/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Vercel</a>', 'Diseño sencillo webs.'],                    
+                    ['<a href="info.php" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> PhpInfo()</a>',  'Información php'],                  
+                    ['<a href="php/test.php" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Test()</a>',  'Prueba php'],
                 ]
             },
             'table4_2': {
-                title: 'Utilidades',
+                title: 'Utilidades Varias',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
-                    ['<a href="https://translate.google.es/" target="_blank">Google Translate</a>', 'Traductor de Google']
+                    ['<a href="https://translate.google.es/" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Google Translate</a>', 'Traductor de Google']
                 ]
             },
             'table4_3': {
-                title: 'Programacion VB.NET',
+                title: 'Programación VB.NET',
                 headers: ['Enlace', 'Descripción'],
                 rows: [
-                    ['<a href="ManejoDeListas.html" target="_blank">Manejo de Listas</a>', 'Manejo de Listas de objetos, LINQ, Busquedas ...'],
-                    ['<a href="VBNET_Avanzados.html" target="_blank">Conceptos avanzados</a>', 'Multihilo y tareas asíncronas, Delegados y eventos, Expresiones lambda, Reflexión, Serialización ...'] ,
-                    ['<a href="VBNET_Avanzados2.html" target="_blank">Conceptos avanzados II</a>', 'Interoperabilidad y APIs ...']
+                    ['<a href="ManejoDeListas.html" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Manejo de Listas</a>', 'Manejo de Listas de objetos, LINQ, Búsquedas ...'],
+                    ['<a href="VBNET_Avanzados.html" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Conceptos avanzados</a>', 'Multihilo y tareas asíncronas, Delegados y eventos, Expresiones lambda, Reflexión, Serialización ...'] ,
+                    ['<a href="VBNET_Avanzados2.html" target="_blank"><i class="fas fa-external-link-alt mr-1"></i> Conceptos avanzados II</a>', 'Interoperabilidad y APIs ...']
                 ]
             }
         };
 
-        let mobileMenuButton;
-        let mainNavigation;
-        let menuCategories;
-        let submenuItems;
-        let contentDisplay;
+        const state = {
+            isDarkMode: false,
+            isCardView: false,
+            currentContentKey: null,
+            longPressTimer: null,
+            isLongPress: false
+        };
+
+        const elements = {
+            body: document.body,
+            mobileMenuButton: document.getElementById('mobile-menu-button'),
+            mainNavigation: document.getElementById('main-navigation'),
+            menuCategories: document.querySelectorAll('.menu-category'),
+            submenuItems: document.querySelectorAll('.submenu-item'),
+            contentDisplay: document.getElementById('content-display'),
+            searchButton: document.getElementById('search-button'),
+            searchBar: document.getElementById('search-bar'),
+            viewToggle: document.getElementById('view-toggle'),
+            darkModeToggle: document.getElementById('dark-mode-toggle'),
+            darkModeIcon: document.getElementById('dark-mode-icon'),
+            notification: document.getElementById('notification'),
+            notificationMessage: document.getElementById('notification-message')
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
-            mobileMenuButton = document.getElementById('mobile-menu-button');
-            mainNavigation = document.getElementById('main-navigation');
-            menuCategories = document.querySelectorAll('.menu-category');
-            submenuItems = document.querySelectorAll('.submenu-item');
-            contentDisplay = document.getElementById('content-display');
-
-            // Toggle mobile menu visibility
-            mobileMenuButton.addEventListener('click', () => {
-                mainNavigation.classList.toggle('hidden');
-            });
-
-            // Handle menu category clicks (for mobile) and hovers (for desktop)
-            menuCategories.forEach(category => {
-                const categoryButton = category.querySelector('button');
-                const submenu = category.querySelector('.submenu');
-
-                // Desktop hover behavior
-                category.addEventListener('mouseenter', () => {
-                    if (window.innerWidth >= 768) {
-                        submenu.classList.add('open');
-                    }
-                });
-                category.addEventListener('mouseleave', () => {
-                    if (window.innerWidth >= 768) {
-                        submenu.classList.remove('open');
-                    }
-                });
-
-                // Mobile click behavior
-                categoryButton.addEventListener('click', () => {
-                    if (window.innerWidth < 768) {
-                        // Close other submenus
-                        menuCategories.forEach(otherCategory => {
-                            if (otherCategory !== category) {
-                                otherCategory.querySelector('.submenu').classList.remove('open');
-                            }
-                        });
-                        submenu.classList.toggle('open');
-                    }
-                });
-            });
-
-            // Handle submenu item clicks
-            submenuItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    // Remove active class from all submenu items
-                    submenuItems.forEach(sub => sub.classList.remove('active'));
-                    // Add active class to the clicked item
-                    item.classList.add('active');
-
-                    // Display content
-                    const key = item.dataset.contentKey;
-                    displayTable(key);
-
-                    // Close all submenus (for both mobile and desktop)
-                    menuCategories.forEach(category => {
-                        category.querySelector('.submenu').classList.remove('open');
-                    });
-
-                    // Hide mobile menu after selection
-                    if (window.innerWidth < 768) {
-                        mainNavigation.classList.add('hidden');
-                    }
-                });
-            });
-
-            // Close mobile menu if clicking outside
-            document.addEventListener('click', (event) => {
-                if (window.innerWidth < 768 && !mainNavigation.contains(event.target) && !mobileMenuButton.contains(event.target)) {
-                    mainNavigation.classList.add('hidden');
-                    menuCategories.forEach(category => {
-                        category.querySelector('.submenu').classList.remove('open');
-                    });
-                }
-            });
-
-            // Handle resize to adjust menu visibility
-            window.addEventListener('resize', checkMenuFit);
-
-            // Initial check on load
-            checkMenuFit();
+            setupEventListeners();
+            checkSystemDarkMode();
+            // El resto de la inicialización se mantiene...
         });
 
-        function checkMenuFit() {
-            const mainMenu = document.querySelector('.main-menu');
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mainNavigation = document.getElementById('main-navigation');
+        function setupEventListeners() {
+            // ... los otros event listeners se mantienen
+             // Menú móvil
+            elements.mobileMenuButton.addEventListener('click', toggleMobileMenu);
+            
+            // Búsqueda
+            elements.searchButton.addEventListener('click', toggleSearchBar);
+            
+            // Cambiar vista
+            elements.viewToggle.addEventListener('click', toggleViewMode);
+            
+            // Modo oscuro
+            elements.darkModeToggle.addEventListener('click', toggleDarkMode);
+            
+            // Categorías del menú
+            elements.menuCategories.forEach(category => {
+                const categoryButton = category.querySelector('button');
+                const submenu = category.querySelector('.submenu');
+                
+                // Desktop hover
+                category.addEventListener('mouseenter', () => {
+                    if (window.innerWidth >= 768) {
+                        openSubmenu(submenu);
+                    }
+                });
+                
+                category.addEventListener('mouseleave', () => {
+                    if (window.innerWidth >= 768) {
+                        closeSubmenu(submenu);
+                    }
+                });
+                
+                // Mobile click
+                categoryButton.addEventListener('click', () => {
+                    if (window.innerWidth < 768) {
+                        toggleSubmenu(category, submenu);
+                    }
+                });
+            });
+            
+            // Items del submenú
+            elements.submenuItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    selectMenuItem(item);
+                });
+            });
+            
+            // Cerrar menú al hacer click fuera
+            document.addEventListener('click', handleOutsideClick);
+            
+            // Redimensionamiento
+            window.addEventListener('resize', handleResize);
 
-            if (!mainMenu || !mobileMenuButton || !mainNavigation) return; // Exit if elements not found
+            // Delegación de eventos para clics sostenidos en el área de contenido
+            elements.contentDisplay.addEventListener('mousedown', handleMouseDown);
+            elements.contentDisplay.addEventListener('mouseup', handleMouseUp);
+            elements.contentDisplay.addEventListener('mouseleave', clearLongPressTimer, true);
+            elements.contentDisplay.addEventListener('touchstart', handleMouseDown, { passive: true });
+            elements.contentDisplay.addEventListener('touchend', handleMouseUp);
+            elements.contentDisplay.addEventListener('click', handleNormalClick, true);
+        }
 
-            // Temporarily make main menu visible to measure
-            mainNavigation.style.display = 'flex';
-            mainNavigation.classList.remove('hidden');
-            mobileMenuButton.style.display = 'none';
+        // --- INICIO: Lógica para clic sostenido ---
 
-            const isOverflowing = mainMenu.scrollWidth > mainMenu.clientWidth;
-
-            if (isOverflowing) {
-                // Show mobile menu button, hide main navigation
-                mobileMenuButton.style.display = 'block';
-                mainNavigation.classList.add('hidden');
-            } else {
-                // Hide mobile menu button, show main navigation
-                mobileMenuButton.style.display = 'none';
-                mainNavigation.classList.remove('hidden');
+        function handleMouseDown(e) {
+            const link = e.target.closest('a[data-long-press-submenu]');
+            if (link) {
+                e.preventDefault(); // Previene acciones por defecto como el arrastre del enlace
+                state.isLongPress = false;
+                state.longPressTimer = setTimeout(() => {
+                    state.isLongPress = true;
+                    showLongPressSubmenu(link);
+                }, 1000); // Reducido a 1 segundo para mejorar la experiencia
             }
+        }
 
-            // Reset display for mobile if it's a mobile view
-            if (window.innerWidth < 768) {
-                if (isOverflowing) {
-                    mainNavigation.classList.add('hidden');
-                    mobileMenuButton.style.display = 'block';
-                } else {
-                    // If it fits on mobile, still hide main nav and show button
-                    // unless the user has explicitly opened it.
-                    // This part needs careful consideration for user experience.
-                    // For now, we'll keep it hidden and button visible if it overflows.
-                    mainNavigation.classList.add('hidden');
-                    mobileMenuButton.style.display = 'block';
+        function handleMouseUp() {
+            clearTimeout(state.longPressTimer);
+        }
+
+        function handleNormalClick(e) {
+            const link = e.target.closest('a[data-long-press-submenu]');
+            if (link && state.isLongPress) {
+                e.preventDefault(); // Previene la navegación si fue un clic largo
+                e.stopPropagation();
+            }
+        }
+
+        function clearLongPressTimer() {
+            clearTimeout(state.longPressTimer);
+        }
+
+        // --- FUNCIÓN MEJORADA: Ahora crea una tabla completa ---
+        function showLongPressSubmenu(element) {
+            const submenuKey = element.dataset.longPressSubmenu;
+            const submenuData = tableData[submenuKey];
+
+            if (!submenuData) return;
+
+            // Eliminar submenús existentes
+            document.querySelectorAll('.long-press-submenu-container').forEach(menu => menu.remove());
+
+            const container = document.createElement('div');
+            container.className = 'long-press-submenu-container animate__animated animate__fadeIn';
+            
+            let tableHTML = `<h2 class="text-xl font-bold text-gray-800 dark:text-white">${submenuData.title}</h2>`;
+            tableHTML += '<div class="overflow-x-auto"><table class="min-w-full">';
+            tableHTML += '<thead><tr class="uppercase text-sm leading-normal">';
+            
+            submenuData.headers.forEach(header => {
+                tableHTML += `<th class="py-3 px-6 text-left">${header}</th>`;
+            });
+            
+            tableHTML += '</tr></thead>';
+            tableHTML += '<tbody class="text-gray-600 text-sm font-light dark:text-gray-300">';
+            
+            submenuData.rows.forEach((row) => {
+                tableHTML += `<tr class="border-b border-gray-200 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700">`;
+                tableHTML += `<td class="py-3 px-6 text-left whitespace-nowrap link-cell">${row[0]}</td>`;
+                tableHTML += `<td class="py-3 px-6 text-left">${row[1]}</td>`;
+                tableHTML += '</tr>';
+            });
+            
+            tableHTML += '</tbody></table></div>';
+            container.innerHTML = tableHTML;
+            elements.body.appendChild(container);
+
+            const rect = element.getBoundingClientRect();
+            container.style.top = `${rect.bottom + window.scrollY + 5}px`; // Un pequeño margen
+            container.style.left = `${rect.left + window.scrollX}px`;
+
+            // Event listener para cerrar el submenú al hacer clic fuera
+            setTimeout(() => {
+                document.addEventListener('click', closeLongPressSubmenu, { once: true });
+            }, 0);
+        }
+
+        function closeLongPressSubmenu(e) {
+            const existingSubmenu = document.querySelector('.long-press-submenu-container');
+            // Si hay un submenú y el clic fue fuera de él, lo eliminamos
+            if (existingSubmenu && !existingSubmenu.contains(e.target)) {
+                 existingSubmenu.remove();
+            } else if (existingSubmenu) {
+                // Si el clic fue DENTRO, volvemos a añadir el listener para el próximo clic
+                setTimeout(() => {
+                   document.addEventListener('click', closeLongPressSubmenu, { once: true });
+                }, 0);
+            }
+        }
+        
+        // --- FIN: Lógica para clic sostenido ---
+
+        // El resto de las funciones (displayTable, toggleDarkMode, etc.) se mantienen sin cambios.
+        
+                function toggleMobileMenu() {
+            elements.mainNavigation.classList.toggle('hidden');
+            if (elements.searchBar.classList.contains('active')) {
+                elements.searchBar.classList.remove('active');
+            }
+        }
+
+        function toggleSearchBar() {
+            elements.searchBar.classList.toggle('active');
+            if (elements.searchBar.classList.contains('active')) {
+                elements.searchBar.querySelector('input').focus();
+            }
+            if (!elements.mainNavigation.classList.contains('hidden') && window.innerWidth < 768) {
+                elements.mainNavigation.classList.add('hidden');
+            }
+        }
+
+        function toggleViewMode() {
+            state.isCardView = !state.isCardView;
+            
+            if (state.isCardView) {
+                elements.viewToggle.innerHTML = '<i class="fas fa-th-large"></i>';
+                elements.viewToggle.querySelector('.tooltip-text').textContent = 'Vista de tabla';
+                if (state.currentContentKey) {
+                    displayCards(state.currentContentKey);
+                }
+            } else {
+                elements.viewToggle.innerHTML = '<i class="fas fa-table"></i>';
+                elements.viewToggle.querySelector('.tooltip-text').textContent = 'Vista de tarjetas';
+                if (state.currentContentKey) {
+                    displayTable(state.currentContentKey);
                 }
             }
+            
+            showNotification(`Modo ${state.isCardView ? 'tarjetas' : 'tabla'} activado`);
+        }
+
+        function toggleDarkMode() {
+            state.isDarkMode = !state.isDarkMode;
+            
+            if (state.isDarkMode) {
+                document.documentElement.classList.add('dark');
+                elements.darkModeIcon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('darkMode', 'enabled');
+                showNotification('Modo oscuro activado');
+            } else {
+                document.documentElement.classList.remove('dark');
+                elements.darkModeIcon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('darkMode', 'disabled');
+                showNotification('Modo claro activado');
+            }
+        }
+
+        function checkSystemDarkMode() {
+            const savedMode = localStorage.getItem('darkMode');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedMode === 'enabled' || (savedMode === null && systemPrefersDark)) {
+                state.isDarkMode = true;
+                document.documentElement.classList.add('dark');
+                elements.darkModeIcon.classList.replace('fa-moon', 'fa-sun');
+            }
+        }
+
+        function openSubmenu(submenu) {
+            submenu.classList.add('open');
+        }
+
+        function closeSubmenu(submenu) {
+            submenu.classList.remove('open');
+        }
+
+        function toggleSubmenu(category, submenu) {
+            elements.menuCategories.forEach(otherCategory => {
+                if (otherCategory !== category) {
+                    otherCategory.querySelector('.submenu').classList.remove('open');
+                }
+            });
+            submenu.classList.toggle('open');
+        }
+
+        function selectMenuItem(item) {
+            elements.submenuItems.forEach(sub => sub.classList.remove('active'));
+            item.classList.add('active');
+            
+            const key = item.dataset.contentKey;
+            state.currentContentKey = key;
+            
+            if (state.isCardView) {
+                displayCards(key);
+            } else {
+                displayTable(key);
+            }
+            
+            elements.menuCategories.forEach(category => {
+                category.querySelector('.submenu').classList.remove('open');
+            });
+            
+            if (window.innerWidth < 768) {
+                elements.mainNavigation.classList.add('hidden');
+            }
+            
+            showNotification(`Mostrando: ${item.textContent.trim()}`);
         }
 
         function displayTable(key) {
             const data = tableData[key];
-            let contentHTML = '';
-
+            
             if (!data) {
-                contentHTML = `<p class="text-center text-gray-500">Contenido no disponible.</p>`;
-            } else {
-                let tableHTML = `<h2 class="text-3xl font-bold text-gray-800 mb-4 text-center">${data.title}</h2>`;
-                tableHTML += '<div class="overflow-x-auto"><table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">';
-                tableHTML += '<thead><tr class="bg-gray-100 text-gray-700 uppercase text-sm leading-normal">';
-                data.headers.forEach(header => {
-                    tableHTML += `<th class="py-3 px-6 text-left">${header}</th>`;
-                });
-                tableHTML += '</tr></thead>';
-                tableHTML += '<tbody class="text-gray-600 text-sm font-light">';
-                data.rows.forEach(row => {
-                    tableHTML += '<tr class="border-b border-gray-200 hover:bg-gray-100">';
-                    row.forEach(cell => {
-                        // Renderizar como HTML si la celda contiene una etiqueta <a>
-                        if (typeof cell === 'string' && cell.startsWith('<a') && cell.endsWith('>')) {
-                            tableHTML += `<td class="py-3 px-6 text-left whitespace-nowrap link-cell">${cell}</td>`;
-                        } else {
-                            tableHTML += `<td class="py-3 px-6 text-left">${cell}</td>`;
-                        }
-                    });
-                    tableHTML += '</tr>';
-                });
-                tableHTML += '</tbody></table></div>';
-                contentHTML = tableHTML;
+                elements.contentDisplay.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 py-12">Contenido no disponible.</p>`;
+                return;
             }
             
-            contentDisplay.innerHTML = contentHTML;
+            let tableHTML = `<h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-6 text-center animate__animated animate__fadeIn">${data.title}</h2>`;
+            tableHTML += '<div class="overflow-x-auto animate__animated animate__fadeIn"><table class="min-w-full">';
+            tableHTML += '<thead><tr class="uppercase text-sm leading-normal">';
+            
+            data.headers.forEach(header => {
+                tableHTML += `<th class="py-3 px-6 text-left">${header}</th>`;
+            });
+            
+            tableHTML += '</tr></thead>';
+            tableHTML += '<tbody class="text-sm font-light">';
+            
+            data.rows.forEach((row, index) => {
+                tableHTML += `<tr class="border-b border-gray-200 dark:border-slate-600 animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.05}s">`;
+                
+                row.forEach(cell => {
+                    const isLinkCell = typeof cell === 'string' && cell.includes('<a');
+                    const tdClass = isLinkCell ? 'link-cell' : '';
+                    tableHTML += `<td class="py-3 px-6 text-left whitespace-nowrap ${tdClass} dark:text-gray-300">${cell}</td>`;
+                });
+                
+                tableHTML += '</tr>';
+            });
+            
+            tableHTML += '</tbody></table></div>';
+            elements.contentDisplay.innerHTML = tableHTML;
+        }
 
-            // Asegurarse de que la tabla recién insertada se muestre
-            const newlyDisplayedTable = contentDisplay.querySelector('table');
-            if (newlyDisplayedTable) {
-                newlyDisplayedTable.style.display = 'table';
+        function displayCards(key) {
+            const data = tableData[key];
+            
+            if (!data) {
+                elements.contentDisplay.innerHTML = `<p class="text-center text-gray-500 dark:text-gray-400 py-12">Contenido no disponible.</p>`;
+                return;
             }
+            
+            let cardsHTML = `<h2 class="text-3xl font-bold text-gray-800 dark:text-white mb-6 text-center animate__animated animate__fadeIn">${data.title}</h2>`;
+            cardsHTML += '<div class="card-container">';
+            
+            data.rows.forEach((row, index) => {
+                cardsHTML += `
+                    <div class="card animate__animated animate__fadeInUp dark:bg-slate-700 dark:border-slate-600" style="animation-delay: ${index * 0.05}s">
+                        <h3 class="card-title dark:text-indigo-300">${row[0].replace('<a', '<a class="dark:text-indigo-300"')}</h3>
+                        <p class="card-description dark:text-gray-300">${row[1]}</p>
+                    </div>
+                `;
+            });
+            
+            cardsHTML += '</div>';
+            elements.contentDisplay.classList.add('card-view');
+            elements.contentDisplay.innerHTML = cardsHTML;
+        }
+
+        function handleOutsideClick(event) {
+            if (window.innerWidth < 768 && 
+                !elements.mainNavigation.contains(event.target) && 
+                !elements.mobileMenuButton.contains(event.target)) {
+                elements.mainNavigation.classList.add('hidden');
+                elements.menuCategories.forEach(category => {
+                    category.querySelector('.submenu').classList.remove('open');
+                });
+            }
+            
+            if (!elements.searchBar.contains(event.target)) {
+                const searchInput = elements.searchBar.querySelector('input');
+                if (searchInput && searchInput.value === '' && elements.searchBar.classList.contains('active')) {
+                    elements.searchBar.classList.remove('active');
+                }
+            }
+        }
+
+        function handleResize() {
+            checkMenuFit();
+            
+            if (window.innerWidth < 768) {
+                elements.mainNavigation.classList.add('hidden');
+            } else {
+                elements.mainNavigation.classList.remove('hidden');
+            }
+        }
+
+        function checkMenuFit() {
+            const mainMenu = document.querySelector('.main-menu');
+            
+            if (!mainMenu) return;
+            
+            elements.mainNavigation.style.display = 'flex';
+            elements.mainNavigation.classList.remove('hidden');
+            elements.mobileMenuButton.style.display = 'none';
+            
+            const isOverflowing = mainMenu.scrollWidth > mainMenu.clientWidth;
+            
+            if (isOverflowing) {
+                elements.mobileMenuButton.style.display = 'block';
+                elements.mainNavigation.classList.add('hidden');
+            } else {
+                elements.mobileMenuButton.style.display = 'none';
+                elements.mainNavigation.classList.remove('hidden');
+            }
+            
+            if (window.innerWidth < 768) {
+                if (isOverflowing) {
+                    elements.mainNavigation.classList.add('hidden');
+                    elements.mobileMenuButton.style.display = 'block';
+                } else {
+                    elements.mainNavigation.classList.add('hidden');
+                    elements.mobileMenuButton.style.display = 'block';
+                }
+            }
+        }
+
+        function showNotification(message) {
+            elements.notificationMessage.textContent = message;
+            
+            elements.notification.classList.remove('hidden');
+            elements.notification.classList.add('show');
+            
+            setTimeout(() => {
+                elements.notification.classList.remove('show');
+                setTimeout(() => {
+                    elements.notification.classList.add('hidden');
+                }, 300);
+            }, 3000);
+        }
+
+        function showWelcomeAnimation() {
+            const welcomeElements = elements.contentDisplay.querySelectorAll('*');
+            welcomeElements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = `opacity 0.5s ease ${index * 0.1}s, transform 0.5s ease ${index * 0.1}s`;
+                
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 100);
+            });
         }
     </script>
 </body>
