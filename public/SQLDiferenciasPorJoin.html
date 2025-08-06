@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Script de Comparación (Versión Final v6)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #f4f7f9;
+        }
+        h1, h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result-container {
+            margin-top: 25px;
+            position: relative;
+        }
+        pre {
+            background-color: #2d2d2d;
+            color: #f2f2f2;
+            padding: 20px;
+            padding-top: 45px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .copy-button:hover {
+            background-color: #777;
+        }
+        .info {
+            background-color: #eaf2f8;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Generador de Script de Comparación (Versión Final v6)</h1>
+        <p>Esta herramienta crea un script T-SQL que deduce automáticamente las columnas comunes y las compara. Esta versión soluciona los errores de sintaxis y subconsultas de las versiones anteriores.</p>
+        
+        <div class="info">
+            ✅ <strong>¡CORRECCIÓN FINAL!</strong> Se ha mejorado la lógica de parsing de la consulta inicial para evitar errores de sintaxis (`Msg 1046`). Esta versión utiliza un método más directo para extraer los alias.
+        </div>
+
+        <h2>Paso 1: Introduce tu consulta</h2>
+        <label for="userQuery">Pega tu consulta `SELECT` completa. Debe usar `INNER JOIN` y alias para las tablas (ej: T1, T2).</label>
+        <textarea id="userQuery" rows="6" placeholder="select * from BD1..Tabla1 T1 inner join BD2..Tabla2 T2 on T1.Codigo = T2.Codigo"></textarea>
+
+        <button id="generateBtn">Generar Script Definitivo</button>
+
+        <div id="result-container" style="display:none;">
+            <h2>Paso 2: Copia y ejecuta este script en SSMS</h2>
+            <p>El siguiente script realizará todo el proceso de forma segura y compatible.</p>
+            <div style="position: relative;">
+                <button class="copy-button" onclick="copyScript()">Copiar Script</button>
+                <pre><code id="outputSql"></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('generateBtn').addEventListener('click', function() {
+            const userQuery = document.getElementById('userQuery').value.trim().replace(/'/g, "''");
+
+            if (!userQuery) {
+                alert("Por favor, introduce tu consulta.");
+                return;
+            }
+
+            const tsqlScript = `
+SET NOCOUNT ON;
+/*************************************************************************************************
+* Script de Comparación Dinámica de Tablas (Versión Final v6 - Definitiva)
+* -----------------------------------------------------------------------------------
+* Corrige los errores de sintaxis en la extracción de alias y tablas.
+* Optimizado para tablas con muchas columnas.
+*************************************************************************************************/
+
+-- Limpieza previa
+IF OBJECT_ID('tempdb..#CommonColumns') IS NOT NULL DROP TABLE #CommonColumns;
+IF OBJECT_ID('tempdb..#Differences') IS NOT NULL DROP TABLE #Differences;
+
+-- ===============================================================================================
+-- PASO 1: CONFIGURACIÓN
+-- ===============================================================================================
+DECLARE @userQuery NVARCHAR(MAX) = N'${userQuery}';
+
+-- ===============================================================================================
+-- PASO 2: ANÁLISIS DE LA CONSULTA Y DETECCIÓN DE TABLAS
+-- ===============================================================================================
+PRINT '--- PASO 1: Analizando la consulta y detectando tablas y claves...';
+
+DECLARE @fromClause NVARCHAR(MAX), @posFrom INT, @posWhere INT;
+DECLARE @table1Def NVARCHAR(255), @table2Def NVARCHAR(255), @alias1 NVARCHAR(128), @alias2 NVARCHAR(128);
+DECLARE @joinCondition NVARCHAR(1000);
+DECLARE @db1 NVARCHAR(128), @schema1 NVARCHAR(128), @table1 NVARCHAR(128);
+DECLARE @db2 NVARCHAR(128), @schema2 NVARCHAR(128), @table2 NVARCHAR(128);
+DECLARE @joinKey1 NVARCHAR(128), @joinKey2 NVARCHAR(128);
+
+BEGIN TRY
+    SET @posFrom = CHARINDEX(' from ', LOWER(@userQuery));
+    SET @posWhere = CHARINDEX(' where ', LOWER(@userQuery));
+    IF @posWhere = 0 SET @posWhere = LEN(@userQuery) + 1;
+
+    SET @fromClause = SUBSTRING(@userQuery, @posFrom + 6, @posWhere - (@posFrom + 6));
+    
+    -- Manejo más robusto para la extracción de alias y tablas
+    DECLARE @tempFromClause NVARCHAR(MAX) = REPLACE(REPLACE(@fromClause, CHAR(13), ' '), CHAR(10), ' '); -- Eliminar saltos de línea
+    SET @tempFromClause = LTRIM(RTRIM(@tempFromClause));
+
+    DECLARE @posJoin INT = CHARINDEX(' inner join ', LOWER(@tempFromClause));
+    DECLARE @posOn INT = CHARINDEX(' on ', LOWER(@tempFromClause));
+    
+    -- Extracción de la primera tabla y alias
+    DECLARE @table1Part NVARCHAR(MAX) = LTRIM(RTRIM(SUBSTRING(@tempFromClause, 1, @posJoin - 1)));
+    DECLARE @posSpace1 INT = LEN(@table1Part) - CHARINDEX(' ', REVERSE(@table1Part));
+    SET @alias1 = LTRIM(RTRIM(SUBSTRING(@table1Part, @posSpace1 + 1, LEN(@table1Part) - @posSpace1)));
+    SET @table1Def = LTRIM(RTRIM(SUBSTRING(@table1Part, 1, @posSpace1)));
+
+    -- Extracción de la segunda tabla y alias
+    DECLARE @table2Part NVARCHAR(MAX) = LTRIM(RTRIM(SUBSTRING(@tempFromClause, @posJoin + 12, @posOn - (@posJoin + 12))));
+    DECLARE @posSpace2 INT = LEN(@table2Part) - CHARINDEX(' ', REVERSE(@table2Part));
+    SET @alias2 = LTRIM(RTRIM(SUBSTRING(@table2Part, @posSpace2 + 1, LEN(@table2Part) - @posSpace2)));
+    SET @table2Def = LTRIM(RTRIM(SUBSTRING(@table2Part, 1, @posSpace2)));
+
+    -- Extracción de la condición de JOIN
+    SET @joinCondition = LTRIM(RTRIM(SUBSTRING(@tempFromClause, @posOn + 4, LEN(@tempFromClause))));
+    
+    SET @joinKey1 = PARSENAME(LTRIM(RTRIM(SUBSTRING(@joinCondition, 1, CHARINDEX('=', @joinCondition)-1))), 1);
+    SET @joinKey2 = PARSENAME(LTRIM(RTRIM(SUBSTRING(@joinCondition, CHARINDEX('=', @joinCondition)+1, LEN(@joinCondition)))), 1);
+END TRY
+BEGIN CATCH
+    PRINT 'ERROR: No se pudo analizar la consulta. Asegúrese de que usa el formato "FROM tabla1 alias1 INNER JOIN tabla2 alias2 ON alias1.col = alias2.col".';
+    PRINT ERROR_MESSAGE();
+    GOTO Cleanup;
+END CATCH
+
+SET @db1 = ISNULL(PARSENAME(@table1Def, 3), DB_NAME());
+SET @schema1 = ISNULL(PARSENAME(@table1Def, 2), 'dbo');
+SET @table1 = PARSENAME(@table1Def, 1);
+SET @db2 = ISNULL(PARSENAME(@table2Def, 3), DB_NAME());
+SET @schema2 = ISNULL(PARSENAME(@table2Def, 2), 'dbo');
+SET @table2 = PARSENAME(@table2Def, 1);
+
+PRINT ' -> Tabla 1: ' + QUOTENAME(@db1) + '.' + QUOTENAME(@schema1) + '.' + QUOTENAME(@table1) + ' (Alias: ' + @alias1 + ')';
+PRINT ' -> Tabla 2: ' + QUOTENAME(@db2) + '.' + QUOTENAME(@schema2) + '.' + QUOTENAME(@table2) + ' (Alias: ' + @alias2 + ')';
+PRINT ' -> Clave Join: ' + @joinKey1;
+
+-- ===============================================================================================
+-- PASO 3: DETECCIÓN DE COLUMNAS COMUNES
+-- ===============================================================================================
+PRINT CHAR(10) + '--- PASO 2: Buscando columnas con nombres idénticos...';
+
+CREATE TABLE #CommonColumns (ColumnName NVARCHAR(128), ordinal_position INT PRIMARY KEY IDENTITY(1,1));
+DECLARE @sqlGetCols NVARCHAR(MAX);
+
+SET @sqlGetCols = 'INSERT INTO #CommonColumns (ColumnName) SELECT c1.name FROM ' + QUOTENAME(@db1) + '.sys.columns c1 INNER JOIN ' + QUOTENAME(@db2) + '.sys.columns c2 ON c1.name = c2.name WHERE c1.object_id = OBJECT_ID(''' + QUOTENAME(@db1) + '.' + QUOTENAME(@schema1) + '.' + QUOTENAME(@table1) + ''') AND c2.object_id = OBJECT_ID(''' + QUOTENAME(@db2) + '.' + QUOTENAME(@schema2) + '.' + QUOTENAME(@table2) + ''') AND c1.name NOT IN (''' + @joinKey1 + ''', ''' + @joinKey2 + ''');';
+EXEC(@sqlGetCols);
+
+IF (SELECT COUNT(*) FROM #CommonColumns) = 0
+BEGIN
+    PRINT 'AVISO: No se encontraron columnas comunes para comparar.';
+    GOTO Cleanup;
+END
+
+DECLARE @columnCount INT;
+SELECT @columnCount = COUNT(*) FROM #CommonColumns;
+
+PRINT ' -> ' + CAST(@columnCount AS VARCHAR) + ' columnas comunes encontradas para comparar.';
+
+-- ===============================================================================================
+-- PASO 4: CONSTRUCCIÓN Y EJECUCIÓN DEL SCRIPT FINAL (PROCESANDO POR LOTES)
+-- ===============================================================================================
+PRINT CHAR(10) + '--- PASO 3: Construyendo y ejecutando la comparación final por lotes...';
+
+DECLARE @columnsToCompare NVARCHAR(MAX);
+DECLARE @dynamicSQL NVARCHAR(MAX);
+DECLARE @pos INT = 1;
+
+CREATE TABLE #Differences (
+    PrimaryKey NVARCHAR(128),
+    FieldName NVARCHAR(128),
+    Value_T1 NVARCHAR(MAX),
+    Value_T2 NVARCHAR(MAX)
+);
+
+WHILE EXISTS (SELECT 1 FROM #CommonColumns WHERE ordinal_position = @pos)
+BEGIN
+    SELECT @columnsToCompare = ColumnName FROM #CommonColumns WHERE ordinal_position = @pos;
+    
+    SET @dynamicSQL = N'
+    
+    INSERT INTO #Differences (PrimaryKey, FieldName, Value_T1, Value_T2)
+    SELECT
+        d.PrimaryKey,
+        d.FieldName,
+        d.Value_T1,
+        d.Value_T2
+    FROM (
+        SELECT
+            ' + QUOTENAME(@alias1) + '.' + QUOTENAME(@joinKey1) + ' AS PrimaryKey,
+            ''' + @columnsToCompare + ''' AS FieldName,
+            CAST(' + QUOTENAME(@alias1) + '.' + QUOTENAME(@columnsToCompare) + ' AS NVARCHAR(MAX)) AS Value_T1,
+            CAST(' + QUOTENAME(@alias2) + '.' + QUOTENAME(@columnsToCompare) + ' AS NVARCHAR(MAX)) AS Value_T2
+        FROM
+            ' + @fromClause + '
+    ) AS d
+    WHERE
+        CAST(d.Value_T1 AS VARBINARY(MAX)) <> CAST(d.Value_T2 AS VARBINARY(MAX)) OR
+        (d.Value_T1 IS NULL AND d.Value_T2 IS NOT NULL) OR
+        (d.Value_T1 IS NOT NULL AND d.Value_T2 IS NULL);
+    ';
+
+    EXEC sp_executesql @dynamicSQL;
+
+    SET @pos = @pos + 1;
+END
+
+PRINT '';
+PRINT '--- RESULTADOS DE LA COMPARACIÓN ---';
+SELECT * FROM #Differences;
+DECLARE @totalDiferencias INT;
+SELECT @totalDiferencias = COUNT(*) FROM #Differences;
+
+PRINT 'Total de diferencias encontradas: ' + CAST(@totalDiferencias AS VARCHAR);
+PRINT '--- FIN DEL SCRIPT ---';
+
+
+Cleanup:
+-- Limpieza final
+IF OBJECT_ID('tempdb..#CommonColumns') IS NOT NULL DROP TABLE #CommonColumns;
+IF OBJECT_ID('tempdb..#Differences') IS NOT NULL DROP TABLE #Differences;
+SET NOCOUNT OFF;
+`;
+            document.getElementById('outputSql').textContent = tsqlScript.trim();
+            document.getElementById('result-container').style.display = 'block';
+        });
+
+        function copyScript() {
+            const scriptText = document.getElementById('outputSql').textContent;
+            navigator.clipboard.writeText(scriptText).then(function() {
+                alert('¡Script copiado al portapapeles!');
+            }, function(err) {
+                alert('Error al copiar el script: ' + err);
+            });
+        }
+    </script>
+
+</body>
+</html>
