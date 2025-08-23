@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -74,13 +73,8 @@ margin: 20px 0;
 </style>
 </head>
 <body>
-
 code
 Code
-download
-content_copy
-expand_less
-
 <h1>Manejo Avanzado de JSON en SQL Server con Generador de Scripts en VB.NET</h1>
 <p>
     Esta guía final proporciona una solución completa que no solo gestiona atributos dinámicos en una clase de VB.NET, sino que también genera los fragmentos de código SQL necesarios para realizar operaciones de lectura (SELECT) y escritura (INSERT/UPDATE) de forma externa.
@@ -96,28 +90,20 @@ expand_less
         <button class="copy-button" onclick="copyCode(this)">Copiar</button>
     </div>
     <pre><code class="language-sql">-- Crear una tabla de ejemplo (Ej: Productos)
-
 CREATE TABLE Productos (
 ID INT PRIMARY KEY IDENTITY(1,1),
 NombreProducto VARCHAR(255) NOT NULL,
 Atributos NVARCHAR(MAX)
 );
 GO
-
 -- Añadir una restricción para asegurar que los datos en 'Atributos' sean siempre un JSON válido
 ALTER TABLE Productos
 ADD CONSTRAINT CHK_Productos_Atributos_IsJSON CHECK (ISJSON(Atributos) > 0);
 GO
 </code></pre>
 </div>
-
 code
 Code
-download
-content_copy
-expand_less
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
 <h2>Paso 2: La Clase de Gestión de Atributos en VB.NET (Versión Final)</h2>
 <p>
     A la clase anterior le hemos añadido dos nuevas funciones: <code style="color:red; font-weight:bold;">GenerarValorSqlParaUpdate</code> y <code style="color:red; font-weight:bold;">GenerarClausulaSqlSelect</code>.
@@ -131,20 +117,12 @@ IGNORE_WHEN_COPYING_END
         <button class="copy-button" onclick="copyCode(this)">Copiar</button>
     </div>
     <pre><code class="language-vb">' Imports necesarios
-
 Imports Newtonsoft.Json
 Imports System.Collections.Generic
 Imports System.Text
-
 Public Class GestionAtributos
-
 code
 Code
-download
-content_copy
-expand_less
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
 Public Property Atributos As Dictionary(Of String, List(Of String))
 
 Public Sub New()
@@ -241,18 +219,11 @@ Public Function GenerarClausulaSqlSelect(ByVal aliasTabla As String, ByVal nombr
 
     Return sb.ToString()
 End Function
-
 End Class
 </code></pre>
 </div>
-
 code
 Code
-download
-content_copy
-expand_less
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
 <h2>Paso 3: Ejemplo de Uso de los Generadores de SQL</h2>
 <p>
     Este módulo demuestra cómo utilizar las nuevas funciones para construir consultas SQL dinámicamente.
@@ -318,18 +289,11 @@ Public Sub Main()
 
     Console.ReadLine()
 End Sub
-
 End Module
 </code></pre>
 </div>
-
 code
 Code
-download
-content_copy
-expand_less
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
 <h3>Resultado Esperado en la Consola</h3>
 <p>La ejecución del código anterior producirá la siguiente salida, mostrando los scripts SQL listos para ser usados.</p>
 <div class="code-container">
@@ -338,128 +302,117 @@ IGNORE_WHEN_COPYING_END
         <button class="copy-button" onclick="copyCode(this)">Copiar</button>
     </div>
     <pre><code class="language-text">--- 1. Generando Cláusula SELECT ---
-
 Cláusula generada:
 , JSON_VALUE(p.Atributos, '
 .
-𝐶
-𝑜
-𝑙
-𝑜
-𝑟
+C
+o
+l
+o
+r
 ′
 )
-𝐴
-𝑆
-𝐶
-𝑜
-𝑙
-𝑜
-𝑟
+A
+S
+C
+o
+l
+o
+r
 1
 ,
-𝐽
-𝑆
-𝑂
-𝑁
-𝑉
-𝐴
-𝐿
-𝑈
-𝐸
+J
+S
+O
+N
+V
+A
+L
+U
+E
 (
-𝑝
+p
 .
-𝐴
-𝑡
-𝑟
-𝑖
-𝑏
-𝑢
-𝑡
-𝑜
-𝑠
+A
+t
+r
+i
+b
+u
+t
+o
+s
 ,
 ′
-.Color
+.Color 
 ′
-)ASColor1,JSON
+ )ASColor1,JSON 
 V
-	​
-
-ALUE(p.Atributos,
+​
+ ALUE(p.Atributos, 
 ′
+ 
 .Color') AS Color2, JSON_VALUE(p.Atributos, '$.Talla') AS Talla1
-
 Consulta SELECT completa:
 SELECT p.ID, p.NombreProducto, JSON_VALUE(p.Atributos, '
 .
-𝐶
-𝑜
-𝑙
-𝑜
-𝑟
+C
+o
+l
+o
+r
 ′
 )
-𝐴
-𝑆
-𝐶
-𝑜
-𝑙
-𝑜
-𝑟
+A
+S
+C
+o
+l
+o
+r
 1
 ,
-𝐽
-𝑆
-𝑂
-𝑁
-𝑉
-𝐴
-𝐿
-𝑈
-𝐸
+J
+S
+O
+N
+V
+A
+L
+U
+E
 (
-𝑝
+p
 .
-𝐴
-𝑡
-𝑟
-𝑖
-𝑏
-𝑢
-𝑡
-𝑜
-𝑠
+A
+t
+r
+i
+b
+u
+t
+o
+s
 ,
 ′
-.Color
+.Color 
 ′
-)ASColor1,JSON
+ )ASColor1,JSON 
 V
-	​
-
-ALUE(p.Atributos,
+​
+ ALUE(p.Atributos, 
 ′
+ 
 .Color') AS Color2, JSON_VALUE(p.Atributos, '$.Talla') AS Talla1 FROM Productos p WHERE p.ID = 1;
-
 --- 2. Generando Valor para UPDATE/INSERT ---
 Valor SQL generado:
 N'{"Color":["Verde","Azul"],"Material":["Algodón"],"Proveedor":["O''Malley''s Fabrics"]}'
-
 Consulta UPDATE completa:
 UPDATE Productos SET Atributos = N'{"Color":["Verde","Azul"],"Material":["Algodón"],"Proveedor":["O''Malley''s Fabrics"]}' WHERE ID = 2;
-
 </code></pre>
 </div>
-
 code
 Code
-download
-content_copy
-expand_less
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
 <script>
     function copyCode(buttonElement) {
         const pre = buttonElement.closest('.code-container').querySelector('pre');
