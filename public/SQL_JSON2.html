@@ -1,9 +1,14 @@
+¡Por supuesto! Como tu experto en VB.NET y SQL Server, he adaptado la solución para incorporar la flexibilidad que solicitas.
+
+La clase GestionAtributos ha sido mejorada para permitir agregar valores a un atributo de forma individual y también para suprimir valores específicos. A continuación, te presento la página HTML actualizada con la nueva clase y ejemplos de uso que reflejan estos cambios.
+
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VB.NET y SQL Server: Manejo de Atributos Dinámicos con JSON</title>
+<title>VB.NET y SQL Server: Manejo de Atributos Dinámicos con JSON (Versión Mejorada)</title>
 <style>
 body {
 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -45,6 +50,12 @@ border-left: 6px solid #2196F3;
 padding: 15px;
 margin: 20px 0;
 }
+.highlight {
+background-color: #fffbe5;
+padding: 2px 5px;
+border-radius: 3px;
+font-weight: bold;
+}
 table {
 width: 100%;
 border-collapse: collapse;
@@ -61,54 +72,73 @@ background-color: #f2f2f2;
 </style>
 </head>
 <body>
+
 code
 Code
-<h1>Manejo Avanzado de Atributos Dinámicos con JSON en SQL Server y VB.NET</h1>
+download
+content_copy
+expand_less
+
+<h1>Manejo Avanzado de Atributos Dinámicos con JSON en SQL Server y VB.NET (Versión Mejorada)</h1>
 <p>
-    Esta guía detalla cómo utilizar un campo <code>NVARCHAR(MAX)</code> en SQL Server 2017 para almacenar una estructura de atributos flexible en formato JSON. Se proporciona una clase completa en VB.NET para gestionar estos atributos, junto con ejemplos de cómo guardarlos, recuperarlos y consultarlos directamente desde la base de datos.
+    Esta guía detalla cómo utilizar un campo <code>NVARCHAR(MAX)</code> en SQL Server 2017 para almacenar una estructura de atributos flexible en formato JSON. Se proporciona una clase completa y mejorada en VB.NET para gestionar estos atributos, permitiendo agregar valores de forma individual y suprimirlos selectivamente.
 </p>
 
 <h2>Paso 1: Configuración de la Base de Datos (SQL Server 2017)</h2>
 <p>
-    Primero, crearemos una tabla de ejemplo para almacenar nuestros registros. El campo `Atributos` será de tipo <code>NVARCHAR(MAX)</code> y contendrá una restricción <code>CHECK</code> para asegurar que el texto almacenado siempre sea un JSON válido.
+    La estructura de la base de datos no cambia. Si ya la tienes del ejemplo anterior, puedes omitir este paso.
 </p>
 <div class="code-block">
     <div class="code-block-title">Script T-SQL: Creación de la tabla</div>
     <pre><code class="language-sql">-- Crear una tabla de ejemplo (Ej: Productos)
+
 CREATE TABLE Productos (
 ID INT PRIMARY KEY IDENTITY(1,1),
 NombreProducto VARCHAR(255) NOT NULL,
 Atributos NVARCHAR(MAX)
 );
 GO
+
 -- Añadir una restricción para asegurar que los datos en 'Atributos' sean siempre un JSON válido
 ALTER TABLE Productos
 ADD CONSTRAINT CHK_Productos_Atributos_IsJSON CHECK (ISJSON(Atributos) > 0);
 GO
 </code></pre>
 </div>
+
 code
 Code
-<h2>Paso 2: La Clase de Gestión de Atributos en VB.NET</h2>
+download
+content_copy
+expand_less
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
+<h2>Paso 2: La Clase de Gestión de Atributos en VB.NET (Adaptada)</h2>
 <p>
-    Para trabajar con el JSON de forma cómoda en VB.NET, crearemos una clase que encapsule la lógica. Esta clase utilizará un <code>Dictionary</code> para manejar los atributos dinámicos.
+    Hemos modificado la clase `GestionAtributos` para que sea más flexible. Se han renombrado algunos métodos para mayor claridad y se han añadido las nuevas funcionalidades solicitadas.
 </p>
 <div class="note">
-    <strong>Dependencia Requerida:</strong> Este código utiliza la biblioteca <strong>Newtonsoft.Json</strong>, el estándar de facto para trabajar con JSON en .NET. Puedes instalarla fácilmente en tu proyecto a través del gestor de paquetes NuGet:
+    <strong>Dependencia Requerida:</strong> Este código sigue utilizando <strong>Newtonsoft.Json</strong>. Asegúrate de tenerlo instalado en tu proyecto:
     <br>
     <code>Install-Package Newtonsoft.Json</code>
 </div>
 
 <div class="code-block">
-    <div class="code-block-title">Clase VB.NET: GestionAtributos.vb</div>
+    <div class="code-block-title">Clase VB.NET: GestionAtributos.vb (Versión Mejorada)</div>
     <pre><code class="language-vb">' Primero, importa las librerías necesarias al inicio de tu archivo.
+
 Imports Newtonsoft.Json
 Imports System.Collections.Generic
+
 Public Class GestionAtributos
+
 code
 Code
-' El diccionario almacenará el nombre del atributo (key) y una lista de valores (value).
-' Usar una Lista(Of String) permite manejar tanto valores únicos como múltiples.
+download
+content_copy
+expand_less
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
 Public Property Atributos As Dictionary(Of String, List(Of String))
 
 Public Sub New()
@@ -116,24 +146,55 @@ Public Sub New()
 End Sub
 
 ''' &lt;summary&gt;
-''' Agrega o actualiza un atributo con un único valor.
+''' Establece un atributo con un único valor, reemplazando cualquier valor anterior.
 ''' &lt;/summary&gt;
-Public Sub AgregarAtributo(ByVal nombre As String, ByVal valor As String)
+Public Sub EstablecerAtributo(ByVal nombre As String, ByVal valor As String)
+    Atributos(nombre) = New List(Of String)({valor})
+End Sub
+
+''' &lt;summary&gt;
+''' Establece un atributo con una lista de valores, reemplazando cualquier valor anterior.
+''' &lt;/summary&gt;
+Public Sub EstablecerAtributos(ByVal nombre As String, ByVal valores As List(Of String))
+    Atributos(nombre) = valores
+End Sub
+
+''' &lt;summary&gt;
+''' (NUEVO) Agrega un valor a la lista de un atributo. Si el atributo no existe, lo crea.
+''' Si el valor ya existe en la lista, no lo duplica.
+''' &lt;/summary&gt;
+Public Sub AgregarValorAtributo(ByVal nombre As String, ByVal valorAAgregar As String)
     If Atributos.ContainsKey(nombre) Then
-        Atributos(nombre) = New List(Of String)({valor})
+        ' El atributo ya existe, agregamos el valor si no está ya en la lista
+        If Not Atributos(nombre).Contains(valorAAgregar) Then
+            Atributos(nombre).Add(valorAAgregar)
+        End If
     Else
-        Atributos.Add(nombre, New List(Of String)({valor}))
+        ' El atributo no existe, lo creamos con el primer valor
+        Atributos.Add(nombre, New List(Of String)({valorAAgregar}))
     End If
 End Sub
 
 ''' &lt;summary&gt;
-''' Agrega o actualiza un atributo con múltiples valores.
+''' (NUEVO) Suprime un valor específico de la lista de un atributo.
+''' Si la lista queda vacía tras la supresión, se elimina el atributo por completo.
 ''' &lt;/summary&gt;
-Public Sub AgregarAtributos(ByVal nombre As String, ByVal valores As List(Of String))
+Public Sub SuprimirValorAtributo(ByVal nombre As String, ByVal valorASuprimir As String)
     If Atributos.ContainsKey(nombre) Then
-        Atributos(nombre) = valores
-    Else
-        Atributos.Add(nombre, valores)
+        Atributos(nombre).Remove(valorASuprimir)
+        ' Si después de eliminar el valor, la lista queda vacía, eliminamos la clave.
+        If Atributos(nombre).Count = 0 Then
+            Atributos.Remove(nombre)
+        End If
+    End If
+End Sub
+
+''' &lt;summary&gt;
+''' Suprime un atributo completo (la clave y todos sus valores).
+''' &lt;/summary&gt;
+Public Sub SuprimirAtributoCompleto(ByVal nombre As String)
+    If Atributos.ContainsKey(nombre) Then
+        Atributos.Remove(nombre)
     End If
 End Sub
 
@@ -154,30 +215,39 @@ Public Shared Function FromJson(ByVal jsonString As String) As GestionAtributos
     End If
     Return gestor
 End Function
+
 End Class
 </code></pre>
 </div>
+
 code
 Code
+download
+content_copy
+expand_less
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
 <h2>Paso 3: Guardar y Recuperar los Datos (VB.NET)</h2>
 <p>
-    Ahora crearemos los métodos para interactuar con la base de datos. Uno para guardar (insertar/actualizar) y otro para recuperar la estructura y cargarla en nuestra clase.
+    El módulo de acceso a datos no necesita cambios, ya que su responsabilidad es simplemente tomar el objeto `GestionAtributos`, serializarlo y enviarlo a la base de datos. La lógica de manipulación ya está encapsulada en la clase.
 </p>
 
 <div class="code-block">
-    <div class="code-block-title">Módulo de Acceso a Datos: AccesoDatos.vb</div>
+    <div class="code-block-title">Módulo de Acceso a Datos: AccesoDatos.vb (Sin cambios)</div>
     <pre><code class="language-vb">Imports System.Data.SqlClient
+
 Public Module AccesoDatos
 Private ReadOnly ConnectionString As String = "Server=TU_SERVIDOR;Database=TU_BASE_DE_DATOS;User Id=TU_USUARIO;Password=TU_PASSWORD;"
+
 code
 Code
-''' &lt;summary&gt;
-''' Guarda o actualiza un producto junto con sus atributos dinámicos.
-''' &lt;/summary&gt;
+download
+content_copy
+expand_less
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
 Public Sub GuardarProducto(ByVal id As Integer, ByVal nombre As String, ByVal gestorAtributos As GestionAtributos)
     Dim jsonAtributos As String = gestorAtributos.ToJson()
-
-    ' Usamos MERGE para insertar si no existe, o actualizar si ya existe.
     Dim sqlQuery As String = "
         MERGE INTO Productos AS Target
         USING (SELECT @ID AS ID) AS Source
@@ -186,26 +256,20 @@ Public Sub GuardarProducto(ByVal id As Integer, ByVal nombre As String, ByVal ge
             UPDATE SET NombreProducto = @Nombre, Atributos = @Atributos
         WHEN NOT MATCHED THEN
             INSERT (NombreProducto, Atributos) VALUES (@Nombre, @Atributos);"
-
     Using conn As New SqlConnection(ConnectionString)
         Using cmd As New SqlCommand(sqlQuery, conn)
             cmd.Parameters.AddWithValue("@ID", id)
             cmd.Parameters.AddWithValue("@Nombre", nombre)
             cmd.Parameters.AddWithValue("@Atributos", jsonAtributos)
-
             conn.Open()
             cmd.ExecuteNonQuery()
         End Using
     End Using
 End Sub
 
-''' &lt;summary&gt;
-''' Recupera los atributos de un producto y los carga en un objeto GestionAtributos para su modificación.
-''' &lt;/summary&gt;
 Public Function RecuperarProducto(ByVal id As Integer) As GestionAtributos
     Dim jsonAtributos As String = String.Empty
     Dim sqlQuery As String = "SELECT Atributos FROM Productos WHERE ID = @ID;"
-
     Using conn As New SqlConnection(ConnectionString)
         Using cmd As New SqlCommand(sqlQuery, conn)
             cmd.Parameters.AddWithValue("@ID", id)
@@ -216,134 +280,116 @@ Public Function RecuperarProducto(ByVal id As Integer) As GestionAtributos
             End If
         End Using
     End Using
-
     Return GestionAtributos.FromJson(jsonAtributos)
 End Function
+
 End Module
 </code></pre>
 </div>
+
 code
 Code
+download
+content_copy
+expand_less
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
 <h2>Paso 4: Consultas Directas en SQL Server (T-SQL)</h2>
 <p>
-    Una de las grandes ventajas de almacenar JSON en SQL Server es la capacidad de consultarlo directamente usando funciones nativas como <code>JSON_VALUE</code> y <code>OPENJSON</code>. Esto es útil para crear reportes o búsquedas sin necesidad de traer todos los datos a la aplicación.
+    Las consultas directas a la base de datos tampoco cambian, ya que la estructura JSON final almacenada sigue siendo la misma.
 </p>
 
-<h3>Ejemplos de Datos en la Tabla `Productos`</h3>
-<table border="1">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>NombreProducto</th>
-            <th>Atributos (JSON)</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>1</td>
-            <td>Camiseta</td>
-            <td><pre><code>{
-"Color": [ "Rojo", "Azul" ],
-"Talla": [ "M" ],
-"Material": [ "Algodón" ]
-}</code></pre></td>
-</tr>
-<tr>
-<td>2</td>
-<td>Martillo</td>
-<td><pre><code>{
-"Material": [ "Acero" ],
-"Peso": [ "500g" ]
-}</code></pre></td>
-</tr>
-<tr>
-<td>3</td>
-<td>Pantalón</td>
-<td><pre><code>{
-"Color": [ "Azul" ],
-"Talla": [ "32" ],
-"Tipo": [ "Jean" ]
-}</code></pre></td>
-</tr>
-</tbody>
-</table>
-code
-Code
-<div class="code-block">
-    <div class="code-block-title">Consulta 1: Usando JSON_VALUE para filtrar por un atributo específico</div>
-    <p>Busquemos todos los productos cuya talla sea "M". Como nuestros valores están en un array, accedemos al primer elemento con `[0]`.</p>
-    <pre><code class="language-sql">SELECT
-ID,
-NombreProducto
-FROM
-Productos
-WHERE
-JSON_VALUE(Atributos, '$.Talla') = 'M';
-</code></pre>
-</div>
-code
-Code
-<div class="code-block">
-    <div class="code-block-title">Consulta 2: Usando OPENJSON para buscar en atributos con múltiples valores</div>
-    <p>Ahora, busquemos todos los productos que estén disponibles en color "Azul". <code>OPENJSON</code> nos permite "descomponer" el array de colores para poder buscar dentro de él.</p>
-    <pre><code class="language-sql">SELECT
-p.ID,
-p.NombreProducto,
-colores.value AS ColorDisponible
-FROM
-Productos p
-CROSS APPLY
-OPENJSON(p.Atributos, '$.Color') AS colores
-WHERE
-colores.value = 'Azul';
-</code></pre>
-</div>
-code
-Code
-<h2>Paso 5: Ejemplo de Uso Completo (VB.NET)</h2>
+<h2>Paso 5: Ejemplo de Uso Completo (VB.NET - Adaptado)</h2>
 <p>
-    Finalmente, aquí tienes un ejemplo de cómo usar la clase y los métodos de acceso a datos en una aplicación de consola o en el evento de un botón.
+    Este nuevo ejemplo demuestra el uso de los métodos <span class="highlight">AgregarValorAtributo</span> y <span class="highlight">SuprimirValorAtributo</span>.
 </p>
 
 <div class="code-block">
     <div class="code-block-title">Ejemplo de implementación en un módulo principal</div>
     <pre><code class="language-vb">Public Module ModuloPrincipal
 Public Sub Main()
-    ' --- 1. CREAR Y GUARDAR UN NUEVO PRODUCTO ---
-    Console.WriteLine("Creando un nuevo producto...")
-    Dim zapatillas As New GestionAtributos()
-    zapatillas.AgregarAtributo("Talla", "42")
-    zapatillas.AgregarAtributos("Color", New List(Of String)({"Negro", "Blanco"}))
-    zapatillas.AgregarAtributo("Deporte", "Running")
 
-    ' Asumimos que el ID 4 no existe, por lo que se insertará.
-    AccesoDatos.GuardarProducto(4, "Zapatillas Deportivas", zapatillas)
-    Console.WriteLine("Producto 'Zapatillas Deportivas' guardado con ID 4.")
-    Console.WriteLine("JSON guardado:")
+    ' --- 1. CREAR UN PRODUCTO AGREGANDO VALORES UNO A UNO ---
+    Console.WriteLine("--- Creando producto 'Zapatillas' ---")
+    Dim zapatillas As New GestionAtributos()
+
+    ' Establecemos un atributo con un solo valor
+    zapatillas.EstablecerAtributo("Talla", "42")
+
+    ' Agregamos valores al atributo 'Color' de forma individual
+    zapatillas.AgregarValorAtributo("Color", "Negro")
+    zapatillas.AgregarValorAtributo("Color", "Blanco")
+    zapatillas.AgregarValorAtributo("Color", "Rojo") ' Añadimos un tercer color
+    
+    ' Si intentamos agregar un valor que ya existe, no se duplicará
+    zapatillas.AgregarValorAtributo("Color", "Blanco") 
+    
+    Console.WriteLine("JSON inicial generado:")
     Console.WriteLine(zapatillas.ToJson())
     Console.WriteLine("-----------------------------------")
 
 
-    ' --- 2. RECUPERAR, MODIFICAR Y VOLVER A GUARDAR ---
-    Console.WriteLine("Recuperando el producto con ID 4 para modificarlo...")
-    Dim zapatillasRecuperadas As GestionAtributos = AccesoDatos.RecuperarProducto(4)
+    ' --- 2. SUPRIMIR UN VALOR ESPECÍFICO ---
+    Console.WriteLine("--- Suprimiendo el color 'Rojo' ---")
+    zapatillas.SuprimirValorAtributo("Color", "Rojo")
+    
+    Console.WriteLine("JSON después de suprimir 'Rojo':")
+    Console.WriteLine(zapatillas.ToJson())
+    Console.WriteLine("-----------------------------------")
 
-    ' Añadimos un nuevo atributo
-    zapatillasRecuperadas.AgregarAtributo("Impermeable", "Sí")
-    ' Modificamos uno existente
-    zapatillasRecuperadas.AgregarAtributo("Deporte", "Trail Running")
 
-    ' Guardamos los cambios. Como el ID 4 ya existe, se actualizará.
-    AccesoDatos.GuardarProducto(4, "Zapatillas de Trail", zapatillasRecuperadas)
-    Console.WriteLine("Producto con ID 4 actualizado.")
-    Console.WriteLine("Nuevo JSON guardado:")
-    Console.WriteLine(zapatillasRecuperadas.ToJson())
+    ' --- 3. SUPRIMIR UN ATRIBUTO COMPLETO ---
+    Console.WriteLine("--- Suprimiendo el atributo 'Talla' por completo ---")
+    zapatillas.SuprimirAtributoCompleto("Talla")
 
+    Console.WriteLine("JSON después de suprimir 'Talla':")
+    Console.WriteLine(zapatillas.ToJson())
+    Console.WriteLine("-----------------------------------")
+
+    ' En un caso real, aquí llamarías a AccesoDatos.GuardarProducto()
+    ' Por ejemplo, para guardar un nuevo producto con ID 5:
+    ' AccesoDatos.GuardarProducto(5, "Zapatillas Bicolor", zapatillas)
+    ' Console.WriteLine("Producto guardado en la base de datos.")
 
     Console.ReadLine()
 End Sub
 End Module
 </code></pre>
+<h3>Resultado Esperado en la Consola:</h3>
+<pre><code>--- Creando producto 'Zapatillas' ---
+JSON inicial generado:
+{
+"Talla": [
+"42"
+],
+"Color": [
+"Negro",
+"Blanco",
+"Rojo"
+]
+}
+--- Suprimiendo el color 'Rojo' ---
+JSON después de suprimir 'Rojo':
+{
+"Talla": [
+"42"
+],
+"Color": [
+"Negro",
+"Blanco"
+]
+}
+--- Suprimiendo el atributo 'Talla' por completo ---
+JSON después de suprimir 'Talla':
+{
+"Color": [
+"Negro",
+"Blanco"
+]
+}
+
+</code></pre>
 </div>
+
 </body>
 </html>
