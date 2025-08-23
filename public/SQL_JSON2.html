@@ -1,14 +1,10 @@
-¡Por supuesto! Como tu experto en VB.NET y SQL Server, he adaptado la solución para incorporar la flexibilidad que solicitas.
-
-La clase GestionAtributos ha sido mejorada para permitir agregar valores a un atributo de forma individual y también para suprimir valores específicos. A continuación, te presento la página HTML actualizada con la nueva clase y ejemplos de uso que reflejan estos cambios.
-
 <!DOCTYPE html>
 
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VB.NET y SQL Server: Manejo de Atributos Dinámicos con JSON (Versión Mejorada)</title>
+<title>VB.NET y SQL Server: Generador de Scripts para JSON</title>
 <style>
 body {
 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -24,6 +20,36 @@ color: #005A9E;
 border-bottom: 2px solid #005A9E;
 padding-bottom: 5px;
 }
+.code-container {
+position: relative;
+margin-bottom: 20px;
+}
+.code-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+background-color: #e0e0e0;
+padding: 5px 10px;
+border-top-left-radius: 5px;
+border-top-right-radius: 5px;
+}
+.code-header-title {
+font-weight: bold;
+color: #333;
+font-family: "Consolas", monospace;
+}
+.copy-button {
+background-color: #007bff;
+color: white;
+border: none;
+padding: 5px 10px;
+border-radius: 3px;
+cursor: pointer;
+font-size: 0.9em;
+}
+.copy-button:hover {
+background-color: #0056b3;
+}
 pre {
 background-color: #2d2d2d;
 color: #f1f1f1;
@@ -31,43 +57,19 @@ padding: 15px;
 border-radius: 5px;
 overflow-x: auto;
 border: 1px solid #ddd;
+margin: 0;
+border-top-left-radius: 0;
+border-top-right-radius: 0;
 }
 code {
 font-family: "Consolas", "Monaco", "Lucida Console", monospace;
 font-size: 0.95em;
-}
-.code-block {
-margin-bottom: 20px;
-}
-.code-block-title {
-font-weight: bold;
-margin-bottom: 5px;
-color: #333;
 }
 .note {
 background-color: #e7f3fe;
 border-left: 6px solid #2196F3;
 padding: 15px;
 margin: 20px 0;
-}
-.highlight {
-background-color: #fffbe5;
-padding: 2px 5px;
-border-radius: 3px;
-font-weight: bold;
-}
-table {
-width: 100%;
-border-collapse: collapse;
-margin: 20px 0;
-}
-th, td {
-border: 1px solid #ddd;
-padding: 8px;
-text-align: left;
-}
-th {
-background-color: #f2f2f2;
 }
 </style>
 </head>
@@ -79,17 +81,20 @@ download
 content_copy
 expand_less
 
-<h1>Manejo Avanzado de Atributos Dinámicos con JSON en SQL Server y VB.NET (Versión Mejorada)</h1>
+<h1>Manejo Avanzado de JSON en SQL Server con Generador de Scripts en VB.NET</h1>
 <p>
-    Esta guía detalla cómo utilizar un campo <code>NVARCHAR(MAX)</code> en SQL Server 2017 para almacenar una estructura de atributos flexible en formato JSON. Se proporciona una clase completa y mejorada en VB.NET para gestionar estos atributos, permitiendo agregar valores de forma individual y suprimirlos selectivamente.
+    Esta guía final proporciona una solución completa que no solo gestiona atributos dinámicos en una clase de VB.NET, sino que también genera los fragmentos de código SQL necesarios para realizar operaciones de lectura (SELECT) y escritura (INSERT/UPDATE) de forma externa.
 </p>
 
 <h2>Paso 1: Configuración de la Base de Datos (SQL Server 2017)</h2>
 <p>
-    La estructura de la base de datos no cambia. Si ya la tienes del ejemplo anterior, puedes omitir este paso.
+    La estructura de la base de datos no cambia.
 </p>
-<div class="code-block">
-    <div class="code-block-title">Script T-SQL: Creación de la tabla</div>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-header-title">Script T-SQL: Creación de la tabla</span>
+        <button class="copy-button" onclick="copyCode(this)">Copiar</button>
+    </div>
     <pre><code class="language-sql">-- Crear una tabla de ejemplo (Ej: Productos)
 
 CREATE TABLE Productos (
@@ -113,22 +118,23 @@ content_copy
 expand_less
 IGNORE_WHEN_COPYING_START
 IGNORE_WHEN_COPYING_END
-<h2>Paso 2: La Clase de Gestión de Atributos en VB.NET (Adaptada)</h2>
+<h2>Paso 2: La Clase de Gestión de Atributos en VB.NET (Versión Final)</h2>
 <p>
-    Hemos modificado la clase `GestionAtributos` para que sea más flexible. Se han renombrado algunos métodos para mayor claridad y se han añadido las nuevas funcionalidades solicitadas.
+    A la clase anterior le hemos añadido dos nuevas funciones: <code style="color:red; font-weight:bold;">GenerarValorSqlParaUpdate</code> y <code style="color:red; font-weight:bold;">GenerarClausulaSqlSelect</code>.
 </p>
 <div class="note">
-    <strong>Dependencia Requerida:</strong> Este código sigue utilizando <strong>Newtonsoft.Json</strong>. Asegúrate de tenerlo instalado en tu proyecto:
-    <br>
-    <code>Install-Package Newtonsoft.Json</code>
+    <strong>Dependencia Requerida:</strong> Se sigue utilizando <strong>Newtonsoft.Json</strong>.
 </div>
-
-<div class="code-block">
-    <div class="code-block-title">Clase VB.NET: GestionAtributos.vb (Versión Mejorada)</div>
-    <pre><code class="language-vb">' Primero, importa las librerías necesarias al inicio de tu archivo.
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-header-title">Clase VB.NET: GestionAtributos.vb (Final)</span>
+        <button class="copy-button" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><code class="language-vb">' Imports necesarios
 
 Imports Newtonsoft.Json
 Imports System.Collections.Generic
+Imports System.Text
 
 Public Class GestionAtributos
 
@@ -145,75 +151,95 @@ Public Sub New()
     Atributos = New Dictionary(Of String, List(Of String))()
 End Sub
 
-''' &lt;summary&gt;
-''' Establece un atributo con un único valor, reemplazando cualquier valor anterior.
-''' &lt;/summary&gt;
+' --- Métodos de Manipulación de Datos ---
 Public Sub EstablecerAtributo(ByVal nombre As String, ByVal valor As String)
     Atributos(nombre) = New List(Of String)({valor})
 End Sub
 
-''' &lt;summary&gt;
-''' Establece un atributo con una lista de valores, reemplazando cualquier valor anterior.
-''' &lt;/summary&gt;
 Public Sub EstablecerAtributos(ByVal nombre As String, ByVal valores As List(Of String))
     Atributos(nombre) = valores
 End Sub
 
-''' &lt;summary&gt;
-''' (NUEVO) Agrega un valor a la lista de un atributo. Si el atributo no existe, lo crea.
-''' Si el valor ya existe en la lista, no lo duplica.
-''' &lt;/summary&gt;
 Public Sub AgregarValorAtributo(ByVal nombre As String, ByVal valorAAgregar As String)
     If Atributos.ContainsKey(nombre) Then
-        ' El atributo ya existe, agregamos el valor si no está ya en la lista
         If Not Atributos(nombre).Contains(valorAAgregar) Then
             Atributos(nombre).Add(valorAAgregar)
         End If
     Else
-        ' El atributo no existe, lo creamos con el primer valor
         Atributos.Add(nombre, New List(Of String)({valorAAgregar}))
     End If
 End Sub
 
-''' &lt;summary&gt;
-''' (NUEVO) Suprime un valor específico de la lista de un atributo.
-''' Si la lista queda vacía tras la supresión, se elimina el atributo por completo.
-''' &lt;/summary&gt;
 Public Sub SuprimirValorAtributo(ByVal nombre As String, ByVal valorASuprimir As String)
     If Atributos.ContainsKey(nombre) Then
         Atributos(nombre).Remove(valorASuprimir)
-        ' Si después de eliminar el valor, la lista queda vacía, eliminamos la clave.
         If Atributos(nombre).Count = 0 Then
             Atributos.Remove(nombre)
         End If
     End If
 End Sub
 
-''' &lt;summary&gt;
-''' Suprime un atributo completo (la clave y todos sus valores).
-''' &lt;/summary&gt;
 Public Sub SuprimirAtributoCompleto(ByVal nombre As String)
-    If Atributos.ContainsKey(nombre) Then
-        Atributos.Remove(nombre)
-    End If
+    Atributos.Remove(nombre)
 End Sub
 
-''' &lt;summary&gt;
-''' Serializa el objeto de atributos a una cadena de texto JSON.
-''' &lt;/summary&gt;
+' --- Serialización ---
 Public Function ToJson() As String
-    Return JsonConvert.SerializeObject(Atributos, Formatting.Indented)
+    Return JsonConvert.SerializeObject(Atributos, Formatting.None)
 End Function
 
-''' &lt;summary&gt;
-''' (Función Compartida) Deserializa una cadena JSON para crear un objeto GestionAtributos.
-''' &lt;/summary&gt;
 Public Shared Function FromJson(ByVal jsonString As String) As GestionAtributos
     Dim gestor = New GestionAtributos()
     If Not String.IsNullOrEmpty(jsonString) Then
         gestor.Atributos = JsonConvert.DeserializeObject(Of Dictionary(Of String, List(Of String)))(jsonString)
     End If
     Return gestor
+End Function
+
+' --- (NUEVO) Generadores de SQL ---
+
+''' &lt;summary&gt;
+''' Genera el valor de texto literal que se debe usar en una consulta SQL para insertar o actualizar el campo JSON.
+''' Se encarga de formatear el JSON y añadir las comillas simples necesarias.
+''' &lt;/summary&gt;
+''' &lt;returns&gt;Una cadena con el formato N'{ "Atributo": ["Valor"] }'&lt;/returns&gt;
+Public Function GenerarValorSqlParaUpdate() As String
+    ' La N inicial es importante para cadenas Unicode (NVARCHAR)
+    ' Se reemplaza cualquier comilla simple por dos para escaparla en SQL.
+    Return "N'" & Me.ToJson().Replace("'", "''") & "'"
+End Function
+
+''' &lt;summary&gt;
+''' Genera la cláusula SELECT para "desnormalizar" los atributos JSON en columnas planas.
+''' Se basa en la estructura actual del objeto para definir qué columnas generar.
+''' &lt;/summary&gt;
+''' &lt;param name="aliasTabla"&gt;El alias de la tabla en la consulta SQL (ej. "p").&lt;/param&gt;
+''' &lt;param name="nombreCampoJson"&gt;El nombre del campo que contiene el JSON (ej. "Atributos").&lt;/param&gt;
+''' &lt;returns&gt;Una cadena como ", JSON_VALUE(p.Atributos, '$.Color') AS Color1, ..."&lt;/returns&gt;
+Public Function GenerarClausulaSqlSelect(ByVal aliasTabla As String, ByVal nombreCampoJson As String) As String
+    If Atributos.Count = 0 Then Return String.Empty
+
+    Dim sb As New StringBuilder()
+
+    For Each kvp As KeyValuePair(Of String, List(Of String)) In Atributos
+        Dim nombreAtributo = kvp.Key
+        Dim valores = kvp.Value
+
+        ' Si la lista de valores está vacía en el objeto, no generamos columnas para ella.
+        ' Si no tiene valores, asumimos que queremos al menos una columna (para el caso de un solo valor).
+        Dim maxValores = If(valores IsNot Nothing AndAlso valores.Count > 0, valores.Count, 1)
+
+        For i As Integer = 0 To maxValores - 1
+            ' Añadimos la coma inicial para cada cláusula
+            sb.Append(", ")
+            ' Usamos el alias de la tabla y el nombre del campo
+            sb.Append($"JSON_VALUE({aliasTabla}.{nombreCampoJson}, '$.{nombreAtributo}[{i}]')")
+            ' Creamos el alias de la columna, ej. Color1, Color2
+            sb.Append($" AS {nombreAtributo}{i + 1}")
+        Next
+    Next
+
+    Return sb.ToString()
 End Function
 
 End Class
@@ -227,169 +253,228 @@ content_copy
 expand_less
 IGNORE_WHEN_COPYING_START
 IGNORE_WHEN_COPYING_END
-<h2>Paso 3: Guardar y Recuperar los Datos (VB.NET)</h2>
+<h2>Paso 3: Ejemplo de Uso de los Generadores de SQL</h2>
 <p>
-    El módulo de acceso a datos no necesita cambios, ya que su responsabilidad es simplemente tomar el objeto `GestionAtributos`, serializarlo y enviarlo a la base de datos. La lógica de manipulación ya está encapsulada en la clase.
+    Este módulo demuestra cómo utilizar las nuevas funciones para construir consultas SQL dinámicamente.
 </p>
 
-<div class="code-block">
-    <div class="code-block-title">Módulo de Acceso a Datos: AccesoDatos.vb (Sin cambios)</div>
-    <pre><code class="language-vb">Imports System.Data.SqlClient
-
-Public Module AccesoDatos
-Private ReadOnly ConnectionString As String = "Server=TU_SERVIDOR;Database=TU_BASE_DE_DATOS;User Id=TU_USUARIO;Password=TU_PASSWORD;"
-
-code
-Code
-download
-content_copy
-expand_less
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-Public Sub GuardarProducto(ByVal id As Integer, ByVal nombre As String, ByVal gestorAtributos As GestionAtributos)
-    Dim jsonAtributos As String = gestorAtributos.ToJson()
-    Dim sqlQuery As String = "
-        MERGE INTO Productos AS Target
-        USING (SELECT @ID AS ID) AS Source
-        ON Target.ID = Source.ID
-        WHEN MATCHED THEN
-            UPDATE SET NombreProducto = @Nombre, Atributos = @Atributos
-        WHEN NOT MATCHED THEN
-            INSERT (NombreProducto, Atributos) VALUES (@Nombre, @Atributos);"
-    Using conn As New SqlConnection(ConnectionString)
-        Using cmd As New SqlCommand(sqlQuery, conn)
-            cmd.Parameters.AddWithValue("@ID", id)
-            cmd.Parameters.AddWithValue("@Nombre", nombre)
-            cmd.Parameters.AddWithValue("@Atributos", jsonAtributos)
-            conn.Open()
-            cmd.ExecuteNonQuery()
-        End Using
-    End Using
-End Sub
-
-Public Function RecuperarProducto(ByVal id As Integer) As GestionAtributos
-    Dim jsonAtributos As String = String.Empty
-    Dim sqlQuery As String = "SELECT Atributos FROM Productos WHERE ID = @ID;"
-    Using conn As New SqlConnection(ConnectionString)
-        Using cmd As New SqlCommand(sqlQuery, conn)
-            cmd.Parameters.AddWithValue("@ID", id)
-            conn.Open()
-            Dim result = cmd.ExecuteScalar()
-            If result IsNot Nothing AndAlso Not DBNull.Value.Equals(result) Then
-                jsonAtributos = result.ToString()
-            End If
-        End Using
-    End Using
-    Return GestionAtributos.FromJson(jsonAtributos)
-End Function
-
-End Module
-</code></pre>
+<div class="note">
+    <strong>Concepto Clave para SELECT:</strong> La función <code>GenerarClausulaSqlSelect</code> se basa en la estructura del objeto que la llama. Debes crear un objeto "plantilla" que defina la máxima cantidad de valores que esperas recuperar por cada atributo. Por ejemplo, si sabes que un producto puede tener hasta 3 colores, tu objeto plantilla debe tener una lista con 3 elementos para el atributo "Color".
 </div>
 
-code
-Code
-download
-content_copy
-expand_less
-IGNORE_WHEN_COPYING_START
-IGNORE_WHEN_COPYING_END
-<h2>Paso 4: Consultas Directas en SQL Server (T-SQL)</h2>
-<p>
-    Las consultas directas a la base de datos tampoco cambian, ya que la estructura JSON final almacenada sigue siendo la misma.
-</p>
-
-<h2>Paso 5: Ejemplo de Uso Completo (VB.NET - Adaptado)</h2>
-<p>
-    Este nuevo ejemplo demuestra el uso de los métodos <span class="highlight">AgregarValorAtributo</span> y <span class="highlight">SuprimirValorAtributo</span>.
-</p>
-
-<div class="code-block">
-    <div class="code-block-title">Ejemplo de implementación en un módulo principal</div>
-    <pre><code class="language-vb">Public Module ModuloPrincipal
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-header-title">Ejemplo de implementación: GeneracionSql.vb</span>
+        <button class="copy-button" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><code class="language-vb">Public Module GeneracionSql
 Public Sub Main()
 
-    ' --- 1. CREAR UN PRODUCTO AGREGANDO VALORES UNO A UNO ---
-    Console.WriteLine("--- Creando producto 'Zapatillas' ---")
-    Dim zapatillas As New GestionAtributos()
+    ' --- EJEMPLO 1: GENERAR CLÁUSULA SELECT ---
+    Console.WriteLine("--- 1. Generando Cláusula SELECT ---")
 
-    ' Establecemos un atributo con un solo valor
-    zapatillas.EstablecerAtributo("Talla", "42")
+    ' Creamos un objeto "plantilla" para definir la estructura que queremos consultar.
+    ' Queremos obtener hasta 2 colores y 1 talla.
+    Dim plantillaSelect As New GestionAtributos()
+    plantillaSelect.EstablecerAtributos("Color", New List(Of String)({"val1", "val2"})) ' 2 valores
+    plantillaSelect.EstablecerAtributo("Talla", "val1") ' 1 valor
 
-    ' Agregamos valores al atributo 'Color' de forma individual
-    zapatillas.AgregarValorAtributo("Color", "Negro")
-    zapatillas.AgregarValorAtributo("Color", "Blanco")
-    zapatillas.AgregarValorAtributo("Color", "Rojo") ' Añadimos un tercer color
-    
-    ' Si intentamos agregar un valor que ya existe, no se duplicará
-    zapatillas.AgregarValorAtributo("Color", "Blanco") 
-    
-    Console.WriteLine("JSON inicial generado:")
-    Console.WriteLine(zapatillas.ToJson())
-    Console.WriteLine("-----------------------------------")
+    ' Generamos la cláusula SQL usando el alias 'p' para la tabla y 'Atributos' para el campo.
+    Dim clausulaSelect As String = plantillaSelect.GenerarClausulaSqlSelect("p", "Atributos")
 
+    ' Construimos la consulta completa
+    Dim consultaSelectCompleta As String = "SELECT p.ID, p.NombreProducto" & clausulaSelect & " FROM Productos p WHERE p.ID = 1;"
 
-    ' --- 2. SUPRIMIR UN VALOR ESPECÍFICO ---
-    Console.WriteLine("--- Suprimiendo el color 'Rojo' ---")
-    zapatillas.SuprimirValorAtributo("Color", "Rojo")
-    
-    Console.WriteLine("JSON después de suprimir 'Rojo':")
-    Console.WriteLine(zapatillas.ToJson())
-    Console.WriteLine("-----------------------------------")
+    Console.WriteLine("Cláusula generada:")
+    Console.WriteLine(clausulaSelect)
+    Console.WriteLine()
+    Console.WriteLine("Consulta SELECT completa:")
+    Console.WriteLine(consultaSelectCompleta)
+    Console.WriteLine(New String("-", 50))
 
 
-    ' --- 3. SUPRIMIR UN ATRIBUTO COMPLETO ---
-    Console.WriteLine("--- Suprimiendo el atributo 'Talla' por completo ---")
-    zapatillas.SuprimirAtributoCompleto("Talla")
+    ' --- EJEMPLO 2: GENERAR VALOR PARA UPDATE O INSERT ---
+    Console.WriteLine("--- 2. Generando Valor para UPDATE/INSERT ---")
 
-    Console.WriteLine("JSON después de suprimir 'Talla':")
-    Console.WriteLine(zapatillas.ToJson())
-    Console.WriteLine("-----------------------------------")
+    ' Creamos un objeto con los datos específicos que queremos guardar.
+    Dim datosGuardar As New GestionAtributos()
+    datosGuardar.AgregarValorAtributo("Color", "Verde")
+    datosGuardar.AgregarValorAtributo("Color", "Azul")
+    datosGuardar.EstablecerAtributo("Material", "Algodón")
+    datosGuardar.EstablecerAtributo("Proveedor", "O'Malley's Fabrics") ' Incluye una comilla simple
 
-    ' En un caso real, aquí llamarías a AccesoDatos.GuardarProducto()
-    ' Por ejemplo, para guardar un nuevo producto con ID 5:
-    ' AccesoDatos.GuardarProducto(5, "Zapatillas Bicolor", zapatillas)
-    ' Console.WriteLine("Producto guardado en la base de datos.")
+    ' Generamos el valor SQL literal.
+    Dim valorSql As String = datosGuardar.GenerarValorSqlParaUpdate()
+
+    ' Construimos la consulta completa de actualización.
+    Dim consultaUpdateCompleta As String = "UPDATE Productos SET Atributos = " & valorSql & " WHERE ID = 2;"
+
+    Console.WriteLine("Valor SQL generado:")
+    Console.WriteLine(valorSql)
+    Console.WriteLine()
+    Console.WriteLine("Consulta UPDATE completa:")
+    Console.WriteLine(consultaUpdateCompleta)
+    Console.WriteLine(New String("-", 50))
 
     Console.ReadLine()
 End Sub
+
 End Module
 </code></pre>
-<h3>Resultado Esperado en la Consola:</h3>
-<pre><code>--- Creando producto 'Zapatillas' ---
-JSON inicial generado:
-{
-"Talla": [
-"42"
-],
-"Color": [
-"Negro",
-"Blanco",
-"Rojo"
-]
-}
---- Suprimiendo el color 'Rojo' ---
-JSON después de suprimir 'Rojo':
-{
-"Talla": [
-"42"
-],
-"Color": [
-"Negro",
-"Blanco"
-]
-}
---- Suprimiendo el atributo 'Talla' por completo ---
-JSON después de suprimir 'Talla':
-{
-"Color": [
-"Negro",
-"Blanco"
-]
-}
+</div>
+
+code
+Code
+download
+content_copy
+expand_less
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
+<h3>Resultado Esperado en la Consola</h3>
+<p>La ejecución del código anterior producirá la siguiente salida, mostrando los scripts SQL listos para ser usados.</p>
+<div class="code-container">
+    <div class="code-header">
+        <span class="code-header-title">Salida de la Consola</span>
+        <button class="copy-button" onclick="copyCode(this)">Copiar</button>
+    </div>
+    <pre><code class="language-text">--- 1. Generando Cláusula SELECT ---
+
+Cláusula generada:
+, JSON_VALUE(p.Atributos, '
+.
+𝐶
+𝑜
+𝑙
+𝑜
+𝑟
+′
+)
+𝐴
+𝑆
+𝐶
+𝑜
+𝑙
+𝑜
+𝑟
+1
+,
+𝐽
+𝑆
+𝑂
+𝑁
+𝑉
+𝐴
+𝐿
+𝑈
+𝐸
+(
+𝑝
+.
+𝐴
+𝑡
+𝑟
+𝑖
+𝑏
+𝑢
+𝑡
+𝑜
+𝑠
+,
+′
+.Color
+′
+)ASColor1,JSON
+V
+	​
+
+ALUE(p.Atributos,
+′
+.Color') AS Color2, JSON_VALUE(p.Atributos, '$.Talla') AS Talla1
+
+Consulta SELECT completa:
+SELECT p.ID, p.NombreProducto, JSON_VALUE(p.Atributos, '
+.
+𝐶
+𝑜
+𝑙
+𝑜
+𝑟
+′
+)
+𝐴
+𝑆
+𝐶
+𝑜
+𝑙
+𝑜
+𝑟
+1
+,
+𝐽
+𝑆
+𝑂
+𝑁
+𝑉
+𝐴
+𝐿
+𝑈
+𝐸
+(
+𝑝
+.
+𝐴
+𝑡
+𝑟
+𝑖
+𝑏
+𝑢
+𝑡
+𝑜
+𝑠
+,
+′
+.Color
+′
+)ASColor1,JSON
+V
+	​
+
+ALUE(p.Atributos,
+′
+.Color') AS Color2, JSON_VALUE(p.Atributos, '$.Talla') AS Talla1 FROM Productos p WHERE p.ID = 1;
+
+--- 2. Generando Valor para UPDATE/INSERT ---
+Valor SQL generado:
+N'{"Color":["Verde","Azul"],"Material":["Algodón"],"Proveedor":["O''Malley''s Fabrics"]}'
+
+Consulta UPDATE completa:
+UPDATE Productos SET Atributos = N'{"Color":["Verde","Azul"],"Material":["Algodón"],"Proveedor":["O''Malley''s Fabrics"]}' WHERE ID = 2;
 
 </code></pre>
 </div>
 
+code
+Code
+download
+content_copy
+expand_less
+IGNORE_WHEN_COPYING_START
+IGNORE_WHEN_COPYING_END
+<script>
+    function copyCode(buttonElement) {
+        const pre = buttonElement.closest('.code-container').querySelector('pre');
+        const code = pre.querySelector('code');
+        const textToCopy = code.innerText;
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            buttonElement.textContent = '¡Copiado!';
+            setTimeout(() => {
+                buttonElement.textContent = 'Copiar';
+            }, 2000);
+        }).catch(err => {
+            console.error('Error al copiar el texto: ', err);
+        });
+    }
+</script>
 </body>
 </html>
