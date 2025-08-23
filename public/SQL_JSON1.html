@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mejores Opciones para Trabajar con JSON en SQL Server</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; color: #333; }
+        h1, h2, h3 { color: #007BFF; }
+        ul, ol { margin-left: 20px; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .diagram { border: 1px solid #ccc; padding: 10px; margin: 20px 0; background-color: #f9f9f9; }
+        .flowchart { display: flex; justify-content: space-around; flex-wrap: wrap; }
+        .step { border: 2px solid #007BFF; border-radius: 5px; padding: 10px; margin: 10px; width: 150px; text-align: center; background-color: #e7f3ff; }
+        .arrow { font-size: 24px; align-self: center; }
+        details { margin: 10px 0; border: 1px solid #eee; padding: 10px; background-color: #fff; }
+        summary { cursor: pointer; font-weight: bold; }
+        code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 3px; }
+        pre { background-color: #f4f4f4; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>Guía Esquemática: Trabajar con JSON en SQL Server</h1>
+    <p>Esta página presenta de forma esquemática las mejores 10 opciones para manejar JSON con atributos dinámicos en campos grandes como varchar(max). Incluye diagramas, tablas y detalles expandidos completos con descripciones, ejemplos, mejores prácticas y consideraciones. Basado en SQL Server hasta 2025 (vista previa para tipo json nativo).</p>
+
+    <h2>Puntos Clave</h2>
+    <ul>
+        <li><strong>Almacenamiento flexible</strong>: Usa varchar(max) para datos dinámicos sin esquema fijo, combinando flexibilidad NoSQL con características relacionales.</li>
+        <li><strong>Funciones esenciales</strong>: JSON_VALUE, OPENJSON, etc., para extracción y modificación, con overhead de análisis que se mitiga con índices.</li>
+        <li><strong>Optimización</strong>: Índices en columnas computadas, tablas en memoria y el nuevo tipo json para mejor rendimiento y compresión.</li>
+        <li><strong>Novedades 2025</strong>: Tipo json nativo en preview para eficiencia binaria, compatible con funciones existentes.</li>
+        <li><strong>Validación y rendimiento</strong>: Siempre usa ISJSON para integridad; optimiza con columnstore para grandes volúmenes.</li>
+    </ul>
+
+    <h2>Diagrama de Flujo: Top 10 Opciones</h2>
+    <div class="diagram flowchart">
+        <div class="step">1. Almacenar en varchar(max)</div>
+        <span class="arrow">→</span>
+        <div class="step">2. Validar con ISJSON</div>
+        <span class="arrow">→</span>
+        <div class="step">3. Extraer con JSON_VALUE</div>
+        <span class="arrow">→</span>
+        <div class="step">4. Manejar con JSON_QUERY</div>
+        <span class="arrow">→</span>
+        <div class="step">5. Modificar con JSON_MODIFY</div>
+        <br>
+        <div class="step">6. Parsear con OPENJSON</div>
+        <span class="arrow">→</span>
+        <div class="step">7. Generar con FOR JSON</div>
+        <span class="arrow">→</span>
+        <div class="step">8. Indexar computadas</div>
+        <span class="arrow">→</span>
+        <div class="step">9. Tablas en memoria</div>
+        <span class="arrow">→</span>
+        <div class="step">10. Tipo json (preview)</div>
+    </div>
+
+    <h2>Tabla de Comparación de Rendimiento</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Opción</th>
+                <th>Caso de Uso</th>
+                <th>Pros</th>
+                <th>Contras</th>
+                <th>Consejo de Rendimiento</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Almacenamiento en nvarchar(max)</td>
+                <td>Almacenamiento de atributos dinámicos</td>
+                <td>Alta flexibilidad, sin cambios de esquema</td>
+                <td>Overhead de análisis en consultas</td>
+                <td>Usa índice de almacén de columnas agrupado para compresión (hasta 25x) en tablas grandes.</td>
+            </tr>
+            <tr>
+                <td>JSON_VALUE/QUERY</td>
+                <td>Extracción</td>
+                <td>Acceso simple basado en ruta</td>
+                <td>Lento sin índices</td>
+                <td>Indexa columnas computadas; castea a tipos más pequeños (ej. tinyint).</td>
+            </tr>
+            <tr>
+                <td>JSON_MODIFY</td>
+                <td>Actualizaciones</td>
+                <td>Ediciones in-place</td>
+                <td>Eliminación limitada de arrays (establece en NULL)</td>
+                <td>Usa en procedimientos compilados nativamente para velocidad.</td>
+            </tr>
+            <tr>
+                <td>OPENJSON</td>
+                <td>Análisis a filas</td>
+                <td>Maneja claves desconocidas</td>
+                <td>Requiere nivel compat. 130+</td>
+                <td>Combina con OUTER APPLY para datos anidados.</td>
+            </tr>
+            <tr>
+                <td>Tipo json nativo</td>
+                <td>Almacenamiento optimizado</td>
+                <td>I/O más rápido, compresión</td>
+                <td>Solo en vista previa</td>
+                <td>Migra desde varchar para ganancias en producción.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h2>Detalles Expandidos por Opción</h2>
+    <details>
+        <summary>1. Almacenar JSON directamente en columnas nvarchar(max) o varchar(max)</summary>
+        <p>Esta es la base para datos dinámicos: trata la columna como un contenedor flexible. Usa nvarchar(max) para caracteres internacionales. Mejor práctica: Limita a nvarchar(4000) si es menor a 8 KB para escenarios optimizados en memoria.</p>
+        <p>Para volúmenes grandes, usa almacenamiento LOB para ingestión rápida, pero analiza durante consultas. Agrega una restricción CHECK como ISJSON(nombre_columna) = 1 para validación. Esto permite manejar atributos dinámicos ilimitados sin esquema fijo, ofreciendo flexibilidad similar a NoSQL en tablas relacionales.</p>
+        <p>Ejemplo:</p>
+        <pre><code>CREATE TABLE DatosDinamicos (
+    ID INT IDENTITY PRIMARY KEY,
+    ContenidoJson NVARCHAR(MAX)
+);
+INSERT INTO DatosDinamicos (ContenidoJson) VALUES ('{"attr1": "valor1", "attr2": 42, "dinamico": {"clave": "var"}}');</code></pre>
+        <p>Pros: Alta flexibilidad, no requiere cambios de esquema para nuevos atributos.</p>
+        <p>Contras: Parsing overhead en consultas frecuentes; no optimizado para búsquedas full-text directas.</p>
+    </details>
+    <details>
+        <summary>2. Validar JSON con ISJSON</summary>
+        <p>Asegura que el contenido varchar sea analizable, retornando 1 para JSON válido. Integra en restricciones o triggers para mantener integridad. Esto previene inserciones inválidas, crucial para datos dinámicos de fuentes externas como APIs o archivos importados.</p>
+        <p>Usa antes de insertar o consultar para evitar errores por datos malformados. Disponible desde SQL Server 2016 (compatibilidad 130+).</p>
+        <p>Ejemplo:</p>
+        <pre><code>ALTER TABLE DatosDinamicos ADD CONSTRAINT CHK_JsonValido CHECK (ISJSON(ContenidoJson) = 1);
+SELECT ISJSON(ContenidoJson) FROM DatosDinamicos;</code></pre>
+        <p>Pros: Mantiene integridad de datos sin overhead significativo.</p>
+        <p>Contras: No valida estructura interna, solo sintaxis JSON.</p>
+    </details>
+    <details>
+        <summary>3. Extraer escalares con JSON_VALUE</summary>
+        <p>Accede a propiedades dinámicas específicas vía rutas (ej. '$.dinamico.clave'). Usa modo 'strict' para error en rutas ausentes. Combina con WHERE/ORDER BY para filtrar atributos dinámicos. Extrae valores individuales de propiedades dinámicas tratando el varchar como JSON en tiempo real.</p>
+        <p>Ideal para consultas selectivas en datos semiestructurados. Soporta casting implícito a tipos como INT o DATETIME.</p>
+        <p>Ejemplo:</p>
+        <pre><code>SELECT JSON_VALUE(ContenidoJson, '$.attr1') AS Attr1 FROM DatosDinamicos
+WHERE JSON_VALUE(ContenidoJson, '$.attr2') > 40;</code></pre>
+        <p>Pros: Simple y eficiente para extracciones puntuales.</p>
+        <p>Contras: No maneja objetos o arrays; usa JSON_QUERY para eso. Lento sin índices en grandes datasets.</p>
+    </details>
+    <details>
+        <summary>4. Extraer objetos/arrays con JSON_QUERY</summary>
+        <p>Extrae sub-JSON para estructuras dinámicas anidadas, retornando como texto para análisis adicional. Recupera fragmentos JSON anidados (por ejemplo, arrays de atributos dinámicos) para procesamiento o visualización.</p>
+        <p>Ideal para arrays de longitudes variables o objetos complejos. Usa con JSON_VALUE para extracciones combinadas.</p>
+        <p>Ejemplo:</p>
+        <pre><code>SELECT JSON_QUERY(ContenidoJson, '$.dinamico') AS Anidado FROM DatosDinamicos;</code></pre>
+        <p>Pros: Mantiene la estructura JSON en la salida.</p>
+        <p>Contras: Retorna como string, requiere parsing adicional si se necesita desglosar.</p>
+    </details>
+    <details>
+        <summary>5. Actualizar JSON con JSON_MODIFY</summary>
+        <p>Ediciones in-place: agrega/actualiza/elimina claves sin reescrituras completas. Soporta agregar a arrays. Agrega, actualiza o elimina claves dinámicamente en el varchar almacenado sin reescribir toda la cadena.</p>
+        <p>Para eliminación, establece en NULL. Útil para actualizaciones parciales en datos dinámicos.</p>
+        <p>Ejemplo:</p>
+        <pre><code>UPDATE DatosDinamicos SET ContenidoJson = JSON_MODIFY(ContenidoJson, '$.nuevoAttr', 'agregado') WHERE ID = 1;</code></pre>
+        <p>Pros: Eficiente para modificaciones selectivas, soporta append en arrays.</p>
+        <p>Contras: No soporta eliminación directa de elementos en arrays grandes; limitada a paths simples.</p>
+    </details>
+    <details>
+        <summary>6. Analizar a filas con OPENJSON</summary>
+        <p>Transforma JSON en tablas, manejando claves dinámicas vía modo predeterminado (columnas clave/valor/tipo). Usa WITH para esquema. Convierte objetos o arrays JSON en formato relacional, manejando claves dinámicas desconocidas devolviéndolas como filas.</p>
+        <p>Usa OUTER APPLY para arrays anidados. Perfecto para normalizar datos JSON a relacional para joins o agregaciones.</p>
+        <p>Ejemplo (predeterminado para claves dinámicas):</p>
+        <pre><code>SELECT * FROM OPENJSON((SELECT ContenidoJson FROM DatosDinamicos WHERE ID=1));</code></pre>
+        <p>Ejemplo con esquema:</p>
+        <pre><code>SELECT * FROM OPENJSON(ContenidoJson) WITH (attr1 VARCHAR(50) '$.attr1', dinamico NVARCHAR(MAX) '$.dinamico' AS JSON);</code></pre>
+        <p>Pros: Convierte semiestructurado a estructurado fácilmente.</p>
+        <p>Contras: Requiere compatibilidad 130+; puede ser lento en JSON muy grandes sin optimización.</p>
+    </details>
+    <details>
+        <summary>7. Generar JSON con FOR JSON</summary>
+        <p>Convierte resultados a JSON: AUTO para jerarquía, PATH para personalizado. Convierte resultados de consultas relacionales de vuelta a JSON, útil para exportar datos dinámicos desde JSON almacenado en varchar.</p>
+        <p>Escapa caracteres especiales automáticamente. Incluye ROOT para envolver en objeto.</p>
+        <p>Ejemplo:</p>
+        <pre><code>SELECT ID, ContenidoJson FROM DatosDinamicos FOR JSON PATH;</code></pre>
+        <p>Pros: Fácil integración con APIs o exportaciones.</p>
+        <p>Contras: Limitado a estructuras relacionales simples; no maneja ciclos.</p>
+    </details>
+    <details>
+        <summary>8. Indexar columnas computadas en propiedades JSON</summary>
+        <p>Para claves dinámicas frecuentes, computa e indexa. Crea columnas computadas vía JSON_VALUE y agrega índices para acelerar consultas en atributos dinámicos frecuentemente accedidos.</p>
+        <p>Reduce overhead de análisis; consciente de intercalación. Útil para filtros comunes en propiedades JSON.</p>
+        <p>Ejemplo:</p>
+        <pre><code>ALTER TABLE DatosDinamicos ADD Attr1_Computada AS JSON_VALUE(ContenidoJson, '$.attr1');
+CREATE INDEX IX_Attr1 ON DatosDinamicos (Attr1_Computada);</code></pre>
+        <p>Pros: Mejora rendimiento en consultas repetitivas.</p>
+        <p>Contras: Aumenta espacio de almacenamiento; no indexa paths variables.</p>
+    </details>
+    <details>
+        <summary>9. Usar tablas optimizadas en memoria para actualizaciones de alto rendimiento</summary>
+        <p>Para datos dinámicos volátiles, habilita MEMORY_OPTIMIZED=ON. Usa procedimientos compilados nativamente para JSON_MODIFY. Almacena JSON en tablas optimizadas en memoria para inserciones/actualizaciones rápidas, limitando a nvarchar(4000) si posible.</p>
+        <p>Aumenta operaciones sin I/O. Ideal para workloads de alta concurrencia.</p>
+        <p>Ejemplo de creación de tabla:</p>
+        <pre><code>CREATE TABLE MemDinamico (ID INT IDENTITY PRIMARY KEY NONCLUSTERED, ContenidoJson NVARCHAR(4000)) WITH (MEMORY_OPTIMIZED=ON);</code></pre>
+        <p>Pros: Velocidad extrema en actualizaciones.</p>
+        <p>Contras: Limitado a 8KB por fila; requiere memoria suficiente.</p>
+    </details>
+    <details>
+        <summary>10. Adoptar el tipo de datos json nativo (en vista previa en 2025)</summary>
+        <p>Almacena en binario para eficiencia; usa con funciones existentes. Para almacenamiento binario optimizado de JSON con atributos dinámicos, usa el nuevo tipo json en lugar de varchar para mejor compresión y eficiencia.</p>
+        <p>Vista previa en Azure SQL; general availability pendiente. Ofrece hasta 25x mejor compresión y I/O más rápido.</p>
+        <p>Ejemplo:</p>
+        <pre><code>CREATE TABLE JsonNativo (ID INT PRIMARY KEY, Datos json);
+INSERT INTO JsonNativo (Datos) VALUES ('{"dinamico": "valor"}');</code></pre>
+        <p>Pros: Optimizado para JSON grande, compatible con funciones legacy.</p>
+        <p>Contras: Aún en preview; no disponible en todas las ediciones.</p>
+    </details>
+
+    <h2>Escenarios Avanzados y Limitaciones</h2>
+    <p>Importar archivos JSON: Usa OPENROWSET(BULK) para cargar JSON externo en columnas varchar. Ejemplo: SELECT @json = BulkColumn FROM OPENROWSET(BULK 'archivo.json', SINGLE_CLOB) AS j;</p>
+    <p>Integración con API: Usa OLE Automation para llamadas HTTP para obtener/actualizar JSON.</p>
+    <p>Manejo de Errores: Siempre verifica compatibilidad; usa TRY/CATCH con funciones JSON para errores de ruta.</p>
+    <p>Limitaciones: No hay búsqueda de texto completo en JSON; para anidamiento muy complejo, considera herramientas externas como PowerShell. Para 2025, el tipo json mejora compresión hasta 25x, pero aún en preview.</p>
+
+    <h2>Citas Clave</h2>
+    <ul>
+        <li><a href="https://learn.microsoft.com/es-es/sql/relational-databases/json/json-data-sql-server?view=sql-server-ver17">Funciona con datos JSON en grupos de SQL Server - Microsoft Learn</a></li>
+        <li><a href="https://learn.microsoft.com/es-es/sql/relational-databases/json/store-json-documents-in-sql-tables?view=sql-server-ver17">Almacenar documentos JSON - SQL Server</a></li>
+        <li><a href="https://learn.microsoft.com/es-es/sql/relational-databases/json/format-query-results-as-json-with-for-json-sql-server?view=sql-server-ver17">Formato de los resultados de la consulta como JSON con FOR JSON</a></li>
+        <li><a href="https://learn.microsoft.com/es-es/sql/t-sql/functions/json-value-transact-sql?view=sql-server-ver17">JSON_VALUE (Transact-SQL) - SQL Server</a></li>
+        <li><a href="https://learn.microsoft.com/es-es/sql/relational-databases/json/convert-json-data-to-rows-and-columns-with-openjson-sql-server?view=sql-server-ver17">Análisis y transformación de datos JSON con OPENJSON</a></li>
+        <li><a href="https://learn.microsoft.com/es-es/sql/connect/jdbc/use-json-data-type?view=sql-server-ver17">Uso del tipo de datos JSON - JDBC Driver for SQL Server</a></li>
+        <li><a href="https://learn.microsoft.com/es-es/azure/azure-sql/database/json-features?view=azuresql">Trabajar con datos JSON - Azure SQL Database</a></li>
+        <li><a href="https://learn.microsoft.com/es-es/sql/relational-databases/json/optimize-json-processing-with-in-memory-oltp?view=sql-server-ver17">Optimización del procesamiento JSON con OLTP de In-Memory</a></li>
+        <li><a href="https://learn.microsoft.com/es-es/sql/t-sql/data-types/json-data-type?view=sql-server-ver17">Tipo de datos JSON - SQL Server</a></li>
+        <li><a href="https://learn.microsoft.com/es-es/sql/sql-server/what-s-new-in-sql-server-2025?view=sql-server-ver17">Novedades de la versión preliminar de SQL Server 2025</a></li>
+    </ul>
+</body>
+</html>
