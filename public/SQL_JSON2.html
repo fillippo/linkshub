@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VB.NET y SQL Server: Generador de Scripts para JSON</title>
+<title>VB.NET y SQL Server: Generador de Scripts para JSON (Versión Corregida)</title>
 <style>
 body {
 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -27,36 +27,42 @@ margin-bottom: 20px;
 display: flex;
 justify-content: space-between;
 align-items: center;
-background-color: #e0e0e0;
-padding: 5px 10px;
+background-color: #e9ecef;
+padding: 8px 15px;
+border: 1px solid #dee2e6;
+border-bottom: none;
 border-top-left-radius: 5px;
 border-top-right-radius: 5px;
 }
 .code-header-title {
 font-weight: bold;
-color: #333;
+color: #495057;
 font-family: "Consolas", monospace;
 }
 .copy-button {
 background-color: #007bff;
 color: white;
 border: none;
-padding: 5px 10px;
-border-radius: 3px;
+padding: 6px 12px;
+border-radius: 4px;
 cursor: pointer;
 font-size: 0.9em;
+transition: background-color 0.2s;
 }
 .copy-button:hover {
 background-color: #0056b3;
+}
+.copy-button.copied {
+background-color: #28a745;
 }
 pre {
 background-color: #2d2d2d;
 color: #f1f1f1;
 padding: 15px;
-border-radius: 5px;
 overflow-x: auto;
-border: 1px solid #ddd;
+border: 1px solid #dee2e6;
 margin: 0;
+border-radius: 5px;
 border-top-left-radius: 0;
 border-top-right-radius: 0;
 }
@@ -75,9 +81,9 @@ margin: 20px 0;
 <body>
 code
 Code
-<h1>Manejo Avanzado de JSON en SQL Server con Generador de Scripts en VB.NET</h1>
+<h1>Manejo Avanzado de JSON en SQL Server con Generador de Scripts en VB.NET (Versión Corregida)</h1>
 <p>
-    Esta guía final proporciona una solución completa que no solo gestiona atributos dinámicos en una clase de VB.NET, sino que también genera los fragmentos de código SQL necesarios para realizar operaciones de lectura (SELECT) y escritura (INSERT/UPDATE) de forma externa.
+    Esta guía proporciona una solución completa que no solo gestiona atributos dinámicos en una clase de VB.NET, sino que también genera los fragmentos de código SQL necesarios para realizar operaciones de lectura (SELECT) y escritura (INSERT/UPDATE) de forma externa.
 </p>
 
 <h2>Paso 1: Configuración de la Base de Datos (SQL Server 2017)</h2>
@@ -106,10 +112,10 @@ code
 Code
 <h2>Paso 2: La Clase de Gestión de Atributos en VB.NET (Versión Final)</h2>
 <p>
-    A la clase anterior le hemos añadido dos nuevas funciones: <code style="color:red; font-weight:bold;">GenerarValorSqlParaUpdate</code> y <code style="color:red; font-weight:bold;">GenerarClausulaSqlSelect</code>.
+    A la clase se le han añadido dos nuevas funciones: <code style="color:red; font-weight:bold;">GenerarValorSqlParaUpdate</code> y <code style="color:red; font-weight:bold;">GenerarClausulaSqlSelect</code>.
 </p>
 <div class="note">
-    <strong>Dependencia Requerida:</strong> Se sigue utilizando <strong>Newtonsoft.Json</strong>.
+    <strong>Dependencia Requerida:</strong> Se sigue utilizando <strong>Newtonsoft.Json</strong>. (<code>Install-Package Newtonsoft.Json</code>)
 </div>
 <div class="code-container">
     <div class="code-header">
@@ -182,6 +188,9 @@ End Function
 ''' &lt;/summary&gt;
 ''' &lt;returns&gt;Una cadena con el formato N'{ "Atributo": ["Valor"] }'&lt;/returns&gt;
 Public Function GenerarValorSqlParaUpdate() As String
+    If Atributos Is Nothing OrElse Atributos.Count = 0 Then
+        Return "NULL"
+    End If
     ' La N inicial es importante para cadenas Unicode (NVARCHAR)
     ' Se reemplaza cualquier comilla simple por dos para escaparla en SQL.
     Return "N'" & Me.ToJson().Replace("'", "''") & "'"
@@ -195,16 +204,15 @@ End Function
 ''' &lt;param name="nombreCampoJson"&gt;El nombre del campo que contiene el JSON (ej. "Atributos").&lt;/param&gt;
 ''' &lt;returns&gt;Una cadena como ", JSON_VALUE(p.Atributos, '$.Color') AS Color1, ..."&lt;/returns&gt;
 Public Function GenerarClausulaSqlSelect(ByVal aliasTabla As String, ByVal nombreCampoJson As String) As String
-    If Atributos.Count = 0 Then Return String.Empty
+    If Atributos Is Nothing OrElse Atributos.Count = 0 Then Return String.Empty
 
     Dim sb As New StringBuilder()
 
     For Each kvp As KeyValuePair(Of String, List(Of String)) In Atributos
         Dim nombreAtributo = kvp.Key
         Dim valores = kvp.Value
-
-        ' Si la lista de valores está vacía en el objeto, no generamos columnas para ella.
-        ' Si no tiene valores, asumimos que queremos al menos una columna (para el caso de un solo valor).
+        
+        ' Si la lista de valores está vacía o es nula, asumimos que queremos al menos una columna.
         Dim maxValores = If(valores IsNot Nothing AndAlso valores.Count > 0, valores.Count, 1)
 
         For i As Integer = 0 To maxValores - 1
@@ -294,8 +302,8 @@ End Module
 </div>
 code
 Code
-<h3>Resultado Esperado en la Consola</h3>
-<p>La ejecución del código anterior producirá la siguiente salida, mostrando los scripts SQL listos para ser usados.</p>
+<h3>Resultado Esperado en la Consola (Corregido)</h3>
+<p>La ejecución del código anterior producirá la siguiente salida, mostrando los scripts SQL correctos y listos para ser usados.</p>
 <div class="code-container">
     <div class="code-header">
         <span class="code-header-title">Salida de la Consola</span>
@@ -421,11 +429,14 @@ Code
 
         navigator.clipboard.writeText(textToCopy).then(() => {
             buttonElement.textContent = '¡Copiado!';
+            buttonElement.classList.add('copied');
             setTimeout(() => {
                 buttonElement.textContent = 'Copiar';
+                buttonElement.classList.remove('copied');
             }, 2000);
         }).catch(err => {
             console.error('Error al copiar el texto: ', err);
+            buttonElement.textContent = 'Error';
         });
     }
 </script>
