@@ -3,208 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clase VB.NET para Manejo de Campos JSON en SQL Server</title>
+    <title>Manual de Implementación: Clase JsonSqlHelper Avanzada</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }
-        h1, h2, h3 { color: #333; }
-        pre { background: #f4f4f4; padding: 10px; border: 1px solid #ddd; overflow-x: auto; }
-        code { font-family: Consolas, monospace; }
-        .copyable { margin-bottom: 20px; }
-        .copyable button { margin-top: 5px; cursor: pointer; }
-    </style>
-    <script>
-        function copyToClipboard(id) {
-            const text = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Copiado al portapapeles');
-            }).catch(err => {
-                console.error('Error al copiar: ', err);
-            });
+        body {
+            font-family: Segoe UI, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            color: #212529;
+            background-color: #f8f9fa;
+            max-width: 1024px;
+            margin: 20px auto;
+            padding: 30px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
-    </script>
+        h1, h2, h3 {
+            color: #004a7c;
+            border-bottom: 2px solid #005691;
+            padding-bottom: 10px;
+            margin-top: 35px;
+        }
+        h1 { font-size: 2.3em; }
+        h2 { font-size: 1.9em; }
+        h3 { font-size: 1.5em; border-bottom: none; }
+        pre {
+            background-color: #2b303b;
+            color: #c0c5ce;
+            border: 1px solid #444;
+            border-radius: 5px;
+            padding: 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+        code {
+            font-family: "Consolas", "Courier New", monospace;
+            background-color: #e9ecef;
+            color: #c7254e;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+        .container {
+            border: 1px solid #ccc;
+            padding: 25px;
+            border-radius: 8px;
+        }
+        .note {
+            background-color: #e7f3fe;
+            border-left: 6px solid #2196F3;
+            padding: 15px 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border-left: 6px solid #ffc107;
+            padding: 15px 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Clase VB.NET para Manejo de Campos JSON en SQL Server</h1>
-    <p>Esta página proporciona una implementación completa de una clase en VB.NET para manejar un campo JSON almacenado en un NVARCHAR(MAX) en SQL Server. El JSON representa atributos variables como listas de valores (ej: "Animal:Perro" o "Color:Verde, Rojo"). La clase soporta guardar, recuperar y modificar los datos. Incluye consideraciones para SQL Server 2017 y 2022, aunque el soporte JSON es similar en ambas versiones (usando funciones como OPENJSON, JSON_VALUE, etc., disponibles desde SQL Server 2016). Para 2017, usamos consultas básicas; para 2022, podemos aprovechar mejoras menores en rendimiento, pero las consultas son idénticas aquí por simplicidad.</p>
-    
-    <p>La estructura interna usa un <code>Dictionary(Of String, List(Of String))</code> para representar los atributos y sus valores múltiples.</p>
-    
-    <h2>Implementación de la Clase en VB.NET</h2>
-    <p>A continuación, el código completo de la clase <code>JsonAttributeHandler</code>. Usa Newtonsoft.Json para serialización/deserialización (asegúrate de agregar la referencia via NuGet: <code>Install-Package Newtonsoft.Json</code>). Para interactuar con SQL Server, usa ADO.NET (requiere <code>Imports System.Data.SqlClient</code>).</p>
-    
-    <div class="copyable">
-        <pre id="class-code"><code>Imports System.Data.SqlClient
+
+    <div class="container">
+        <h1>Manual de Implementación: Clase <code>JsonSqlHelper</code> Avanzada</h1>
+        <p>Esta clase de utilidad para <strong>Visual Basic .NET</strong> ha sido generada para actuar como una potente herramienta de creación de fragmentos T-SQL. Simplifica drásticamente la manipulación y consulta de campos JSON en <strong>SQL Server 2017</strong> y <strong>2022</strong>, incorporando funcionalidades avanzadas como manejo de arrays, serialización de objetos, generación de cláusulas <code>WHERE</code> y operaciones de carga masiva.</p>
+
+        <div class="warning">
+            <strong>Prerrequisito:</strong> Esta clase depende de la librería <strong>Newtonsoft.Json</strong>. Debes instalarla en tu proyecto a través del gestor de paquetes NuGet: <br><code>Install-Package Newtonsoft.Json</code>
+        </div>
+
+        <h2>Código Fuente de la Clase (JsonSqlHelper.vb)</h2>
+        <pre><code>
 Imports Newtonsoft.Json
 Imports System.Collections.Generic
+Imports System.Dynamic
+Imports System.Text
+Imports System.Text.RegularExpressions
 
-Public Class JsonAttributeHandler
-    Private _attributes As New Dictionary(Of String, List(Of String))
-    Private _connectionString As String
-    Private _sqlVersion As String  ' "2017" o "2022"
+''' &lt;summary&gt;
+''' Enumera las versiones de SQL Server soportadas para optimizar la generación de T-SQL.
+''' &lt;/summary&gt;
+Public Enum SqlServerVersion
+    SQL2017
+    SQL2022
+End Enum
+
+''' &lt;summary&gt;
+''' Clase de utilidad avanzada para generar fragmentos de T-SQL para manipular campos JSON en SQL Server.
+''' &lt;/summary&gt;
+Public Class JsonSqlHelper
+
+#Region "Propiedades"
+    ''' &lt;summary&gt;
+    ''' Obtiene o establece la versión de SQL Server de destino para optimizar las consultas.
+    ''' El valor por defecto es SQL2017.
+    ''' &lt;/summary&gt;
+    Public Property SqlServerVersion As SqlServerVersion = SqlServerVersion.SQL2017
 
     ''' &lt;summary&gt;
-    ''' Constructor.
+    ''' Obtiene o establece el contenido del objeto JSON como una cadena.
     ''' &lt;/summary&gt;
-    ''' &lt;param name="connectionString"&gt;Cadena de conexión a SQL Server.&lt;/param&gt;
-    ''' &lt;param name="sqlVersion"&gt;Versión de SQL Server: "2017" o "2022".&lt;/param&gt;
-    Public Sub New(connectionString As String, sqlVersion As String)
-        _connectionString = connectionString
-        If sqlVersion &lt;&gt; "2017" AndAlso sqlVersion &lt;&gt; "2022" Then
-            Throw New ArgumentException("Versión de SQL Server no soportada. Usa '2017' o '2022'.")
+    Public Property JsonContent As String = "{}"
+#End Region
+
+#Region "Serialización de Objetos"
+    ''' &lt;summary&gt;
+    ''' Serializa un objeto de VB.NET y establece su representación JSON en la propiedad JsonContent.
+    ''' &lt;/summary&gt;
+    ''' &lt;param name="obj"&gt;El objeto a serializar.&lt;/param&gt;
+    Public Sub SetJsonContentFromObject(obj As Object)
+        JsonContent = JsonConvert.SerializeObject(obj)
+    End Sub
+#End Region
+
+#Region "Manipulación de Datos (UPDATE)"
+    ''' &lt;summary&gt;
+    ''' Genera el fragmento T-SQL para añadir, actualizar o añadir a un array en un campo JSON usando JSON_MODIFY.
+    ''' &lt;/summary&gt;
+    ''' &lt;param name="jsonFieldName"&gt;El nombre del campo de la tabla. Ejemplo: "DatosAdicionales"&lt;/param&gt;
+    ''' &lt;param name="path"&gt;La expresión de ruta JSON. Para añadir a un array, usa "append $.arrayName". Ejemplo: "$.cliente.nombre"&lt;/param&gt;
+    ''' &lt;param name="value"&gt;El valor a insertar/actualizar. Si es Nothing, se eliminará el atributo.&lt;/param&gt;
+    ''' &lt;returns&gt;Una cadena con el fragmento T-SQL para una cláusula SET.&lt;/returns&gt;
+    Public Function AddOrUpdateValue(jsonFieldName As String, path As String, value As Object) As String
+        If value Is Nothing OrElse value Is DBNull.Value Then
+            Return DeleteValue(jsonFieldName, path)
         End If
-        _sqlVersion = sqlVersion
-    End Sub
 
-    ''' &lt;summary&gt;
-    ''' Agrega o actualiza un atributo con sus valores.
-    ''' &lt;/summary&gt;
-    Public Sub AddOrUpdateAttribute(attributeName As String, values As List(Of String))
-        If _attributes.ContainsKey(attributeName) Then
-            _attributes(attributeName) = values
-        Else
-            _attributes.Add(attributeName, values)
+        Dim valueToUse As Object = value
+        ' Si el valor es un objeto complejo (no un tipo primitivo), serializarlo a JSON
+        If Not (TypeOf value Is String OrElse value.GetType().IsPrimitive OrElse TypeOf value Is Decimal OrElse TypeOf value Is DateTime) Then
+            valueToUse = JsonConvert.SerializeObject(value)
+            Return $"SET [{jsonFieldName}] = JSON_MODIFY([{jsonFieldName}], '{path}', JSON_QUERY('{valueToUse.ToString().Replace("'", "''")}'))"
         End If
-    End Sub
 
-    ''' &lt;summary&gt;
-    ''' Guarda los atributos como JSON en la base de datos.
-    ''' &lt;/summary&gt;
-    ''' &lt;param name="tableName"&gt;Nombre de la tabla.&lt;/param&gt;
-    ''' &lt;param name="idColumn"&gt;Columna ID para identificar el registro.&lt;/param&gt;
-    ''' &lt;param name="idValue"&gt;Valor del ID.&lt;/param&gt;
-    ''' &lt;param name="jsonColumn"&gt;Nombre de la columna JSON (NVARCHAR(MAX)).&lt;/param&gt;
-    Public Sub SaveToDatabase(tableName As String, idColumn As String, idValue As Integer, jsonColumn As String)
-        Dim json As String = JsonConvert.SerializeObject(_attributes)
-        Using conn As New SqlConnection(_connectionString)
-            conn.Open()
-            Dim cmd As New SqlCommand($"UPDATE {tableName} SET {jsonColumn} = @json WHERE {idColumn} = @id", conn)
-            cmd.Parameters.AddWithValue("@json", json)
-            cmd.Parameters.AddWithValue("@id", idValue)
-            cmd.ExecuteNonQuery()
-        End Using
-    End Sub
-
-    ''' &lt;summary&gt;
-    ''' Recupera el JSON directamente de la base de datos (SELECT directo).
-    ''' &lt;/summary&gt;
-    ''' &lt;returns&gt;El JSON como string.&lt;/returns&gt;
-    Public Function GetJsonDirect(tableName As String, idColumn As String, idValue As Integer, jsonColumn As String) As String
-        Using conn As New SqlConnection(_connectionString)
-            conn.Open()
-            Dim cmd As New SqlCommand($"SELECT {jsonColumn} FROM {tableName} WHERE {idColumn} = @id", conn)
-            cmd.Parameters.AddWithValue("@id", idValue)
-            Return CStr(cmd.ExecuteScalar())
-        End Using
+        Dim formattedValue As String = FormatSqlValue(valueToUse)
+        Return $"SET [{jsonFieldName}] = JSON_MODIFY([{jsonFieldName}], '{path}', {formattedValue})"
     End Function
 
     ''' &lt;summary&gt;
-    ''' Carga los atributos desde el JSON de la base de datos a la clase para modificación.
+    ''' Genera el fragmento T-SQL para eliminar un atributo o un elemento de un array de un campo JSON.
     ''' &lt;/summary&gt;
-    ''' &lt;returns&gt;El Dictionary cargado.&lt;/returns&gt;
-    Public Function LoadFromDatabase(tableName As String, idColumn As String, idValue As Integer, jsonColumn As String) As Dictionary(Of String, List(Of String))
-        Dim json As String = GetJsonDirect(tableName, idColumn, idValue, jsonColumn)
-        If Not String.IsNullOrEmpty(json) Then
-            _attributes = JsonConvert.DeserializeObject(Of Dictionary(Of String, List(Of String)))(json)
-            Return _attributes
-        Else
-            Return New Dictionary(Of String, List(Of String))
+    ''' &lt;param name="jsonFieldName"&gt;El nombre del campo de la tabla.&lt;/param&gt;
+    ''' &lt;param name="path"&gt;La expresión de ruta JSON del atributo a eliminar (ej: "$.tags[2]").&lt;/param&gt;
+    ''' &lt;returns&gt;Una cadena con el fragmento T-SQL para una cláusula SET.&lt;/returns&gt;
+    Public Function DeleteValue(jsonFieldName As String, path As String) As String
+        Return $"SET [{jsonFieldName}] = JSON_MODIFY([{jsonFieldName}], '{path}', NULL)"
+    End Function
+#End Region
+
+#Region "Consulta de Datos (SELECT / WHERE)"
+    ''' &lt;summary&gt;
+    ''' Genera una cláusula WHERE para filtrar registros basados en un valor dentro del campo JSON.
+    ''' &lt;/summary&gt;
+    ''' &lt;param name="jsonFieldName"&gt;El nombre del campo de la tabla.&lt;/param&gt;
+    ''' &lt;param name="path"&gt;La ruta JSON del atributo por el que filtrar.&lt;/param&gt;
+    ''' &lt;param name="operator"&gt;El operador de comparación (ej: "=", "!=", "&gt;", "LIKE").&lt;/param&gt;
+    ''' &lt;param name="value"&gt;El valor a comparar.&lt;/param&gt;
+    ''' &lt;returns&gt;Una cadena de condición para una cláusula WHERE.&lt;/returns&gt;
+    Public Function GenerateWhereClause(jsonFieldName As String, path As String, operator As String, value As Object) As String
+        Dim formattedValue As String = FormatSqlValue(value)
+        ' Optimización para SQL Server 2022+: JSON_PATH_EXISTS es más eficiente para comprobar existencias.
+        If SqlServerVersion = SqlServerVersion.SQL2022 AndAlso operator.Trim().ToUpper() = "EXISTS" Then
+            Return $"JSON_PATH_EXISTS([{jsonFieldName}], '{path}') = 1"
         End If
+        Return $"JSON_VALUE([{jsonFieldName}], '{path}') {operator} {formattedValue}"
     End Function
 
     ''' &lt;summary&gt;
-    ''' Consulta SQL para extraer valores específicos usando funciones JSON (compatible con 2017 y 2022).
-    ''' Ejemplo: Extrae valores de un atributo dado.
+    ''' Genera una cadena de columnas para un SELECT, extrayendo y convirtiendo tipos de datos de un campo JSON.
     ''' &lt;/summary&gt;
-    ''' &lt;param name="attributeName"&gt;Nombre del atributo.&lt;/param&gt;
-    ''' &lt;returns&gt;Lista de valores.&lt;/returns&gt;
-    Public Function QueryAttributeValues(tableName As String, idColumn As String, idValue As Integer, jsonColumn As String, attributeName As String) As List(Of String)
-        Dim values As New List(Of String)
-        ' Consulta base compatible con ambas versiones (OPENJSON disponible desde 2016)
-        Dim query As String = $"
-            SELECT [value]
-            FROM {tableName}
-            CROSS APPLY OPENJSON({jsonColumn}, '$.{attributeName}')
-            WHERE {idColumn} = @id"
+    ''' &lt;param name="jsonFieldName"&gt;El nombre del campo de la tabla.&lt;/param&gt;
+    ''' &lt;param name="attributes"&gt;Un diccionario donde la Clave es la ruta JSON y el Valor es el tipo de dato SQL (ej: "NVARCHAR(100)", "INT", "BIT").&lt;/param&gt;
+    ''' &lt;returns&gt;Una cadena de columnas separadas por comas para usar en un SELECT.&lt;/returns&gt;
+    Public Function GetJsonAttributesForSelect(jsonFieldName As String, attributes As Dictionary(Of String, String)) As String
+        If attributes Is Nothing OrElse attributes.Count = 0 Then Return ""
+
+        Dim sb As New StringBuilder()
+        Dim aliasCounts As New Dictionary(Of String, Integer)()
+
+        For Each attr As KeyValuePair(Of String, String) In attributes
+            ' Generar un alias legible a partir de la ruta
+            Dim aliasBase As String = String.Join("_", attr.Key.Split("."c, "$"c, "["c, "]"c).Where(Function(s) Not String.IsNullOrEmpty(s)))
+            Dim finalAlias As String = aliasBase
+            If aliasCounts.ContainsKey(aliasBase) Then
+                aliasCounts(aliasBase) += 1
+                finalAlias = $"{aliasBase}{aliasCounts(aliasBase)}"
+            Else
+                aliasCounts(aliasBase) = 1
+            End If
+            
+            sb.Append($"TRY_CAST(JSON_VALUE([{jsonFieldName}], '{attr.Key}') AS {attr.Value}) AS {finalAlias}, ")
+        Next
+
+        If sb.Length > 0 Then sb.Length -= 2
+        Return sb.ToString()
+    End Function
+
+    ''' &lt;summary&gt;
+    ''' Genera un fragmento T-SQL para usar con CROSS APPLY OPENJSON, permitiendo consultas dinámicas.
+    ''' &lt;/summary&gt;
+    ''' &lt;param name="jsonFieldName"&gt;El nombre del campo de la tabla que contiene el JSON.&lt;/param&gt;
+    ''' &lt;returns&gt;Una cadena para usar en la cláusula FROM.&lt;/returns&gt;
+    Public Function GetDynamicJsonAttributesForSelect(jsonFieldName As String) As String
+        Return $"CROSS APPLY OPENJSON([{jsonFieldName}])"
+    End Function
+#End Region
+
+#Region "Inserción y Carga Masiva"
+    ''' &lt;summary&gt;
+    ''' Devuelve el contenido de la propiedad JsonContent formateado para una instrucción SQL INSERT o UPDATE.
+    ''' &lt;/summary&gt;
+    ''' &lt;returns&gt;Una cadena JSON envuelta en comillas simples y con las comillas internas escapadas.&lt;/returns&gt;
+    Public Function GetJsonValueForSql() As String
+        If String.IsNullOrWhiteSpace(JsonContent) OrElse JsonContent.Trim() = "{}" Then
+            Return "NULL"
+        End If
+        Return $"'{JsonContent.Replace("'", "''")}'"
+    End Function
+
+    ''' &lt;summary&gt;
+    ''' Genera un script T-SQL completo para actualizar múltiples registros en una sola operación.
+    ''' &lt;/summary&gt;
+    ''' &lt;param name="tableName"&gt;El nombre de la tabla a actualizar.&lt;/param&gt;
+    ''' &lt;param name="primaryKeyName"&gt;El nombre de la columna de clave primaria de la tabla.&lt;/param&gt;
+    ''' &lt;param name="jsonFieldName"&gt;El nombre del campo JSON a actualizar.&lt;/param&gt;
+    ''' &lt;param name="data"&gt;Una colección de objetos. Cada objeto DEBE tener una propiedad con el mismo nombre que 'primaryKeyName' y otra que se serializará como el nuevo contenido JSON.&lt;/param&gt;
+    ''' &lt;param name="pkType"&gt;El tipo de dato SQL de la clave primaria (ej: "INT", "UNIQUEIDENTIFIER").&lt;/param&gt;
+    ''' &lt;returns&gt;Un script T-SQL para ejecución masiva.&lt;/returns&gt;
+    Public Function GenerateBulkUpdateScript(tableName As String, primaryKeyName As String, jsonFieldName As String, data As IEnumerable(Of Object), pkType As String) As String
+        Dim jsonData As String = JsonConvert.SerializeObject(data)
+
+        Dim sb As New StringBuilder()
+        sb.AppendLine("DECLARE @jsonData NVARCHAR(MAX);")
+        sb.AppendLine($"SET @jsonData = '{jsonData.Replace("'", "''")}';")
+        sb.AppendLine()
+        sb.AppendLine($"UPDATE T")
+        sb.AppendLine($"SET T.[{jsonFieldName}] = S.JsonData")
+        sb.AppendLine($"FROM [{tableName}] AS T")
+        sb.AppendLine($"JOIN (")
+        sb.AppendLine($"    SELECT *")
+        sb.AppendLine($"    FROM OPENJSON(@jsonData)")
+        sb.AppendLine($"    WITH (")
+        sb.AppendLine($"        {primaryKeyName} {pkType} '$.{primaryKeyName}',")
+        sb.AppendLine($"        JsonData NVARCHAR(MAX) '$' AS JSON")
+        sb.AppendLine($"    )")
+        sb.AppendLine($") AS S ON T.[{primaryKeyName}] = S.[{primaryKeyName}];")
+
+        Return sb.ToString()
+    End Function
+#End Region
+
+#Region "Métodos Privados de Ayuda"
+    Private Function FormatSqlValue(value As Object) As String
+        If value Is Nothing OrElse value Is DBNull.Value Then Return "NULL"
+
+        Select Case value
+            Case IsA(Of String), IsA(Of Guid)
+                Return $"'{value.ToString().Replace("'", "''")}'"
+            Case IsA(Of DateTime)
+                Return $"'{DirectCast(value, DateTime):yyyy-MM-ddTHH:mm:ss.fff}'"
+            Case IsA(Of Boolean)
+                Return value.ToString().ToLower()
+            Case Else
+                Return value.ToString()
+        End Select
+    End Function
+#End Region
+
+End Class
+</code></pre>
+
+        <h2>Ejemplos de Uso Avanzado</h2>
+        <p>A continuación se muestran ejemplos que cubren las nuevas funcionalidades de la clase.</p>
         
-        ' Para 2022, podría usarse JSON_PATH o mejoras, pero mantenemos igual por simplicidad.
-        
-        Using conn As New SqlConnection(_connectionString)
-            conn.Open()
-            Dim cmd As New SqlCommand(query, conn)
-            cmd.Parameters.AddWithValue("@id", idValue)
-            Using reader As SqlDataReader = cmd.ExecuteReader()
-                While reader.Read()
-                    values.Add(reader.GetString(0))
-                End While
-            End Using
-        End Using
-        Return values
-    End Function
-End Class</code></pre>
-        <button onclick="copyToClipboard('class-code')">Copiar Código de la Clase</button>
+        <h3>1. Trabajar con Objetos y Serialización (Propuesta 2)</h3>
+        <pre><code>
+' Creamos una clase o un objeto anónimo
+Dim producto = New With {
+    .ID = 1025,
+    .Nombre = "Teclado Mecánico",
+    .Activo = True,
+    .Tags = New List(Of String) From {"Gaming", "RGB", " Español"},
+    .FechaLanzamiento = New Date(2024, 1, 15)
+}
+
+Dim helper As New JsonSqlHelper()
+' Serializamos el objeto directamente a la propiedad JsonContent
+helper.SetJsonContentFromObject(producto)
+
+Dim jsonForInsert As String = helper.GetJsonValueForSql()
+Dim sql As String = $"INSERT INTO Productos (DatosJson) VALUES ({jsonForInsert})"
+' Ejecutar el comando SQL...
+        </code></pre>
+
+        <h3>2. Manipular Arrays (Propuesta 1)</h3>
+        <pre><code>
+Dim helper As New JsonSqlHelper()
+
+' Añadir un nuevo tag al final del array 'Tags'
+Dim addTagSql As String = helper.AddOrUpdateValue("Productos", "append $.Tags", "Inalámbrico")
+' sql resultante: UPDATE Productos SET [DatosJson] = JSON_MODIFY([DatosJson], 'append $.Tags', 'Inalámbrico') WHERE ...
+
+' Eliminar el segundo tag (índice 1) del array
+Dim removeTagSql As String = helper.DeleteValue("Productos", "$.Tags[1]")
+' sql resultante: UPDATE Productos SET [DatosJson] = JSON_MODIFY([DatosJson], '$.Tags[1]', NULL) WHERE ...
+        </code></pre>
+
+        <h3>3. Generar Cláusulas WHERE (Propuesta 3)</h3>
+        <pre><code>
+Dim helper As New JsonSqlHelper()
+helper.SqlServerVersion = SqlServerVersion.SQL2022
+
+' Crear una condición para buscar productos activos
+Dim where1 As String = helper.GenerateWhereClause("DatosJson", "$.Activo", "=", True)
+' where1: JSON_VALUE([DatosJson], '$.Activo') = true
+
+' Crear una condición para productos lanzados después de una fecha
+Dim where2 As String = helper.GenerateWhereClause("DatosJson", "$.FechaLanzamiento", ">", New Date(2023, 12, 31))
+' where2: JSON_VALUE([DatosJson], '$.FechaLanzamiento') > '2023-12-31T00:00:00.000'
+
+' Comprobar si la propiedad 'Nombre' existe (aprovechando la optimización de SQL 2022)
+Dim where3 As String = helper.GenerateWhereClause("DatosJson", "$.Nombre", "EXISTS", Nothing)
+' where3: JSON_PATH_EXISTS([DatosJson], '$.Nombre') = 1
+
+Dim fullSql = $"SELECT * FROM Productos WHERE {where1} AND {where2}"
+' Ejecutar el comando SQL...
+        </code></pre>
+
+        <h3>4. Seleccionar con Tipos de Datos Específicos (Propuesta 4)</h3>
+        <pre><code>
+Dim helper As New JsonSqlHelper()
+Dim attributesToSelect = New Dictionary(Of String, String) From {
+    {"$.Nombre", "NVARCHAR(200)"},
+    {"$.Activo", "BIT"},
+    {"$.ID", "INT"}
+}
+
+Dim selectColumns As String = helper.GetJsonAttributesForSelect("DatosJson", attributesToSelect)
+' selectColumns contendrá algo como:
+' TRY_CAST(JSON_VALUE([DatosJson], '$.Nombre') AS NVARCHAR(200)) AS Nombre, TRY_CAST(JSON_VALUE([DatosJson], '$.Activo') AS BIT) AS Activo, ...
+
+Dim sql As String = $"SELECT {selectColumns} FROM Productos"
+' Ejecutar el comando SQL...
+        </code></pre>
+
+        <h3>5. Generar Script para Actualización Masiva (Propuesta 5)</h3>
+        <pre><code>
+' Creamos una lista de objetos a actualizar. Cada uno tiene la PK y los nuevos datos.
+Dim updates = New List(Of Object) From {
+    New With {.ProductoID = 1, .Nombre = "Nuevo Nombre 1", .Activo = False},
+    New With {.ProductoID = 5, .Nombre = "Otro Nombre", .Activo = True},
+    New With {.ProductoID = 12, .Nombre = "Producto Descatalogado", .Activo = False}
+}
+
+Dim helper As New JsonSqlHelper()
+Dim bulkScript As String = helper.GenerateBulkUpdateScript("Productos", "ProductoID", "DatosJson", updates, "INT")
+
+' bulkScript contendrá el script T-SQL completo para actualizar 3 filas en una sola llamada a la base de datos.
+' Simplemente ejecuta este script.
+Console.WriteLine(bulkScript)
+        </code></pre>
     </div>
 
-    <h2>Ejemplos de Datos</h2>
-    <p>Aquí hay ejemplos de datos JSON que se almacenarían en el campo NVARCHAR(MAX):</p>
-    <div class="copyable">
-        <pre id="data-example1"><code>{
-  "Animal": ["Perro"],
-  "Color": ["Verde", "Rojo"]
-}</code></pre>
-        <button onclick="copyToClipboard('data-example1')">Copiar Ejemplo 1</button>
-    </div>
-    <div class="copyable">
-        <pre id="data-example2"><code>{
-  "Forma": ["Cuadrado"],
-  "Tamaño": ["Grande", "Mediano", "Pequeño"],
-  "Material": ["Madera"]
-}</code></pre>
-        <button onclick="copyToClipboard('data-example2')">Copiar Ejemplo 2</button>
-    </div>
-
-    <h2>Ejemplos de Uso de la Clase</h2>
-    <p>Ejemplo de uso en un programa VB.NET. Asume una tabla <code>MiTabla</code> con columnas <code>ID (INT)</code> y <code>AtributosJson (NVARCHAR(MAX))</code>.</p>
-    <div class="copyable">
-        <pre id="usage-example"><code>Dim connectionString As String = "Server=myServer;Database=myDB;Trusted_Connection=True;"
-Dim handler As New JsonAttributeHandler(connectionString, "2022")  ' O "2017"
-
-' Agregar atributos
-handler.AddOrUpdateAttribute("Animal", New List(Of String) From {"Perro"})
-handler.AddOrUpdateAttribute("Color", New List(Of String) From {"Verde", "Rojo"})
-
-' Guardar en DB (para ID=1)
-handler.SaveToDatabase("MiTabla", "ID", 1, "AtributosJson")
-
-' Recuperar JSON directo
-Dim jsonDirect As String = handler.GetJsonDirect("MiTabla", "ID", 1, "AtributosJson")
-Console.WriteLine(jsonDirect)
-
-' Cargar para modificar
-Dim attrs As Dictionary(Of String, List(Of String)) = handler.LoadFromDatabase("MiTabla", "ID", 1, "AtributosJson")
-attrs("Color").Add("Azul")  ' Modificar
-handler.AddOrUpdateAttribute("Color", attrs("Color"))  ' Actualizar en clase
-handler.SaveToDatabase("MiTabla", "ID", 1, "AtributosJson")  ' Guardar cambios
-
-' Query valores de un atributo
-Dim colors As List(Of String) = handler.QueryAttributeValues("MiTabla", "ID", 1, "AtributosJson", "Color")
-For Each color In colors
-    Console.WriteLine(color)
-Next</code></pre>
-        <button onclick="copyToClipboard('usage-example')">Copiar Ejemplo de Uso</button>
-    </div>
-
-    <h2>Consultas SQL Directas</h2>
-    <p>Para SQL Server 2017/2022 (idénticas):</p>
-    <div class="copyable">
-        <pre id="sql-example"><code>-- Recuperar JSON completo
-SELECT AtributosJson FROM MiTabla WHERE ID = 1;
-
--- Extraer valores de 'Color'
-SELECT [value]
-FROM MiTabla
-CROSS APPLY OPENJSON(AtributosJson, '$.Color')
-WHERE ID = 1;</code></pre>
-        <button onclick="copyToClipboard('sql-example')">Copiar Consultas SQL</button>
-    </div>
 </body>
 </html>
