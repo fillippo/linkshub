@@ -5,65 +5,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manual de Implementación: Clase JsonSqlHelper Avanzada</title>
     <style>
+        :root {
+            --primary-color: #004a7c;
+            --primary-dark-color: #003b63;
+            --border-color: #dee2e6;
+            --background-color: #f8f9fa;
+            --text-color: #212529;
+            --code-bg-color: #f6f8fa;
+            --code-border-color: #d0d7de;
+            --success-color: #28a745;
+        }
+
         body {
-            font-family: Segoe UI, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             line-height: 1.7;
-            color: #212529;
-            background-color: #f8f9fa;
+            color: var(--text-color);
+            background-color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
             max-width: 1024px;
             margin: 20px auto;
-            padding: 30px;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 15px 30px 30px 30px;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.07);
         }
+
         h1, h2, h3 {
-            color: #004a7c;
-            border-bottom: 2px solid #005691;
-            padding-bottom: 10px;
-            margin-top: 35px;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-dark-color);
+            padding-bottom: 12px;
+            margin-top: 40px;
+            font-weight: 600;
         }
-        h1 { font-size: 2.3em; }
+
+        h1 { font-size: 2.4em; }
         h2 { font-size: 1.9em; }
-        h3 { font-size: 1.5em; border-bottom: none; }
+        h3 { font-size: 1.5em; border-bottom: 1px solid var(--border-color); }
+
+        .code-container {
+            position: relative;
+            margin: 20px 0;
+        }
+
         pre {
-            background-color: #2b303b;
-            color: #c0c5ce;
-            border: 1px solid #444;
-            border-radius: 5px;
+            background-color: var(--code-bg-color);
+            border: 1px solid var(--code-border-color);
+            border-radius: 6px;
             padding: 20px;
             white-space: pre-wrap;
             word-wrap: break-word;
-            font-family: "Consolas", "Courier New", monospace;
+            font-family: "Consolas", "SFMono-Regular", "Menlo", "Monaco", "Liberation Mono", "Courier New", monospace;
             font-size: 14px;
             overflow-x: auto;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+            line-height: 1.5;
         }
+        
         code {
-            font-family: "Consolas", "Courier New", monospace;
-            background-color: #e9ecef;
-            color: #c7254e;
-            padding: 3px 6px;
+             font-family: "Consolas", "SFMono-Regular", "Menlo", "Monaco", "Liberation Mono", "Courier New", monospace;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background-color: #f6f8fa;
+            border: 1px solid rgba(27,31,36,0.15);
+            border-radius: 6px;
+            color: #24292f;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 5px 12px;
+            transition: background-color 0.2s cubic-bezier(0.3, 0, 0.5, 1);
+            user-select: none;
+        }
+
+        .copy-button:hover {
+            background-color: #f3f4f6;
+            border-color: rgba(27,31,36,0.35);
+        }
+        
+        .copy-button.copied {
+            background-color: var(--success-color);
+            color: white;
+            border-color: #208339;
+        }
+
+        .note, .warning {
+            border-left: 6px solid;
+            padding: 15px 20px;
+            margin: 25px 0;
             border-radius: 4px;
         }
-        .container {
-            border: 1px solid #ccc;
-            padding: 25px;
-            border-radius: 8px;
-        }
+
         .note {
             background-color: #e7f3fe;
-            border-left: 6px solid #2196F3;
-            padding: 15px 20px;
-            margin: 25px 0;
-            border-radius: 4px;
+            border-color: #2196F3;
         }
+
         .warning {
             background-color: #fff3cd;
-            border-left: 6px solid #ffc107;
-            padding: 15px 20px;
-            margin: 25px 0;
-            border-radius: 4px;
+            border-color: #ffc107;
         }
     </style>
 </head>
@@ -78,7 +126,8 @@
         </div>
 
         <h2>Código Fuente de la Clase (JsonSqlHelper.vb)</h2>
-        <pre><code>
+        <div class="code-container">
+            <pre><code>
 Imports Newtonsoft.Json
 Imports System.Collections.Generic
 Imports System.Dynamic
@@ -277,12 +326,15 @@ Public Class JsonSqlHelper
 
 End Class
 </code></pre>
+        <button class="copy-button">Copiar</button>
+        </div>
 
         <h2>Ejemplos de Uso Avanzado</h2>
         <p>A continuación se muestran ejemplos que cubren las nuevas funcionalidades de la clase.</p>
         
-        <h3>1. Trabajar con Objetos y Serialización (Propuesta 2)</h3>
-        <pre><code>
+        <h3>1. Trabajar con Objetos y Serialización</h3>
+        <div class="code-container">
+            <pre><code>
 ' Creamos una clase o un objeto anónimo
 Dim producto = New With {
     .ID = 1025,
@@ -300,9 +352,12 @@ Dim jsonForInsert As String = helper.GetJsonValueForSql()
 Dim sql As String = $"INSERT INTO Productos (DatosJson) VALUES ({jsonForInsert})"
 ' Ejecutar el comando SQL...
         </code></pre>
+            <button class="copy-button">Copiar</button>
+        </div>
 
-        <h3>2. Manipular Arrays (Propuesta 1)</h3>
-        <pre><code>
+        <h3>2. Manipular Arrays</h3>
+        <div class="code-container">
+            <pre><code>
 Dim helper As New JsonSqlHelper()
 
 ' Añadir un nuevo tag al final del array 'Tags'
@@ -313,9 +368,12 @@ Dim addTagSql As String = helper.AddOrUpdateValue("Productos", "append $.Tags", 
 Dim removeTagSql As String = helper.DeleteValue("Productos", "$.Tags[1]")
 ' sql resultante: UPDATE Productos SET [DatosJson] = JSON_MODIFY([DatosJson], '$.Tags[1]', NULL) WHERE ...
         </code></pre>
+            <button class="copy-button">Copiar</button>
+        </div>
 
-        <h3>3. Generar Cláusulas WHERE (Propuesta 3)</h3>
-        <pre><code>
+        <h3>3. Generar Cláusulas WHERE</h3>
+        <div class="code-container">
+            <pre><code>
 Dim helper As New JsonSqlHelper()
 helper.SqlServerVersion = SqlServerVersion.SQL2022
 
@@ -334,9 +392,12 @@ Dim where3 As String = helper.GenerateWhereClause("DatosJson", "$.Nombre", "EXIS
 Dim fullSql = $"SELECT * FROM Productos WHERE {where1} AND {where2}"
 ' Ejecutar el comando SQL...
         </code></pre>
+            <button class="copy-button">Copiar</button>
+        </div>
 
-        <h3>4. Seleccionar con Tipos de Datos Específicos (Propuesta 4)</h3>
-        <pre><code>
+        <h3>4. Seleccionar con Tipos de Datos Específicos</h3>
+        <div class="code-container">
+            <pre><code>
 Dim helper As New JsonSqlHelper()
 Dim attributesToSelect = New Dictionary(Of String, String) From {
     {"$.Nombre", "NVARCHAR(200)"},
@@ -351,9 +412,12 @@ Dim selectColumns As String = helper.GetJsonAttributesForSelect("DatosJson", att
 Dim sql As String = $"SELECT {selectColumns} FROM Productos"
 ' Ejecutar el comando SQL...
         </code></pre>
+            <button class="copy-button">Copiar</button>
+        </div>
 
-        <h3>5. Generar Script para Actualización Masiva (Propuesta 5)</h3>
-        <pre><code>
+        <h3>5. Generar Script para Actualización Masiva</h3>
+        <div class="code-container">
+            <pre><code>
 ' Creamos una lista de objetos a actualizar. Cada uno tiene la PK y los nuevos datos.
 Dim updates = New List(Of Object) From {
     New With {.ProductoID = 1, .Nombre = "Nuevo Nombre 1", .Activo = False},
@@ -368,7 +432,38 @@ Dim bulkScript As String = helper.GenerateBulkUpdateScript("Productos", "Product
 ' Simplemente ejecuta este script.
 Console.WriteLine(bulkScript)
         </code></pre>
+            <button class="copy-button">Copiar</button>
+        </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const allCopyButtons = document.querySelectorAll('.copy-button');
+
+            allCopyButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const container = button.parentElement;
+                    const pre = container.querySelector('pre');
+                    if (pre) {
+                        const codeText = pre.innerText;
+                        
+                        navigator.clipboard.writeText(codeText).then(() => {
+                            const originalText = button.innerText;
+                            button.innerText = '¡Copiado!';
+                            button.classList.add('copied');
+
+                            setTimeout(() => {
+                                button.innerText = originalText;
+                                button.classList.remove('copied');
+                            }, 2000);
+                        }).catch(err => {
+                            console.error('Error al copiar el texto: ', err);
+                            button.innerText = 'Error';
+                        });
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
