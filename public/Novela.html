@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interfaz API Mejorada - Legado de Hermes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #0056b3;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="password"],
+        textarea {
+            width: calc(100% - 22px); /* Ajuste para padding */
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .api-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        .status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+        .api-response {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Control de API Legado de Hermes</h1>
+
+        <div class="input-group">
+            <label for="api_key">Clave API:</label>
+            <input type="password" id="api_key" placeholder="Introduce tu clave API">
+            <button id="connect_api_button">Conectar</button>
+            <p id="api_status" class="status-message"></p>
+        </div>
+
+        <div class="input-group">
+            <label for="command_input">Comando para la API:</label>
+            <textarea id="command_input" placeholder="Escribe tu comando aquí..."></textarea>
+            <div class="api-controls">
+                <div class="nav-buttons">
+                    <button id="prev_chapter_button" onclick="executeCommand('capitulo anterior', true)">&lt;&lt; Anterior</button>
+                    <button id="next_chapter_button" onclick="executeCommand('capitulo siguiente', true)">Siguiente &gt;&gt;</button>
+                </div>
+                <div>
+                    <button id="export_log_button" onclick="writeCommand('exportar log')">Exportar Log</button>
+                    <button id="send_command_button" disabled>Enviar Comando</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Respuesta de la API:</label>
+            <div id="api_response" class="api-response">Esperando respuesta...</div>
+        </div>
+    </div>
+
+    <script>
+        const apiKeyInput = document.getElementById('api_key');
+        const connectApiButton = document.getElementById('connect_api_button');
+        const apiStatus = document.getElementById('api_status');
+        const commandInput = document.getElementById('command_input');
+        const sendCommandButton = document.getElementById('send_command_button');
+        const apiResponseDiv = document.getElementById('api_response');
+        
+        // Simulación de una clave API correcta y un endpoint
+        const CORRECT_API_KEY = "mi_clave_secreta_hermes"; 
+        const API_ENDPOINT = "https://api.ejemplo.com/hermes"; // Reemplazar con el endpoint real de tu API
+
+        let isAuthenticated = false;
+
+        // Función para simular la conexión a la API
+        async function connectAPI() {
+            const enteredKey = apiKeyInput.value;
+            apiStatus.textContent = "Conectando...";
+            apiStatus.className = "status-message";
+
+            // Simulación de retraso de red
+            await new Promise(resolve => setTimeout(resolve, 1000)); 
+
+            if (enteredKey === CORRECT_API_KEY) {
+                isAuthenticated = true;
+                apiKeyInput.type = "text"; // Ocultar visualmente la clave o cambiar a texto para feedback
+                apiKeyInput.readOnly = true;
+                connectApiButton.disabled = true;
+                sendCommandButton.disabled = false;
+                apiStatus.textContent = "Conexión exitosa. Clave API oculta.";
+                apiStatus.className = "status-message status-success";
+                apiKeyInput.style.color = 'transparent'; // Hace el texto de la clave invisible
+                apiKeyInput.style.textShadow = '0 0 8px rgba(0,0,0,0.5)'; // Efecto para indicar que está "oculto"
+            } else {
+                isAuthenticated = false;
+                apiStatus.textContent = "Error al conectar: Clave API incorrecta.";
+                apiStatus.className = "status-message status-error";
+                // No ocultar la clave para que el usuario pueda corregirla
+                apiKeyInput.style.color = ''; 
+                apiKeyInput.style.textShadow = ''; 
+            }
+        }
+
+        // Función para enviar comandos a la API
+        async function sendCommand() {
+            if (!isAuthenticated) {
+                apiResponseDiv.textContent = "Error: No autenticado. Conecta con tu clave API primero.";
+                return;
+            }
+
+            const command = commandInput.value;
+            if (!command.trim()) {
+                apiResponseDiv.textContent = "Por favor, introduce un comando.";
+                return;
+            }
+
+            apiResponseDiv.textContent = "Enviando comando: '" + command + "'...";
+            sendCommandButton.disabled = true;
+
+            try {
+                // Simular llamada real a la API
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKeyInput.value}` // Usar la clave correcta para la autorización
+                    },
+                    body: JSON.stringify({ command: command })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+                apiResponseDiv.textContent = JSON.stringify(data, null, 2); // Formatear JSON
+            } catch (error) {
+                apiResponseDiv.textContent = "Error al comunicarse con la API: " + error.message;
+            } finally {
+                sendCommandButton.disabled = false;
+            }
+        }
+
+        // Función para escribir un comando en la caja de texto y opcionalmente ejecutarlo
+        function executeCommand(cmd, shouldExecute = false) {
+            commandInput.value = cmd;
+            if (shouldExecute) {
+                sendCommand();
+            }
+        }
+
+        // Función para solo escribir el comando sin ejecutarlo
+        function writeCommand(cmd) {
+            commandInput.value = cmd;
+        }
+
+        // Event Listeners
+        connectApiButton.addEventListener('click', connectAPI);
+        sendCommandButton.addEventListener('click', sendCommand);
+        apiKeyInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                connectAPI();
+            }
+        });
+        commandInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !sendCommandButton.disabled) {
+                e.preventDefault(); // Prevenir salto de línea en textarea
+                sendCommand();
+            }
+        });
+
+        // Configuración inicial de botones
+        sendCommandButton.textContent = "Enviar Comando";
+        sendCommandButton.id = "send_command_button";
+
+        // Aquí es donde puedes añadir más botones fácilmente siguiendo el patrón
+        // Ejemplo de cómo añadir un nuevo botón dinámico (simplemente descomenta o añade más)
+        /*
+        const navButtonsContainer = document.querySelector('.nav-buttons');
+        const newButton = document.createElement('button');
+        newButton.textContent = "Mi Comando Especial";
+        newButton.onclick = function() { executeCommand('mi_comando_aqui', true); }; // O false para solo escribir
+        navButtonsContainer.appendChild(newButton);
+        */
+        
+    </script>
+</body>
+</html>
